@@ -1,0 +1,89 @@
+Q1: Electrical engineering 3rd semester. usually working on 50% mathematics exercises and more and more hardware based stuff, circuits and electronics theoretically.
+	used to do 1 year of biology.
+
+Q2:	circuits was most difficult in 1st semester.
+	mathematical methods was difficult in mathematical methods.
+	In general I'd say 4.
+
+Q3:	sometimes I try to do it on my own until I get to a point where I rly don't know what to do.
+	sometimes I get so frustrated that I do it all with gemini.
+	usually I try to solve it by myself first.
+
+Q4:	when I don't know much about the subject yet I ask for help more often and use tools more frequently.
+	I let it check by gemini when I want it to be correct.
+	usually 5 - 10 mins on maths tasks
+	or mergesort I try to implement and debug.
+
+
+-------------------------------------------------------
+
+
+Q1:	last saturday I was on a electornic cicuits question and it looked easy but then 
+	I was a little stuck. so I thought let's check with gemini what the best workflow
+	for these kinds of quetsions is.
+	you have to decide when diodes block and when they open. I expected it to be easy
+	but it wasn't so I was furstrared and asked gemini but it gave me bda ansewrs so I 
+	asked chatGPT and that didn't work well either so after 30mins I skipped they
+	quetsion.
+
+Q2:	I try to calm down and reread the question. If it's not possible to solve I go and
+	ask gemini for hints and not the full solution. While writing out the problem
+	I often figure out the solution just from stating the question.
+
+Q3:	sometimes I'm passively consuming lectures. it's good to have friends around you
+	that repeat what the lecturer says and question it and that helps because it makes
+	you think about the lecture
+
+Q6:	yes for the lecture it helped me understand the probelm.
+	but when I use AI it just gives me the answer to the question so that doesn't help as much.
+	when working with a friend they often just say random stuff and it helps to think		about the problem so that helps with learning.
+
+Q7:	Asking lecturers sometimes makes it more complicated. Because you have a specific
+	problem in your head. And the professors say something and you don't fully get it
+	and you're afraid to say that you don't fully understand the answer.
+	professors give short or not real answers that don't fully answer the quetsion.
+
+Q8:	In the professor situation I would have preferred it if he would've just taken
+	some time to understand my question and take my question a bit more serious.
+	instead of saying "it's not important for the exam and just accept it, it's
+	the way it is".
+	when I use an AI tool I'd want it to give a summary of the answer first.
+	and after confirming that the question was understood correctly you can prompt
+	again and go deeper. often it's so much text and you only need a small part of
+	the explanation
+
+Q9:	It depends but when I'm in the lecture I try to ask my friends as much as possible
+	so I don't get stuck on small details that don't matter. so I can just continue
+	with the lecture.
+	At home if it depends on whether I want to just get the task done or if I want
+	to really understand it. Usually when I realize oh it's getting late and I want
+	to finish the task in time I ask for help. Otherwise sometimes I just ask tools
+	to explain the theory around it or for hints. Usually I can't solve a problem
+	because I lack some of the theory behind it.
+
+Q10:If I'm just speeding through the series yes. But when I have an aha moment, now I
+	get the problem, then I'll probably recognize it the next time.
+
+
+--------------------------------------------------------
+
+
+Q1:	As long as you only search for theory stuff and try to solve the specific problem
+	on your own.
+	If you just type in the task into an AI and it gives you a solution it feels like
+	you did nothing.
+
+Q2: In general I'd say help is supportive if you don't feel like you have to prove
+	that you're not stupid and you're allowed to ask "stupid" questoins without
+	judgement.
+	And it's helpful when the person summorizes it really well so you understand it.
+	Or if chatgpt derives a formula for you and then you can look at the steps and
+	try to understand the steps. but it'd be best if you try to solve it yourself
+
+Q3:	In analysis I really wanted to do all the exercises and then I got more and more
+	confused by solving all of them. I would've liked to just focus one a few and
+	really understand them.
+	Even if you ask after an hour you get the experience of trying it for yourself
+	first and that's what makes you learn.
+	sometimes when there are not many exercises left I'm not that motivated anymore
+	and I just wanna get it done so I sometimes don't spend enough time on it.

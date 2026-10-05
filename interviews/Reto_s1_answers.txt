@@ -1,0 +1,76 @@
+
+
+Q1:	I study pharmacy bachelor 3rd year. We don't solve a problem actually.
+	We learn how mechanisms function. we learn by heart. Learn 200plant names.
+	Chemical reactions.
+	sometimes in the lab, then the TA helps more.
+	
+Q2:	depending on subject. chemistry courses difficult, biology are easier.
+	medical chemistry: 3
+	genetic technology: 4
+	general: 3
+
+Q3:	look at it for 10 seconds. If I don't understand the subject/direction I would ask AI
+
+Q4:	10s, 1minute.
+	when learning for exam: 20min
+	to not fall behind: 10s-1min
+
+
+
+
+
+Q1:	lernphase, statistics 2. how to solve problems with R studio (programming language)
+	it was frustrating because she asked claude but it didn't help.
+
+	the explanation was too difficult.
+	musterlösung,
+	took about 2-3 days.
+	gave musterlösung to claude to explain it.
+	probeprüfung.
+
+	logistic regression.
+
+Q2:	try and then ask AI.
+	what really helps when struggling for a while, she'd take a break and solve a different problem and then return to the original problem later.
+
+Q3:	(modified who do you ask for help): I'm a visual and auditorial learner.
+	make a video about the topic with notebook lm, ai video generator.
+
+Q4:	because it was visualized.
+
+Q6:	it did help me to learn and understand the topic better
+	there are not many tasks where we have to really solve problems or exercises.
+
+Q7:	when I asked my supervisor how to make something and she just said something that din't help at all, I was more confused.
+	(does it happen with AI)
+	yes often chatGPT confuses me with chemical stuff, he's not good at chemistry. Claude is also ok but I always have to upload my lecture notes, that makes it easier.
+	he hallucinates answers that aren't correct. er gibt falsche quellenangaben. für quellen wird deshalb ein anderes AI tool verwendet.
+
+Q8:	with AI I would've wanted him to just read my script and answer my questions based on that and it should take more time.
+	I would've wanted my TA to give me a better asnwer.
+
+Q9:	when a subject is very important for the exam and the lecture mentioned that, I would really try hard to understand it by myself. For the learning process.
+	When I spend too much time on a problem or when it's too detailed and complex.
+
+Q10:depends on the help I received. When I really try to understand it myself then I would be able to solve it by myself the next time.
+	When the help wasn't that helpful I would have to ask again next time.
+
+
+
+
+Q1:	when the AI just gives me the formula and I would calculate it by myself then I feel like I'm solving it myself.
+	If the help just gives me the solution and already calculates everyhting then I don't feel like I'm doing it by myself.
+	(in my courses I usually have to just apply the correct formula)
+
+
+Q2:	it's helpful when the help comes step by step and not everything at once.
+	it would be really helpful if it was interactive and step by step when I'm for example working with claude.
+	When working with a tutor it is helpful when the help comes step by step and I'm thinking for myself instead of the help just giving me the correct answer and explaining it.
+
+
+Q3:	Yes I wasted too much time before asking happens very frequently. Both have happened. For exmple in subjects where I solve problems myself I spent time on it but not enough for the learning to be effective, then I would've wanted to spend more time on that problem.
+	Subjects where I have to learn by heart you need active recall because it should stay in the long term memory.
+
+when making a gemisch and didn't know arznei in form von zäpfli machen und nicht sicher wie man das berechnet, dann im Buch nachgeschaut. also lieber selber gelöst.
+
