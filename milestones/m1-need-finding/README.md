@@ -18,7 +18,7 @@
 | Supplementary materials | Franco |
 | Meta-reflection | Rafa |
 
-All files are Markdown exported to PDF. Follow [FORMATTING_GUIDELINE.md](FORMATTING_GUIDELINE.md) (and paste it into any Claude session before writing).
+All files are Markdown exported to PDF. Follow [FORMATTING_GUIDELINE.md](../../FORMATTING_GUIDELINE.md) (and paste it into any Claude session before writing).
 
 ## Suggested process
 1. Draft an interview script ([interviews/interview-script-template.md](interviews/interview-script-template.md)).
