@@ -63,7 +63,7 @@ We interviewed **12 STEM students** (mostly BSc, plus one Master's student and o
 | **Mathematics and finance** | Mathematics, Quantitative Finance | 2 |
 | **Computing and information** | Computer Science, Information Systems | 2 |
 
-The interview followed four steps: **profiling** (field, difficulty, how quickly they seek help), **a concrete example** (the last time they got really stuck), **what made help useful and what made it fall short**, and **reflection** (what keeps them feeling that they are solving the problem themselves). No question mentioned AI.
+The interview followed four steps: **profiling** (field, difficulty, how quickly they seek help), **a concrete example** (the last time they got really stuck), **what made help useful and what made it fall short**, and **reflection** (what keeps them feeling that they are solving the problem themselves). 
 
 What we took away:
 
