@@ -18,12 +18,11 @@ Working problem statement (from the course's example prompts, refine as needed):
 
 ```
 milestones/
-  m1-need-finding/        Milestone 1: interviews, personas, needs
+  m1-need-finding/        Milestone 1: interviews (in interviews/), personas, needs
   m2-ideation-lowfi/       Milestone 2: ideation, low-fi prototypes, peer testing
   m3-ui-optimization/      Milestone 3: UI optimization report & code
   m4-hifi-prototype/       Milestone 4: hi-fi prototype, user study, final video
 meeting-notes/             Dated team meeting notes
-interviews/                Interview reports (template + one file per interview)
 assets/                    Shared images, exported figures, raw prototype media
 ```
 
