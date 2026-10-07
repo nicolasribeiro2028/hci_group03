@@ -48,13 +48,9 @@ Students now have an always-available helper for almost any problem they get stu
 
 Our goal was to understand what makes help useful for STEM students, and what makes it fall short, when they are trying to learn or solve problems. We deliberately framed the interviews around help in general rather than AI, hoping that the way students seek and judge help from other sources would show us how AI support could become more useful for learning.
 
-```mermaid
-flowchart LR
-    A["Interview script<br/>14 questions"] --> B["12 interviews<br/>STEM students"]
-    B --> C["Summaries and<br/>key takeaways"]
-    C --> D["3 personas"]
-    D --> E["Needs"]
-```
+<p align="center">
+  <img src="assets/m1-process.png" alt="Needfinding process: interview script, interviews, summaries, personas, needs" width="100%">
+</p>
 
 ### Interviews
 
