@@ -49,7 +49,7 @@ Students now have an always-available helper for almost any problem they get stu
 Our goal was to understand what makes help useful for STEM students, and what makes it fall short, when they are trying to learn or solve problems. We deliberately framed the interviews around help in general rather than AI, hoping that the way students seek and judge help from other sources would show us how AI support could become more useful for learning.
 
 <p align="center">
-  <img src="assets/m1-process.png" alt="Needfinding process: interview script, interviews, summaries, personas, needs" width="100%">
+  <img src="assets/path.png" alt="Needfinding process: interview script, interviews, summaries, personas, needs" width="100%">
 </p>
 
 ### Interviews
