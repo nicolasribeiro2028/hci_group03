@@ -1,10 +1,10 @@
 # Markdown Formatting Guideline
 
-Every Milestone 1 section is written in Markdown and converted to PDF (e.g. with Pandoc). Follow these rules so all sections look consistent when combined. Paste this file into any Claude session before asking it to write a section.
+Every milestone document in this repo is written in Markdown and converted to PDF (e.g. with Pandoc). Follow these rules so all documents look consistent. Paste this file into any Claude session before asking it to write one.
 
 ## 1. File basics
 
-- Work in the existing files listed in the [README](README.md) (`need-finding-report.md`, `persona-template.md`, `supplementary-materials.md`, `interviews/`). Keep the template's headings; fill in the TODOs rather than restructuring.
+- Work in the existing files listed in the milestone's `README.md` (e.g. `milestones/m1-need-finding/need-finding-report.md`). Keep the template's headings; fill in the TODOs rather than restructuring.
 - Exported PDFs are prefixed `g3-` (e.g. `g3-need-finding-report.pdf`).
 - UTF-8 plain text, `.md` extension.
 - Write in English.
@@ -66,7 +66,7 @@ Every Milestone 1 section is written in Markdown and converted to PDF (e.g. with
 
 ## 7. Images and figures
 
-- Store images in `milestones/m1-need-finding/images/` and link with relative paths: `![Caption](images/persona_1.png)`.
+- Store images in the repo's `assets/` folder and link with relative paths from your file (e.g. `![Caption](../../assets/persona_1.png)`).
 - Every image needs a caption in the alt text.
 - Use PNG or JPG, with a width that fits the page (about 1600 px maximum).
 
@@ -79,7 +79,7 @@ Every Milestone 1 section is written in Markdown and converted to PDF (e.g. with
 ## 9. Links and references
 
 - Use inline links: `[text](url)`. Do not paste bare URLs in the body.
-- Link to interview files with relative paths (e.g. `interviews/...`) only in supplementary materials, not in the main sections.
+- Link to interview files with relative paths only in supplementary materials, not in the main sections.
 
 ## 10. Instructions for Claude sessions
 
