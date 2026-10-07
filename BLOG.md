@@ -5,8 +5,8 @@
 <p align="center">Group 3 · Human Computer Interaction (HS26) · ETH Zürich</p>
 
 <p align="center">
-Rafael Bragança Oliveira · Noah Faoro · Franco Fierro Brandes<br>
-Valentin Fontana · Nicolas Ribeiro · Reto Russmann
+Franco Fierro Brandes · Nicolas Ribeiro · Noah Faoro <br>
+Rafael Bragança Oliveira · Reto Russmann · Valentin Fontana
 </p>
 
 > [!NOTE]
