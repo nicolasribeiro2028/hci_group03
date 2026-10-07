@@ -81,13 +81,49 @@ Every milestone document in this repo is written in Markdown and converted to PD
 - Use inline links: `[text](url)`. Do not paste bare URLs in the body.
 - Link to interview files with relative paths only in supplementary materials, not in the main sections.
 
-## 10. Instructions for Claude sessions
+## 10. Converting Markdown to PDF
+
+We use [Pandoc](https://pandoc.org/) with the XeLaTeX engine.
+
+### Setup (once)
+
+- macOS: `brew install pandoc` (a LaTeX distribution such as MacTeX or BasicTeX must also be installed, so that `xelatex` works).
+- Check with `pandoc --version` and `xelatex --version`.
+
+### Convert one file
+
+Run from the folder that contains the Markdown file, so relative image paths resolve:
+
+```bash
+pandoc need-finding-report.md -o g3-need-finding-report.pdf \
+  --pdf-engine=xelatex \
+  -V geometry:margin=2.5cm \
+  -V fontsize=11pt
+```
+
+- The output name must start with `g3-` (e.g. `g3-supplementary-materials.pdf`).
+- Use the same options for every document so the PDFs look alike. Do not tweak margins or font size per document (see section 8).
+- To merge several Markdown files into one PDF, list them in order: `pandoc 01.md 02.md -o g3-report.pdf --pdf-engine=xelatex`.
+
+### Check the result
+
+- Open the PDF and check page count, heading hierarchy, table widths and image placement.
+- If a table runs off the page, shorten the cell text or drop a column (section 6).
+- If an image is missing, check the relative path from the Markdown file.
+- Non-ASCII characters (e.g. accents) are handled by XeLaTeX. If a character is missing, remove it rather than changing fonts.
+
+### What to commit
+
+- Commit the `.md` source. Commit the final `g3-*.pdf` only when it is ready to submit, in the milestone folder named in its `README.md`.
+- Do not commit intermediate or test PDFs.
+
+## 11. Instructions for Claude sessions
 
 Include these lines when prompting Claude:
 
 > Write the section as a single Markdown file following `FORMATTING_GUIDELINE.md`. One H1 title, `##`/`###` headings only, hyphen bullets, `>` blockquotes for quotes, pipe tables, no HTML, no emojis, no participant names. Stay within the page limit and output only the Markdown, with no commentary before or after.
 
-## 11. Pre-commit checklist
+## 12. Pre-commit checklist
 
 - [ ] One H1, no skipped heading levels
 - [ ] Blank lines around headings, lists, tables
