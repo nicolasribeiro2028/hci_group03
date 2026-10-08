@@ -80,9 +80,9 @@ Full details: [interview summary](milestones/m1-need-finding/interview-summary.m
 
 We created three personas from the interview findings:
 
-- [**Sofia, the Validation-Seeking Learner**](milestones/m1-need-finding/personas/Persona1.pdf): starts with her own approach and uses AI as a quick sanity check, but worries about depending on external confirmation.
-- [**Braxton, the Deadline-Driven Learner**](milestones/m1-need-finding/personas/Persona_Braxton.pdf): wants to understand, but under time pressure asks for complete solutions and later wonders what he actually learned.
-- [**Kaj, the Efficiency-Seeking Learner**](milestones/m1-need-finding/personas/Persona_kaj.pdf): tries first, then wants a quick hint, and gets frustrated by long answers or full solutions when a nudge was enough.
+- [**Sofia, the Validation-Seeking Learner**](milestones/m1-need-finding/Persona1.pdf): starts with her own approach and uses AI as a quick sanity check, but worries about depending on external confirmation.
+- [**Braxton, the Deadline-Driven Learner**](milestones/m1-need-finding/Persona_Braxton.pdf): wants to understand, but under time pressure asks for complete solutions and later wonders what he actually learned.
+- [**Kaj, the Efficiency-Seeking Learner**](milestones/m1-need-finding/Persona_kaj.pdf): tries first, then wants a quick hint, and gets frustrated by long answers or full solutions when a nudge was enough.
 
 ### Needs
 

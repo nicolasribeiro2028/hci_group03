@@ -1,6 +1,6 @@
 # Needs: Nicolas's Perspective
 
-Notes toward Section 5 (Identified Needs) of the need-finding report, written from my reading of the interview summaries. Participant codes follow the report (P1 to P12, the same order as Interviews 1 to 12 in the supplementary materials). This document is separate from [needs_reto.md](needs_reto.md), and the two are to be merged into the report.
+Notes toward Section 5 (Identified Needs) of the need-finding report, written from my reading of the interview summaries. Participant codes follow the report (P1 to P12, the same numbering as Participants 1 to 12 in the supplementary materials). This document is separate from [needs_reto.md](needs_reto.md), and the two are to be merged into the report.
 
 ## Participant key
 

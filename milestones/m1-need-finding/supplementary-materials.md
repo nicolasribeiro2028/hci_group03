@@ -38,7 +38,7 @@
 
 ## Interview Summaries
 
-### Interview 1
+### Participant 1 (P1)
 
 This participant is a Medicine BSc student at ETH who rates their courses on average as 4 out of 5 in difficulty. They are part of the group of people who barely try on their own before looking for help, saying explicitly that they take less than 1 minute on average to try to solve a problem alone. The tasks they work on mostly involve memorizing with Anki and diagnosing virtual patients based on provided information.
 
@@ -46,7 +46,7 @@ What stood out about this conversation was that they have a very structured way 
 
 **Key findings**: The participant barely tries alone before seeking help and trusts AI more than friends, whose answers feel uncertain. How they use help depends on their commitment to the topic: on topics they half understand, they ask for indirect help and need less and less of it over time, whereas on topics they have struggled with before (Maths and Physics), they jump straight to asking for the exact answer, sometimes regretting it when they realize they could have solved it themselves. Help was clearly unhelpful when they relied on AI from the start for a coding task and lacked the knowledge to fix the code it gave them, leaving them unable to submit and confused.
 
-### Interview 2
+### Participant 2 (P2)
 
 This participant graduated with a Mechanical Engineering BSc in September 2026. They rate their courses on average as 4 out of 5 in difficulty. The problems they generally had to solve involved considering a provided context and finding out more information using mathematical equations. Their approach is almost exclusively to try on their own, taking around 15 minutes of attempts before looking for help. When approaching a problem, they start by using intuition and gathering formulas, then try to combine them in a way that yields the solution. If this doesn't work, they go directly to AI. Surprisingly, they don't use it to obtain the complete solution, but rather to check what they have done so far and where they got stuck, before trying again on their own. Sometimes they would instead read the solutions up to the point where they got stuck, to see the next step or to confirm that their previous work was going in the right direction. They found both approaches quite positive, the only problem being when the help is at a much higher level than where they think they are in the topic they are trying to learn. Sometimes, they said, they "lacked the basics" to even understand what the help was trying to hint at. Curiously, they blamed themselves and not the AI for not being up to the task.
 
@@ -56,7 +56,7 @@ In the end, the discussion focused on how, for them, AI is the way to go: they s
 
 **Key findings**: The participant tries alone for about 15 minutes and uses AI or the official solutions only to check their progress and get past the point where they are stuck, then continues on their own. They need less help over time as they build up a set of known cases, and only need it again for very specific cases they haven't seen in a while. Help was unhelpful when it was pitched above their level and they "lacked the basics" to follow it, which they blamed on themselves rather than on the AI. They prefer AI over slides, other resources and people, finding the latter either too vague or too quick to give away the answer, and value AI for being tailored to their question.
 
-### Interview 3
+### Participant 3 (P3)
 
 This participant is currently studying for a Maths BSc at ETH. They rated their studies as 3 out of 5, meaning they are moderately struggling. They draw a strict distinction in how they ask for help depending on whether it comes from a person or from AI: they generally ask a person only after 90 minutes of trying on their own, whereas their threshold for AI is 5 minutes. When they get stuck on a problem, they usually go about it as follows: "I first try to understand what my question will be for ChatGPT. I go to ChatGPT and if I am still stuck, I go back to the slides and try to understand the basics. And then back to ChatGPT." So they usually go to AI first.
 
@@ -64,7 +64,7 @@ They explained that AI is useful because it tackles the specific question asked,
 
 **Key findings**: The participant treats AI as their primary source of help and asks it much sooner than a person (after about 5 minutes instead of 90). They find AI useful because it answers their specific question, and they put effort into formulating questions that get the explanation they want. Help falls short when AI gives the solution too quickly and lacks the course context, such as slides and scripts. They believe AI that pointed them to the relevant course material instead of giving the answer would greatly improve learning, and that with these changes it would outperform help from a person.
 
-### Interview 4
+### Participant 4 (P4)
 
 This participant is currently studying for a Master's in Quantitative Finance. They rate their current courses as 4 out of 5 in difficulty: challenging, but manageable. They describe themselves as someone who can generally solve problems on their own, usually taking between 30 minutes and 1 hour to complete a standard problem. When they get stuck, they go back to the course material first, such as the script and slides. If this does not help, they use Claude or ChatGPT, depending on the problem, to ask for further clarification.
 
@@ -74,7 +74,7 @@ They described help as more useful when it only assists them in solving the prob
 
 **Key findings**: The participant usually solves problems on their own and turns to the course material before asking AI for clarification. They find AI useful but too solution-oriented, and help falls short when it gives the complete solution without explaining the reasoning behind the steps, or when it doesn't match the course material, for example by stating theorems differently from the script or assuming conditions that still need to be proven. In one case AI repeatedly gave wrong answers on dynamic programming exercises, wasting time they could have spent solving the problem themselves. They value help that assists them rather than solving the problem for them, and find a person more valuable than AI for general concepts without a set "recipe". They now need less help from AI than during their undergraduate studies, although they are unsure whether this is because they rely on it less.
 
-### Interview 5
+### Participant 5 (P5)
 
 This participant is a Mechanical Engineering student who rated the difficulty of their courses as 4 out of 5. They generally try to understand the material on their own first by rereading the course material, concentrating more closely, and sometimes taking notes or making sketches. If they still do not understand the content, they tend to ask ChatGPT for help, sometimes by providing a screenshot of the material.
 
@@ -86,7 +86,7 @@ Another important factor was time pressure. When there is no time pressure, the 
 
 **Key findings**: The participant tries to understand the material on their own first and then turns to ChatGPT. Help is less useful when it assumes too much prior knowledge or is too long and complex, often requiring several follow-up questions before it becomes understandable. Explanations work best when they match the learner's current level and are reasonably concise, and guiding explanations and examples support deeper understanding, especially when the participant rewrites them in their own words. Time pressure strongly influences when they seek help: without it they are willing to struggle on their own, but during the semester or under deadlines they turn to AI sooner.
 
-### Interview 6
+### Participant 6 (P6)
 
 This participant is a Robotics student who rated the difficulty of their courses as 3 out of 5. They described themselves as someone who generally tries to solve problems on their own, but after roughly two minutes of being stuck, they often turn to ChatGPT. They also stated that they generally do not ask other people for help.
 
@@ -100,7 +100,7 @@ They also reflected that there are situations where, after receiving an answer, 
 
 **Key findings**: The participant turns to AI very quickly once they become stuck, after about two minutes, and generally does not ask other people for help. Helpful support should be concise and should not overestimate prior knowledge, since it can otherwise take several follow-up questions before an explanation becomes useful. Their goal affects whether they persist: if they genuinely want to learn something, they keep trying on their own, otherwise they seek help quickly. Quick access to answers can create cognitive offloading and reduce productive struggle: they can solve a similar problem on their own only about half of the time after receiving help, and sometimes realize they could have solved it themselves had they struggled longer.
 
-### Interview 7
+### Participant 7 (P7)
 
 This participant is a 3rd-year Computer Science BSc student at TU Berlin (5th/6th semester) who rates their coursework difficulty as 4 out of 5. Their current workload combines advanced modules like Software Engineering and Distributed Systems (Softwaretechnik und Verteilte Systeme), Compiler Construction (Compilerbau), and system programming projects, alongside theoretical algorithms. They typically insist on working on their own for 15 to 20 minutes before seeking external support, although this patience drops to just a couple of minutes when facing tight assignment deadlines.
 
@@ -108,7 +108,7 @@ They reported a clear contrast in their study methods. For some more content-hea
 
 **Key findings**: The participant persists on their own for 15 to 20 minutes, but this drops to a couple of minutes under deadline pressure. AI is effective for conceptual overviews of dense theoretical topics, but counterproductive when it completely replaces hands-on coding, if the goal is to learn for the exam. Receiving complete code solutions creates a false sense of competence and harms recall in pen-and-paper exams, where they have blanked on content they had outsourced to AI. Helpful support should act like an interactive teaching assistant, pointing out errors and giving directional hints rather than complete answers.
 
-### Interview 8
+### Participant 8 (P8)
 
 This participant is an Information Systems (Wirtschaftsinformatik) BSc student at TU Munich (TUM) who rates their course difficulty as 4 out of 5. Their studies balance management concepts with applied data analysis and system modeling. Their study routine centers on continuously synthesizing lecture slides into personal Notion summaries. When stuck on a problem, they usually work alone for 10 to 15 minutes, seeking assistance once they enter an unproductive loop or face impending deadlines.
 
@@ -116,7 +116,7 @@ Unlike students who use AI strictly for coding, they keep a ChatGPT Plus tab per
 
 **Key findings**: The participant uses AI primarily as a validation partner to confirm intermediate reasoning, seeking help after 10 to 15 minutes or when deadlines approach. Immediate confirmation creates reliance, eroding their confidence in unassisted exams where no verification is available. Accepting pre-formulated explanations leads to unearned fluency: they adopted the AI's reasoning without forming their own arguments and could not defend the solution to peers. Supportive tools should prompt reflection and question assumptions instead of giving immediate solutions.
 
-### Interview 9
+### Participant 9 (P9)
 
 This participant is an Industrial Engineering student who rates the difficulty of their program as 3 out of 5. Their problems mostly involve calculation and translating word problems into mathematical language, or as they put it, "being able to understand the problem in words and do the math". They used to prefer asking people for help but now rely more on AI because it is easy and accessible. They always try to solve a problem without AI at least once, and turn to it after about 10 to 20 minutes of being stuck. When approaching a problem, they first identify what it is asking and check whether they have solved something similar before; if not, they try to identify which part of the course material it draws on. In a recent example from a stochastic models exam that required genuine insight rather than mechanical solving, they reread all of the professor's notes looking for a relevant property or formula, and the notes were what got them unstuck.
 
@@ -126,7 +126,7 @@ They don't feel guilty about studying with AI because they use it actively, havi
 
 **Key findings**: The participant has shifted from asking people to relying mainly on AI, valuing its speed, constant availability and the absence of embarrassment when asking basic questions. They try at least once on their own and use the course notes as their first resource before turning to AI. AI help falls short without course context, bringing in content that does not belong to the course, but works best when given the professor's notes and told to act like a TA that points to where to look instead of giving the solution, which lets them stay in control of solving the problem. When completely stuck they ask for the final answer, knowing they retain less, and they admit they sometimes give up earlier than they need to.
 
-### Interview 10
+### Participant 10 (P10)
 
 This participant studies Computational Biology, which includes computational simulations and molecular interactions, alongside coursework in calculus, linear algebra, chemistry and dynamics. They rate the difficulty of their courses at around 4 to 5 out of 5. They always try a problem on their own first, typically for about an hour, which is also their stated threshold before seeking help. In a recent example, they struggled to understand a value involving the image of a function, asked Claude for an explanation and an example, and were then able to solve the problem.
 
@@ -136,7 +136,7 @@ After receiving help, they can handle very similar problems, but changes in word
 
 **Key findings**: The participant tries on their own for about an hour before seeking help and focuses on understanding the concept before finishing the problem. Help is most useful when they prompt AI to act as a tutor that explains and gives examples, walking them through the line of thinking rather than only giving the answer, although they may still ask for a direct solution if an example is not enough. Help falls short when AI stops following earlier instructions in long chats, or when it changes their own words instead of only correcting them. What they learn transfers to very similar problems, but changes in wording or framing make it harder to apply.
 
-### Interview 11
+### Participant 11 (P11)
 
 This participant is a 3rd-year Pharmacy BSc student whose studies involve little actual problem solving and mostly consist of memorizing content and understanding mechanisms and chemical reactions. They rate their courses overall as 3 out of 5, with chemistry harder than biology. They turn to AI very quickly: during the semester they try for only 10 seconds to 1 minute, whereas when studying for exams they try for about 20 minutes. They also persist longer on topics the lecturer marked as important for the exam, but ask for help when a problem takes too much time or is too detailed and complex.
 
@@ -144,7 +144,7 @@ In a recent example, they struggled with logistic regression in R while studying
 
 **Key findings**: The participant turns to AI within a minute during the semester, but persists longer when studying for exams or on topics marked as important. AI help falls short when the explanation is too difficult, when it lacks the course material, or when it hallucinates. Help works best when it is step by step, visual and based on their course material, and when it leaves part of the work to them, such as giving the formula but letting them calculate. They can solve similar problems on their own only when they really tried to understand the help.
 
-### Interview 12
+### Participant 12 (P12)
 
 This participant is a 3rd-semester Electrical Engineering student whose work is about half mathematics exercises and increasingly circuits and electronics theory. They rate their courses overall as 4 out of 5. They usually try on their own first, about 5 to 10 minutes on maths tasks, until they really don't know what to do, though sometimes they get so frustrated that they do the whole task with Gemini. They ask for help more often when a subject is still new to them. In a recent example, a diode circuit question that looked easy left them stuck and frustrated; both Gemini and ChatGPT gave bad answers, and after 30 minutes they skipped the question. Their usual approach is to calm down, reread the question and then ask AI for hints rather than the full solution, and they often find the answer just by writing out the problem.
 
