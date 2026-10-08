@@ -78,9 +78,9 @@ The full interview script and a summary of each interview are in our [supplement
 
 We created three personas from the interview findings. Each has its own page in the [Needfinding report](milestones/m1-need-finding/submission/g3-need-finding-report.pdf):
 
-- [**Sofia, the Efficiency-Seeking Learner**]: tries first, then wants a quick hint, and gets frustrated by long answers or full solutions when a nudge was enough.
-- [**Peter, the Deadline-Driven Learner**]: wants to understand, but under time pressure asks for complete solutions and later wonders what he actually learned.
-- [**Max, the Validation-Seeking Learner**]: starts with his own approach and uses AI as a quick sanity check, but worries about depending on external confirmation.
+- **Sofia, the Efficiency-Seeking Learner**: tries first, then wants a quick hint, and gets frustrated by long answers or full solutions when a nudge was enough.
+- **Peter, the Deadline-Driven Learner**: wants to understand, but under time pressure asks for complete solutions and later wonders what he actually learned.
+- **Max, the Validation-Seeking Learner**: starts with his own approach and uses AI as a quick sanity check, but worries about depending on external confirmation.
 
 ### Needs
 
