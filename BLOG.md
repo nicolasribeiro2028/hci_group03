@@ -12,8 +12,6 @@ Rafael Bragança Oliveira · Reto Russmann · Valentin Fontana
 > [!NOTE]
 > **In short:** We want to understand how students get help when they are stuck on STEM problems, and how that help can support learning instead of replacing it, especially now that AI is the default place to ask. This blog documents our process, milestone by milestone.
 
-> **Quick links:** [Milestone 1 files](milestones/m1-need-finding/) · [Schedule](SCHEDULE.md)
-
 ## Table of Contents
 
 1. [Project description](#project-description)
@@ -42,7 +40,7 @@ Students now have an always-available helper for almost any problem they get stu
 ## Needfinding (Milestone 1)
 
 > [!TIP]
-> **Deliverables:** [Interview summary](milestones/m1-need-finding/g3-interview-summary.pdf) · [Supplementary materials (script and summaries)](milestones/m1-need-finding/submission/g3-supplementary-materials.pdf) · [Needfinding report](milestones/m1-need-finding/submission/g3-need-finding-report.pdf) · Personas (below)
+> **Deliverables:** [Needfinding report](milestones/m1-need-finding/submission/g3-need-finding-report.pdf) (interview summary, personas and needs) · [Supplementary materials](milestones/m1-need-finding/submission/g3-supplementary-materials.pdf) (interview script and summaries)
 
 ### Goal and approach
 
@@ -74,15 +72,15 @@ What we took away:
 | **Step-by-step help feels more natural** | **Sometimes pointing the way is enough** |
 | Students prefer small steps that leave part of the work to them. | Pointing to where in the course material to look can beat giving the answer. |
 
-Full details: [interview summary](milestones/m1-need-finding/interview-summary.md), [script and per-interview summaries](milestones/m1-need-finding/supplementary-materials.md). We do not publish recordings or names, and participants appear only by role or code.
+The full interview script and a summary of each interview are in our [supplementary materials](milestones/m1-need-finding/submission/g3-supplementary-materials.pdf). We do not publish recordings or names, and participants appear only by role or code.
 
 ### Personas
 
-We created three personas from the interview findings:
+We created three personas from the interview findings. Each has its own page in the [Needfinding report](milestones/m1-need-finding/submission/g3-need-finding-report.pdf):
 
-- [**Sofia, the Efficiency-Seeking Learner**](milestones/m1-need-finding/personas/persona_sofia.pdf): tries first, then wants a quick hint, and gets frustrated by long answers or full solutions when a nudge was enough.
-- [**Peter, the Deadline-Driven Learner**](milestones/m1-need-finding/personas/persona_peter.pdf): wants to understand, but under time pressure asks for complete solutions and later wonders what he actually learned.
-- [**Max, the Validation-Seeking Learner**](milestones/m1-need-finding/personas/persona_max.pdf): starts with his own approach and uses AI as a quick sanity check, but worries about depending on external confirmation.
+- [**Sofia, the Efficiency-Seeking Learner**]: tries first, then wants a quick hint, and gets frustrated by long answers or full solutions when a nudge was enough.
+- [**Peter, the Deadline-Driven Learner**]: wants to understand, but under time pressure asks for complete solutions and later wonders what he actually learned.
+- [**Max, the Validation-Seeking Learner**]: starts with his own approach and uses AI as a quick sanity check, but worries about depending on external confirmation.
 
 ### Needs
 
