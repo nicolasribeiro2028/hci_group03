@@ -2,6 +2,27 @@
 
 Notes toward Section 5 (Identified Needs) of the need-finding report, written from my reading of the interview summaries. Participant codes follow the report (P1 to P12, the same order as Interviews 1 to 12 in the supplementary materials). This document is separate from [needs_reto.md](needs_reto.md), and the two are to be merged into the report.
 
+## Participant key
+
+Reto's notes and the interview files use interviewer-based codes (for example franco_1). This table maps them to the report's P1 to P12. Participants themselves are identified only by role.
+
+| Code | Interview code | Interviewed by | Role | Summary file |
+|---|---|---|---|---|
+| P1 | franco_1 | Franco | Medicine BSc student | interview_summaries_franco_fierro.md |
+| P2 | franco_2 | Franco | Mechanical Engineering graduate | interview_summaries_franco_fierro.md |
+| P3 | valentin_1 | Valentin | Mathematics BSc student | Summary_interview_valentin_fontana.md |
+| P4 | valentin_2 | Valentin | Quantitative Finance MSc student | Summary_interview_valentin_fontana.md |
+| P5 | noah_1 | Noah | Mechanical Engineering student | interview_summaries_noah_faoro.md |
+| P6 | noah_2 | Noah | Robotics student | interview_summaries_noah_faoro.md |
+| P7 | rafael_1 | Rafael | Computer Science BSc student | interview_summaries_rafael.md |
+| P8 | rafael_2 | Rafael | Information Systems BSc student | interview_summaries_rafael.md |
+| P9 | nicolas_1 | Nicolas | Industrial Engineering student | summary_nicolas_interview_01.md |
+| P10 | nicolas_2 | Nicolas | Computational Biology student | nicolas_interview_02.md |
+| P11 | reto_1 | Reto | Pharmacy BSc student | interview_summaries_reto_russmann.md |
+| P12 | reto_2 | Reto | Electrical Engineering student | interview_summaries_reto_russmann.md |
+
+All summary files are in `interviews/summaries/`.
+
 ## Key needs
 
 ### Walk through my own attempt before solving
