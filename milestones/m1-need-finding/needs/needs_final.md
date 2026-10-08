@@ -1,6 +1,6 @@
 # Identified Needs
 
-This section presents the needs we identified from the twelve interviews. Participant counts are based on the interview summaries, not on a formal coding of transcripts. The participant key at the end maps the codes P1 to P12 to interviews.
+This section presents the needs we identified from the twelve interviews. Participant counts are based on the interview summaries, not on a formal coding of transcripts.
 
 ## Key needs
 
@@ -119,22 +119,3 @@ Frustration pushes students to hand the whole problem to AI, and some students f
 
 - **Evidence (2 of 12):** P12 sometimes gets so frustrated that they do everything with an AI, and otherwise tries to calm down and reread the question first. P11 takes a break or solves a different problem and returns with a fresh mind.
 - **Why it matters:** this has the thinnest support among our needs, since only two participants described it. It suggests that the point where a student is most likely to ask for a full answer may be the point where a pause would help most.
-
-## Appendix: Participant key
-
-The interview files use interviewer-based codes (for example franco_1). This table maps them to P1 to P12. Participants are identified only by role.
-
-| Code | Interview code | Interviewed by | Role |
-|---|---|---|---|
-| P1 | franco_1 | Franco | Medicine BSc student |
-| P2 | franco_2 | Franco | Mechanical Engineering graduate |
-| P3 | valentin_1 | Valentin | Mathematics BSc student |
-| P4 | valentin_2 | Valentin | Quantitative Finance MSc student |
-| P5 | noah_1 | Noah | Mechanical Engineering student |
-| P6 | noah_2 | Noah | Robotics student |
-| P7 | rafael_1 | Rafael | Computer Science BSc student |
-| P8 | rafael_2 | Rafael | Information Systems BSc student |
-| P9 | nicolas_1 | Nicolas | Industrial Engineering student |
-| P10 | nicolas_2 | Nicolas | Computational Biology student |
-| P11 | reto_1 | Reto | Pharmacy BSc student |
-| P12 | reto_2 | Reto | Electrical Engineering student |
