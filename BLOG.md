@@ -42,7 +42,7 @@ Students now have an always-available helper for almost any problem they get stu
 ## Needfinding (Milestone 1)
 
 > [!TIP]
-> **Deliverables:** [Interview summary](milestones/m1-need-finding/g3-interview-summary.pdf) · [Supplementary materials (script and summaries)](milestones/m1-need-finding/g3-supplementary-materials.pdf) · Needfinding report <!-- TODO: link --> · Personas (below)
+> **Deliverables:** [Interview summary](milestones/m1-need-finding/g3-interview-summary.pdf) · [Supplementary materials (script and summaries)](milestones/m1-need-finding/submission/g3-supplementary-materials.pdf) · [Needfinding report](milestones/m1-need-finding/submission/g3-need-finding-report.pdf) · Personas (below)
 
 ### Goal and approach
 
@@ -80,13 +80,21 @@ Full details: [interview summary](milestones/m1-need-finding/interview-summary.m
 
 We created three personas from the interview findings:
 
-- [**Sofia, the Validation-Seeking Learner**](milestones/m1-need-finding/Persona1.pdf): starts with her own approach and uses AI as a quick sanity check, but worries about depending on external confirmation.
-- [**Braxton, the Deadline-Driven Learner**](milestones/m1-need-finding/Persona_Braxton.pdf): wants to understand, but under time pressure asks for complete solutions and later wonders what he actually learned.
-- [**Kaj, the Efficiency-Seeking Learner**](milestones/m1-need-finding/Persona_kaj.pdf): tries first, then wants a quick hint, and gets frustrated by long answers or full solutions when a nudge was enough.
+- [**Sofia, the Efficiency-Seeking Learner**](milestones/m1-need-finding/personas/persona_sofia.pdf): tries first, then wants a quick hint, and gets frustrated by long answers or full solutions when a nudge was enough.
+- [**Peter, the Deadline-Driven Learner**](milestones/m1-need-finding/personas/persona_peter.pdf): wants to understand, but under time pressure asks for complete solutions and later wonders what he actually learned.
+- [**Max, the Validation-Seeking Learner**](milestones/m1-need-finding/personas/persona_max.pdf): starts with his own approach and uses AI as a quick sanity check, but worries about depending on external confirmation.
 
 ### Needs
 
-<!-- TODO (Nicolas and Reto): summary of the key needs + link to the needfinding report -->
+From the twelve interviews we identified five key needs and eight secondary ones. The key needs are:
+
+1. **Short, step-by-step help that goes deeper on request.** Long answers that arrive all at once confuse students more than they help.
+2. **Help that matches what the student already knows.** Answers that assume knowledge the student lacks force them to explain and prompt again.
+3. **Help grounded in the course material.** Students want AI to know their lectures and point back to them, instead of bringing in outside content.
+4. **Support that keeps the student doing the thinking.** Students want hints and checks of their own reasoning, not finished solutions.
+5. **Knowing when not to trust the AI.** Some students trust AI over friends, while others catch hallucinations, and both need ways to verify answers.
+
+The secondary needs, the evidence behind each need and our critical reflection are in the [Needfinding report](milestones/m1-need-finding/submission/g3-need-finding-report.pdf).
 
 ### Meta-reflection
 
