@@ -8,8 +8,7 @@ This section presents the needs we identified from the twelve interviews. Partic
 
 AI explanations are often too long or too in-depth and arrive all at once. Students want a short first answer, a check that the question was understood, and then the option to go deeper.
 
-> "It's helpful when the help comes step by step and not all at once."
->
+> "It's helpful when the help comes step by step and not all at once."\
 > — P11
 
 - **Evidence (4 of 12):** P5, P6, P11, P12.
@@ -29,8 +28,7 @@ Help is unhelpful when it assumes knowledge the student does not have yet. The s
 
 Students want the AI to know their lecture material and to point back to it instead of bringing in outside content.
 
-> "It brought in topics that weren't from the class to answer a problem."
->
+> "It brought in topics that weren't from the class to answer a problem."\
 > — P9
 
 - **Evidence (4 of 12):** P3, P4, P9, P11.
@@ -42,8 +40,7 @@ Students want the AI to know their lecture material and to point back to it inst
 
 Students want help that guides and supervises their work instead of solving it for them. A finished answer feels fast but leaves less understanding behind. The strongest pattern is that the student starts the work and the AI follows their reasoning, instead of imposing its own approach.
 
-> "I was still trying to solve the problem, even with help."
->
+> "I was still trying to solve the problem, even with help."\
 > — P9
 
 - **Evidence (10 of 12):** P2, P3, P4, P6, P7, P8, P9, P10, P11, P12.
@@ -56,8 +53,7 @@ Students want help that guides and supervises their work instead of solving it f
 
 Students need support judging when an AI answer may be wrong. Trust varies strongly between participants, and both extremes cause problems.
 
-> "My peers make mistakes, unlike AI, hence I go directly to it."
->
+> "My peers make mistakes, unlike AI, hence I go directly to it."\
 > — P2
 
 - **Evidence (5 of 12):** P1, P2, P4, P11, P12.
