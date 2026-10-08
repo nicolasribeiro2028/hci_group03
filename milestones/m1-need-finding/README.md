@@ -21,8 +21,8 @@
 All files are Markdown exported to PDF. Follow [FORMATTING_GUIDELINE.md](../../FORMATTING_GUIDELINE.md) (and paste it into any Claude session before writing).
 
 ## Suggested process
-1. Draft an interview script ([interviews/interview-script-template.md](interviews/interview-script-template.md)).
+1. Draft an interview script ([interviews/interview-script-template.md](interviews/templates/interview-script-template.md)).
 2. Recruit and run interviews (aim for 5+ participants relevant to "studying with AI").
-3. Summarize each interview ([interviews/interview-summary-template.md](interviews/interview-summary-template.md)).
-4. Synthesize needs and build personas ([persona-template.md](persona-template.md)).
+3. Summarize each interview ([interviews/interview-summary-template.md](interviews/templates/interview-summary-template.md)).
+4. Synthesize needs and build personas ([persona-template.md](personas/persona-template.md)).
 5. Write up the need-finding report, citing specific interview evidence for each need.

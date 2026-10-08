@@ -32,7 +32,7 @@ For each need: state it, link to supporting interview evidence, and note how man
 
 ## 6. Personas
 
-See [persona-template.md](persona-template.md) for the format; embed or link 1–2 personas here that represent your key user needs.
+See [persona-template.md](personas/persona-template.md) for the format; embed or link 1–2 personas here that represent your key user needs.
 
 ## 7. Synthesis / Key Takeaways
 TODO — 3-5 bullet points summarizing the most important, well-supported insights that will drive ideation in M2.
