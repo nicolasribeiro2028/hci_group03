@@ -1,6 +1,6 @@
 # Interviews
 
-Interview reports for the project. After each interview, copy [_template.md](_template.md) to `YYYY-MM-DD_participant-code.md` (e.g. `2026-10-05_P01.md`) and fill it in within an hour, while it's fresh. Use a participant code or initials, not full names.
+Interview reports for the project. After each interview, copy [_template.md](templates/_template.md) to `YYYY-MM-DD_participant-code.md` (e.g. `2026-10-05_P01.md`) and fill it in within an hour, while it's fresh. Use a participant code or initials, not full names.
 
 ## Goal
 
