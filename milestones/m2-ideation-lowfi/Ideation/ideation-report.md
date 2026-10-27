@@ -29,7 +29,15 @@ We reviewed 19 sources (7 papers, 10 products and 2 other posts or docs), organi
 | [Trust and Reliance on AI in Education](https://arxiv.org/abs/2604.01114) | Paper | 5 | Higher trust went with worse judgment of when the AI was wrong. |
 | [Scite](http://scite.ai) | Product | 5 | Helps judge how trustworthy or contested a scientific claim is. |
 
-The three baselines below are covered in the next part: [NotebookLM](https://notebooklm.google.com), [Khanmigo](https://www.khanmigo.ai/) and [GitHub Copilot](https://github.com/features/copilot).
+### Related work in depth
+
+Two papers shaped our design most directly.
+
+**Segmentation of Worked Examples** ([Spanjers, van Gog and van Merriënboer, 2012](https://onlinelibrary.wiley.com/doi/10.1002/acp.1832)). This study compared three ways of studying worked examples: shown whole, pre-divided into segments by blank lines, and divided into segments by the students themselves. Pre-segmented examples led to the same learning with less mental effort, while asking students to segment actively added effort without improving performance. A related study by the same group found that segmentation helped learners with low prior knowledge more than those with high prior knowledge. For our concept this supports splitting help into short steps (Need 1), and suggests the tool should do the splitting instead of leaving it to the student. The prior-knowledge result also links Need 1 to Need 2, since the right step size may depend on what the student already knows. The study tested worked examples, not AI chat, so it supports the design direction without proving it.
+
+**Evolution of Programmers' Trust in Generative AI Programming Assistants** ([Shah et al.](https://arxiv.org/abs/2509.13253)). This study followed 71 upper-division computer science students using GitHub Copilot, measuring their trust after one hour and again after 10 days. Trust rose on average. Students said it grew when they saw Copilot be correct, understood how it uses the surrounding code as context, and learned some basics of how language models work. Incorrect suggestions were a main reason for distrust, and students concluded that Copilot still needs a competent programmer for some tasks. For our concept (Need 5), it shows that students build trust from what they can see the tool get right or wrong, which supports showing sources and confidence for each answer. The study measured attitudes rather than behavior, involved only students with programming backgrounds, lasted 10 days and concerned code completion, not help with STEM problems in general.
+
+The three baselines are covered in the next part: [NotebookLM](https://notebooklm.google.com), [Khanmigo](https://www.khanmigo.ai/) and [GitHub Copilot](https://github.com/features/copilot).
 
 ### Baseline apps
 
