@@ -59,6 +59,7 @@ No dedicated section in the doc.
 ### S8: The Rundown post
 
 - The author uses AI with a framework that first builds context about the problem and how much the person knows. The AI does not produce solutions directly but gathers understanding, then guides the user.
+- Meta-information: shows how people are approaching AI as a partner in guiding how to discuss or complete tasks, not just as an answer generator. It is a community post about writing and decision-making, not research, so it is context and inspiration rather than evidence.
 
 ### S9: Claude Code learning output style
 
