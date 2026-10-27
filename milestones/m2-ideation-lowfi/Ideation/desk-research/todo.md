@@ -8,12 +8,12 @@ Each insight is 1 to 2 sentences, taken from what the source says, plus how it r
 
 ### Papers
 
-- [ ] S1 Help Helps, But Only So Much: expand beyond "cognitive load" (Need 1)
-- [ ] S2 Segmentation of Worked Examples: no notes yet (Need 1)
-- [ ] S4 Learning Context framework: no notes yet (Needs 2, 3)
-- [ ] S5 Beyond the Benefits, harms of GenAI in computing education: no notes yet (Need 5)
-- [ ] S6 Evolution of Programmers' Trust in GenAI assistants: no notes yet (Need 5)
-- [ ] S7 Trust and Reliance on AI in Education: no notes yet (Need 5)
+- [x] S1 Help Helps, But Only So Much: insight added
+- [x] S2 Segmentation of Worked Examples: insight added
+- [x] S4 Learning Context framework: insight added
+- [x] S5 Beyond the Benefits, harms of GenAI in computing education: insight added
+- [x] S6 Evolution of Programmers' Trust in GenAI assistants: insight added
+- [x] S7 Trust and Reliance on AI in Education: insight added
 
 ### Products
 
@@ -51,5 +51,5 @@ Each insight is 1 to 2 sentences, taken from what the source says, plus how it r
 | Requirement | Now | Needed |
 |---|---|---|
 | Sources listed | 18 | at least 10 |
-| Sources with an insight | 13 | all that go into the report (at least 10) |
+| Sources with an insight | 18 | all that go into the report (at least 10) |
 | Baseline feature cells filled | 0 of 24 | 24 |

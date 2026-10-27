@@ -18,8 +18,8 @@ Source: the team Google Doc "HCI Group 3", tabs "Desk Research" and "how might w
 
 | Requirement | Status |
 |---|---|
-| At least 10 sources (2 x 5 members) | 18 listed, but 13 have written insights |
-| Key insight for each source | Missing for most sources |
+| At least 10 sources (2 x 5 members) | 18 listed, all with a written insight (S1 to S7 and S12 from abstracts and search results, verify before citing) |
+| Key insight for each source | Done for all 18 |
 | Baseline apps and feature comparison | Apps named, no comparison yet |
 | One paragraph on the most related solution | Not started |
 

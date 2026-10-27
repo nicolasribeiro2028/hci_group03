@@ -6,7 +6,7 @@ The doc names NotebookLM as the closest baseline. Other tools are listed under "
 
 | Tool | Why it is relevant | Needs |
 |---|---|---|
-| NotebookLM (Gemini Notebook) | Answers grounded in uploaded sources with citations | 2, 3, 5 |
+| NotebookLM (Gemini Notebook) | Answers grounded in uploaded sources with citations that open the passage. Grounds answers but does not guide problem solving | 2, 3, 5 |
 | ChatGPT Study Mode | Opens with questions about goal and level | 2 |
 | Gemini Guided Learning | Goal and level questions, diagnostic quiz tied to uploaded material | 2 |
 | Claude (learning output style) | Leaves decisions to the user | 3, 4 |
