@@ -4,9 +4,9 @@
 
 ## Deliverables (prefix files `g3-`)
 
-- [ ] `g3-ideation-report.pdf` — from [ideation-report.md](ideation-report.md)
-- [ ] `g3-lofi-prototyping-report.pdf` — from [prototype-report.md](prototype-report.md): 2 interactable lo-fi prototypes and 2 interaction storyboards
-- [ ] `g3-formative-testing-report.pdf` — from [peer-testing-report.md](peer-testing-report.md): peer testing and heuristic evaluation
+- [ ] `g3-ideation-report.pdf` — from [Ideation/ideation-report.md](Ideation/ideation-report.md)
+- [ ] `g3-lofi-prototyping-report.pdf` — from [LoFiPrototyping/lofi-prototyping-report.md](LoFiPrototyping/lofi-prototyping-report.md): 2 interactable lo-fi prototypes and 2 interaction storyboards
+- [ ] `g3-formative-testing-report.pdf` — from [FormativeTesting/formative-testing-report.md](FormativeTesting/formative-testing-report.md): peer testing and heuristic evaluation
 - [ ] Prototype files (Idea A and Idea B) and heuristic evaluation workbooks in [prototypes/](prototypes/)
 - [ ] Blog update in root [BLOG.md](../../BLOG.md), including the AI declaration and meta-reflection
 - [ ] Both prototypes shown to the TA before the deadline
