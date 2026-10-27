@@ -1,26 +1,51 @@
-# Ideation Report — Group 3
+# Ideation Report
 
-## 1. Related Work
-Summarize 3-5 relevant existing tools/research (e.g., AI tutoring systems, transparency/disclosure tools, collaborative AI interfaces). For each: what it does, and its gap relative to your identified needs.
+## A.0 Declaration of Use of AI
 
-| Work / Tool | What it does | Gap relative to our needs |
-|---|---|---|
-| | | |
+TODO — state whether AI was used for this report. If yes, name each tool and explain how it was used. If no AI was used, say so explicitly.
 
-## 2. Field Research
-TODO — any additional research beyond M1 interviews (competitive analysis, secondary research, literature).
+## A.1 Field Research Summary
 
-## 3. Affinity Diagram
-TODO — describe the clustering process; embed a photo/export in [prototypes/](prototypes/) and link it here.
+### Related work and baseline apps
 
-Key clusters identified:
-- **Cluster 1:** TODO
-- **Cluster 2:** TODO
+Find at least 10 sources (2 x 5 group members): research papers, products, blogs, videos, editorials, news articles or customer reviews. Include at least some baseline apps and compare their features.
 
-## 4. Design Principles / Goals
-Derived from needs + affinity diagram — 3-5 concrete design goals that should guide prototyping.
-1. TODO
-2. TODO
+| Source | Type | Key insight | Link |
+|---|---|---|---|
+| TODO | | | |
 
-## 5. Idea Generation
-Brief list of ideas considered (even ones you didn't pursue) and rationale for the 2 chosen for low-fi prototyping.
+### Baseline feature comparison
+
+| Feature | Baseline 1 | Baseline 2 | Baseline 3 |
+|---|---|---|---|
+| TODO | | | |
+
+### Most related solution(s)
+
+TODO — one short paragraph on the most related solution(s) found in the desk research. Add images or examples if applicable.
+
+## A.2 Brainstorming Summary
+
+### How might we statements
+
+At least 5, each traceable to a user need from Milestone 1.
+
+- TODO
+
+### Brainstorming method
+
+TODO — one short paragraph: which method from the lecture was used and why.
+
+### Brainstormed ideas
+
+At least 15 ideas. Give each a label and a 1 to 2 sentence description. Group 2 to 3 ideas per page. Store images in [../../assets/](../../assets/).
+
+TODO
+
+## A.3 Affinity Diagram Summary
+
+TODO — embed one image of the affinity diagram. It must map the Milestone 1 user needs, the field research insights and all brainstormed ideas.
+
+### Key themes and insights
+
+TODO — brief summary of the themes that emerged and how they guide the next design steps.
