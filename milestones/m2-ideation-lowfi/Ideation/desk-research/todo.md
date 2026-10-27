@@ -17,14 +17,14 @@ Each insight is 1 to 2 sentences, taken from what the source says, plus how it r
 
 ### Products
 
-- [ ] S15 Turbo AI: no notes, no linked need
-- [ ] S16 Khanmigo: no notes, no linked need
-- [ ] S17 Thetawise: no notes, no linked need
-- [ ] S18 ScrollToStudy: no notes, no linked need
+- [x] S15 Turbo AI: one-line insight added (from listings and reviews, verify against official site)
+- [x] S16 Khanmigo: one-line insight added (from listings and reviews, verify against official site)
+- [x] S17 Thetawise: one-line insight added (from listings and reviews, verify against official site)
+- [x] S18 ScrollToStudy: one-line insight added (from listings and reviews, verify against official site)
 
 ## 2. Decisions needed from the team
 
-- [ ] Link S15 to S18 to a need, or mark them as baselines only
+- [x] S15 to S18 linked to needs (S15 baseline only, S16 Needs 4 and 2, S17 Need 1, S18 Need 3). Confirm with the team
 - [ ] Need 3 (course material) has no section of its own: add sources, or accept thin coverage with NotebookLM, Claude and S4
 - [ ] Choose the 3 to 4 baselines for the comparison (candidates in [baselines.md](baselines.md))
 - [ ] Confirm that the 2026 arXiv links (S5 to S7) open, and replace any that do not
@@ -51,5 +51,5 @@ Each insight is 1 to 2 sentences, taken from what the source says, plus how it r
 | Requirement | Now | Needed |
 |---|---|---|
 | Sources listed | 18 | at least 10 |
-| Sources with an insight | 9 | all that go into the report (at least 10) |
+| Sources with an insight | 13 | all that go into the report (at least 10) |
 | Baseline feature cells filled | 0 of 24 | 24 |

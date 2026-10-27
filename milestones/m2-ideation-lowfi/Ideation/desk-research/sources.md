@@ -18,10 +18,10 @@ IDs are for cross-referencing only. "Insights" says whether the Google Doc alrea
 | S12 | NotebookLM (Gemini Notebook) | Product | 2, 3, 5 | Yes |
 | S13 | Claude (document upload as course context) | Product | 3 | Yes |
 | S14 | Scite ([scite.ai](http://scite.ai)) | Product | 5 | Yes |
-| S15 | Turbo AI ([link](https://www.turbo.ai/)) | Product | none | TODO |
-| S16 | Khanmigo, Khan Academy ([link](https://www.khanmigo.ai/)) | Product | none (HMW 4 mentions Khan Academy style guardrails) | TODO |
-| S17 | Thetawise ([link](https://thetawise.ai/)) | Product | none | TODO |
-| S18 | ScrollToStudy ([link](https://scrolltostudy.com/)) | Product | none | TODO |
+| S15 | Turbo AI ([link](https://www.turbo.ai/)) | Product | baseline only | Yes |
+| S16 | Khanmigo, Khan Academy ([link](https://www.khanmigo.ai/)) | Product | 4, 2 | Yes |
+| S17 | Thetawise ([link](https://thetawise.ai/)) | Product | 1 | Yes |
+| S18 | ScrollToStudy ([link](https://scrolltostudy.com/)) | Product | 3 | Yes |
 
 ## Counts
 
