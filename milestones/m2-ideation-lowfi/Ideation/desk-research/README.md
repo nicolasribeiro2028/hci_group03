@@ -10,7 +10,7 @@ Source: the team Google Doc "HCI Group 3", tabs "Desk Research" and "how might w
 |---|---|
 | [sources.md](sources.md) | One master list of every source, with type, linked need and status |
 | [by-need.md](by-need.md) | The same sources grouped under the five key needs from Milestone 1 |
-| [baselines.md](baselines.md) | The three baselines, the feature comparison and a draft "most related solution" paragraph |
+| [baselines.md](baselines.md) | The three baseline profiles and a draft "most related solution" paragraph |
 | [a1-mapping.md](a1-mapping.md) | How this material becomes section A.1 of the report |
 | [todo.md](todo.md) | Everything still open, grouped by type of task |
 
@@ -20,7 +20,7 @@ Source: the team Google Doc "HCI Group 3", tabs "Desk Research" and "how might w
 |---|---|
 | At least 10 sources (2 x 5 members) | 19 listed, all with a written insight (S1 to S7 and S12 from abstracts and search results, verify before citing) |
 | Key insight for each source | Done for all 19 |
-| Baseline apps and feature comparison | Done for 3 baselines, from web research (verify) |
+| Baseline apps | Done: 3 profiles, from web research (verify) |
 | One paragraph on the most related solution | Draft written, needs team review |
 
 ## Open questions for the team

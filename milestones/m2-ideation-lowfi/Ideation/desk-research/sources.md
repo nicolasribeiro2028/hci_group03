@@ -19,7 +19,7 @@ IDs are for cross-referencing only. Basis: S1 to S7 and S12 from abstracts and w
 | S13 | Claude (document upload as course context) | Product | 3 | Course documents can be uploaded as context. |
 | S14 | Scite ([scite.ai](http://scite.ai)) | Product | 5 | It helps judge how trustworthy or contested a scientific claim is, not just where to find papers. |
 | S15 | Turbo AI ([link](https://www.turbo.ai/)) | Product | baseline only | It produces notes, flashcards, quizzes and audio summaries but does not guide students through problems. |
-| S16 | Khanmigo, Khan Academy ([link](https://www.khanmigo.ai/)) | Product | 4, 2 | It guides with questions instead of answers, but a review found it ignored a student's correct work. |
+| S16 | Khanmigo, Khan Academy ([link](https://www.khanmigo.ai/)) | Product | 4, 2 | An assistant inside Khan Academy, so it has the exercise context built in. It guides with questions instead of answers, but it is limited to Khan Academy content and a review found it ignored a student's correct work. |
 | S17 | Thetawise ([link](https://thetawise.ai/)) | Product | 1 | It gives hints and step-by-step math help, but the student picks Tutor Mode or Answer Directly. |
 | S18 | ScrollToStudy ([link](https://scrolltostudy.com/)) | Product | 3 | It builds a feed of flashcards and quizzes from the student's own material, for passive review. |
 | S19 | GitHub Copilot ([link](https://github.com/features/copilot)) | Product | 5 | A general coding assistant, the tool studied in S6. It can attach files and repos as context and explain code (`/explain`), but it is not built for learning and it does not stage help or check what the student knows. |

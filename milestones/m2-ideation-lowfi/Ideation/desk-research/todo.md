@@ -29,9 +29,9 @@ Each insight is 1 to 2 sentences, taken from what the source says, plus how it r
 - [x] Baselines chosen: NotebookLM, Khanmigo, GitHub Copilot (3 is enough, no minimum in the instructions)
 - [ ] Confirm that the 2026 arXiv links (S5 to S7) open, and replace any that do not
 
-## 3. Baseline comparison (A.1)
+## 3. Baseline profiles (A.1)
 
-- [x] Feature table filled from web research (18 cells). Verify against the products before submitting
+- [x] Baselines written as profiles (idea, strengths, weaknesses, key insights) instead of a feature table. Verify against the products before submitting
 - [x] Khanmigo relevance and needs added
 - [ ] Review the DRAFT "most related solution" paragraph, and add an image or example if possible
 
@@ -52,4 +52,4 @@ Each insight is 1 to 2 sentences, taken from what the source says, plus how it r
 |---|---|---|
 | Sources listed | 19 | at least 10 |
 | Sources with an insight | 19 | all that go into the report (at least 10) |
-| Baseline feature cells filled | 18 of 18 | 18 |
+| Baseline profiles written | 3 of 3 | 3 |

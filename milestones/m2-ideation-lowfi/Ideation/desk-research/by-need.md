@@ -34,7 +34,7 @@ Needs are from [needs_final.md](../../../m1-need-finding/needs/needs_final.md). 
 
 ### S16: Khanmigo
 
-- Built to guide students with questions instead of handing over answers (Need 4). A review cites a 2024 analysis where it ignored a student's correct work and questioned them as if they knew nothing, which is a Need 2 gap.
+- An assistant inside Khan Academy, so it has the exercise context built in instead of general knowledge. Built to guide students with questions instead of handing over answers (Need 4). A review cites a 2024 analysis where it ignored a student's correct work and questioned them as if they knew nothing, which is a Need 2 gap.
 
 ### S10 and S11: Gemini Guided Learning and ChatGPT Study Mode
 
