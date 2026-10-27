@@ -12,6 +12,7 @@ Source: the team Google Doc "HCI Group 3", tabs "Desk Research" and "how might w
 | [by-need.md](by-need.md) | The same sources grouped under the five key needs from Milestone 1 |
 | [baselines.md](baselines.md) | Baseline apps and the feature comparison (skeleton) |
 | [a1-mapping.md](a1-mapping.md) | How this material becomes section A.1 of the report |
+| [todo.md](todo.md) | Everything still open, grouped by type of task |
 
 ## Status against the requirements
 
