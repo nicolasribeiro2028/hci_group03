@@ -15,17 +15,18 @@ IDs are for cross-referencing only. Basis: S1 to S7 and S12 from abstracts and w
 | S9 | Claude Code "learning" output style ([docs](https://code.claude.com/docs/en/output-styles#learning)) | Product docs | 4 | The mode leaves TODOs for the user, so the user makes the decisions. |
 | S10 | Gemini Guided Learning | Product | 2 | It asks about goal and level before teaching, and adds a diagnostic quiz tied to uploaded class material. |
 | S11 | ChatGPT Study Mode | Product | 2 | It asks about goal and level before teaching. |
-| S12 | NotebookLM (Gemini Notebook) | Product | 2, 3, 5 | Answers come only from uploaded sources, with citations that open the highlighted passage. One small study found about 13% hallucinations versus 40% for general chatbots, but citations do not guarantee correctness. It grounds answers but does not guide problem solving. |
+| S12 | NotebookLM (Gemini Notebook) | Product | 2, 3, 5 | Answers come only from uploaded sources, with citations that open the highlighted passage. One small study found about 13% hallucinations versus 40% for general chatbots, but citations do not guarantee correctness. Its Learning Guide mode asks probing questions in a Socratic style, but no hint ladder or up-front knowledge check was found. |
 | S13 | Claude (document upload as course context) | Product | 3 | Course documents can be uploaded as context. |
 | S14 | Scite ([scite.ai](http://scite.ai)) | Product | 5 | It helps judge how trustworthy or contested a scientific claim is, not just where to find papers. |
 | S15 | Turbo AI ([link](https://www.turbo.ai/)) | Product | baseline only | It produces notes, flashcards, quizzes and audio summaries but does not guide students through problems. |
 | S16 | Khanmigo, Khan Academy ([link](https://www.khanmigo.ai/)) | Product | 4, 2 | It guides with questions instead of answers, but a review found it ignored a student's correct work. |
 | S17 | Thetawise ([link](https://thetawise.ai/)) | Product | 1 | It gives hints and step-by-step math help, but the student picks Tutor Mode or Answer Directly. |
 | S18 | ScrollToStudy ([link](https://scrolltostudy.com/)) | Product | 3 | It builds a feed of flashcards and quizzes from the student's own material, for passive review. |
+| S19 | GitHub Copilot ([link](https://github.com/features/copilot)) | Product | 5 | A general coding assistant, the tool studied in S6. It can attach files and repos as context and explain code (`/explain`), but it is not built for learning and it does not stage help or check what the student knows. |
 
 ## Counts
 
 - Papers: 7
-- Products: 9
+- Products: 10
 - Blog posts and docs: 2
-- Total: 18 (requirement: at least 10)
+- Total: 19 (requirement: at least 10)

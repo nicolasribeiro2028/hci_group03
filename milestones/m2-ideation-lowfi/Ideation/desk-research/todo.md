@@ -26,14 +26,14 @@ Each insight is 1 to 2 sentences, taken from what the source says, plus how it r
 
 - [x] S15 to S18 linked to needs (S15 baseline only, S16 Needs 4 and 2, S17 Need 1, S18 Need 3). Confirm with the team
 - [ ] Need 3 (course material) has no section of its own: add sources, or accept thin coverage with NotebookLM, Claude and S4
-- [ ] Choose the 3 to 4 baselines for the comparison (candidates in [baselines.md](baselines.md))
+- [x] Baselines chosen: NotebookLM, Khanmigo, GitHub Copilot (3 is enough, no minimum in the instructions)
 - [ ] Confirm that the 2026 arXiv links (S5 to S7) open, and replace any that do not
 
 ## 3. Baseline comparison (A.1)
 
-- [ ] Fill the feature table in [baselines.md](baselines.md): 6 features by 4 tools (24 cells). Check each tool, do not guess
-- [ ] Khanmigo row in the candidates table: relevance and needs
-- [ ] Write the "most related solution" paragraph, with an image or example if possible
+- [x] Feature table filled from web research (18 cells). Verify against the products before submitting
+- [x] Khanmigo relevance and needs added
+- [ ] Review the DRAFT "most related solution" paragraph, and add an image or example if possible
 
 ## 4. Writing the report section
 
@@ -50,6 +50,6 @@ Each insight is 1 to 2 sentences, taken from what the source says, plus how it r
 
 | Requirement | Now | Needed |
 |---|---|---|
-| Sources listed | 18 | at least 10 |
-| Sources with an insight | 18 | all that go into the report (at least 10) |
-| Baseline feature cells filled | 0 of 24 | 24 |
+| Sources listed | 19 | at least 10 |
+| Sources with an insight | 19 | all that go into the report (at least 10) |
+| Baseline feature cells filled | 18 of 18 | 18 |

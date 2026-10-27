@@ -76,7 +76,7 @@ No dedicated section in the original doc. Covered by S12, S13, S18 and S4.
 - Answers come only from uploaded sources (PDFs, Docs, Slides, web pages, audio, YouTube transcripts) and carry inline citations that open the highlighted passage. It also generates summaries, flashcards, quizzes and mind maps from the same sources.
 - One small study (40 responses) reported about 13% hallucinations versus about 40% for Gemini and ChatGPT. A University of Michigan review says it feels lower but would need research to prove.
 - A citation does not guarantee a correct answer. A preprint reports it sometimes inventing content or using "general knowledge", and another source reports "source blindness" (saying "not found" when the material exists).
-- It grounds answers but does not guide problem solving, check attempts or stage the support. That is the gap our concept fills.
+- It also has a Learning Guide mode (rolled out September 2025) that asks probing, open-ended questions in a Socratic style instead of answering directly, and adapts explanation depth to follow-up prompts. I found no up-front check of the student's knowledge level and no hint ladder, so these gaps remain.
 
 ### S14: Scite
 
@@ -91,6 +91,12 @@ No dedicated section in the original doc. Covered by S12, S13, S18 and S4.
 - 71 upper-division CS students used Copilot. Trust was measured after one hour and after 10 days, and rose on average.
 - Seeing Copilot be correct, understanding how it uses codebase context and learning NLP basics raised trust. Incorrect suggestions were a main reason for distrust. Students concluded it still needs a competent programmer.
 - Limits: measured attitudes, not behavior; only students with programming backgrounds; 10 days.
+
+### S19: GitHub Copilot
+
+- The tool studied in S6. A general coding assistant: files, repositories and issues can be attached as context (`@` and `#`), and `/explain` explains code. Visual Studio asks clarifying questions when context is unclear and lists the instruction files it used under References.
+- A 2021 technical-preview study showed a per-completion score ("mean prob."), but I could not confirm that today's product shows a confidence marker.
+- Not built for learning: no staged help or knowledge check found.
 
 ### S7: Trust and Reliance on AI in Education
 
