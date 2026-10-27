@@ -1,6 +1,6 @@
 # Ideation
 
-Ideation combines the understanding of the problem space and the people we design for with imagination, to generate solution concepts. The output is one PDF, **Ideation Report**, written in [ideation-report.md](ideation-report.md).
+Ideation combines the understanding of the problem space and the people we design for with imagination, to generate solution concepts. The output is one PDF, **Ideation Report**, built from the Markdown files in [sections/](sections/).
 
 ## Task
 
@@ -31,3 +31,39 @@ Consistency matters: the ideas must match the user needs from the need-finding p
 
 - One PDF named "Ideation Report" (here: `g3-ideation-report.pdf`).
 - Official location: `Deliverables/Ideation`.
+
+## Folder structure
+
+| Path | Purpose |
+|---|---|
+| `sections/` | One Markdown file per report section. This is where the text is edited |
+| `figures/` | Images for the report (brainstorm images, affinity diagram). Link them as `figures/name.png` |
+| `main.tex` | LaTeX wrapper: cover page, layout and the list of sections. Rarely needs editing |
+| `Makefile` | Builds the PDF |
+| `desk-research/` | Helper notes behind A.1. Not submitted |
+
+## Who edits what
+
+Edit only your own section file, so changes do not collide.
+
+| File | Section | Owner |
+|---|---|---|
+| `sections/a0-ai-declaration.md` | A.0 Declaration of Use of AI | Nicolas |
+| `sections/a1-field-research.md` | A.1 Field Research Summary | Nicolas |
+| `sections/a2-brainstorming.md` | A.2 Brainstorming Summary | TODO |
+| `sections/a3-affinity-diagram.md` | A.3 Affinity Diagram Summary | TODO |
+
+## Build the PDF
+
+From this folder:
+
+```bash
+make        # builds g3-ideation-report.pdf
+make clean  # removes build/ and the PDF
+```
+
+- Needs `pandoc` and `xelatex` (see section 10 of [FORMATTING_GUIDELINE.md](../../../FORMATTING_GUIDELINE.md)).
+- Each Markdown file in `sections/` is converted to LaTeX by Pandoc and included by `main.tex`.
+- To add a section, create `sections/<name>.md` and add a matching `\input{build/<name>}` line to `main.tex`.
+- Keep one `#` heading per section file, then `##` and `###` below it. Tables: set column widths with the dashes in the separator row, otherwise columns come out equal.
+- The generated PDF is git-ignored. Commit the final one only when it is ready, with `git add -f`.

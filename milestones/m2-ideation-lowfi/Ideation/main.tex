@@ -1,0 +1,54 @@
+% Ideation Report, Group 3.
+% Build with `make` (see README.md). Do not write report text here:
+% edit the Markdown files in sections/ instead.
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=2.5cm]{geometry}
+\usepackage{fontspec}
+\usepackage{longtable,booktabs,array,calc}
+\newcounter{none} % unnumbered tables, used by Pandoc longtable output
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+% Helpers that the Pandoc-generated fragments in build/ rely on
+\providecommand{\tightlist}{\setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\providecommand{\pandocbounded}[1]{#1}
+\setkeys{Gin}{width=\linewidth,height=0.8\textheight,keepaspectratio}
+
+% Section headings carry their own "A.x" labels, so no automatic numbers
+\setcounter{secnumdepth}{0}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.6em}
+
+\begin{document}
+
+% ---- Cover page ----
+\thispagestyle{empty}
+\begin{center}
+\vspace*{3cm}
+{\Huge\bfseries Ideation Report}\\[1.2cm]
+{\Large Milestone 2}\\[2.5cm]
+{\LARGE\bfseries When Is Help Actually Helpful?}\\[0.6cm]
+{\large Rethinking Studying with AI}\\[3cm]
+{\Large\bfseries Group 3}\\[0.8cm]
+Franco Fierro Brandes\\
+Nicolas Ribeiro\\
+Noah Faoro\\
+Rafael Bragança Oliveira\\
+Reto Russmann\\
+Valentin Fontana\\[2.5cm]
+Human Computer Interaction (HS26)\\
+ETH Zürich\\[0.4cm]
+Prof. Dr. April Wang\\[1cm]
+29 October 2026
+\end{center}
+\newpage
+
+% ---- Sections (generated from sections/*.md by the Makefile) ----
+% To add a section: create sections/<name>.md, then add a line here.
+\input{build/a0-ai-declaration}
+\input{build/a1-field-research}
+\input{build/a2-brainstorming}
+\input{build/a3-affinity-diagram}
+
+\end{document}

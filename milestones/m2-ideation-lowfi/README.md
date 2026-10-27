@@ -4,7 +4,7 @@
 
 ## Deliverables (prefix files `g3-`)
 
-- [ ] `g3-ideation-report.pdf` — from [Ideation/ideation-report.md](Ideation/ideation-report.md)
+- [ ] `g3-ideation-report.pdf` — from [Ideation/sections/](Ideation/sections/), built with `make` in [Ideation/](Ideation/)
 - [ ] `g3-lofi-prototyping-report.pdf` — from [LoFiPrototyping/lofi-prototyping-report.md](LoFiPrototyping/lofi-prototyping-report.md): 2 interactable lo-fi prototypes and 2 interaction storyboards
 - [ ] `g3-formative-testing-report.pdf` — from [FormativeTesting/formative-testing-report.md](FormativeTesting/formative-testing-report.md): peer testing and heuristic evaluation
 - [ ] Prototype files (Idea A and Idea B) and heuristic evaluation workbooks in [prototypes/](prototypes/)

@@ -1,0 +1,4 @@
+# LaTeX build output
+build/
+# Generated PDF: commit only the final one, with `git add -f`
+g3-ideation-report.pdf

@@ -37,7 +37,7 @@ Each insight is 1 to 2 sentences, taken from what the source says, plus how it r
 
 ## 4. Writing the report section
 
-- [ ] Condense the source table into A.1 of [../ideation-report.md](../ideation-report.md), grouped by need, as laid out in [a1-mapping.md](a1-mapping.md)
+- [ ] Condense the source table into A.1 of [../sections/a1-field-research.md](../sections/a1-field-research.md), grouped by need, as laid out in [a1-mapping.md](a1-mapping.md)
 - [ ] Add 1 to 2 images of the baseline apps (screenshots with source links)
 - [ ] Write A.0, the AI declaration, once the work above is done (tools used and how, including AI used on the UZH summary and this research)
 

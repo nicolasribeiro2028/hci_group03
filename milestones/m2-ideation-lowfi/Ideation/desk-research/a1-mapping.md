@@ -1,6 +1,6 @@
 # Mapping to Report Section A.1
 
-How the helper files feed [../ideation-report.md](../ideation-report.md).
+How the helper files feed [../sections/a1-field-research.md](../sections/a1-field-research.md).
 
 | Report part | Built from | Notes |
 |---|---|---|

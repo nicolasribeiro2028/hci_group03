@@ -1,6 +1,6 @@
 # Desk Research Helper
 
-Working folder for organizing the desk research. **Not submitted.** It collects everything from the team's Google Doc ("Desk Research" tab) in one structure, so it can be reviewed and then condensed into section A.1 of [../ideation-report.md](../ideation-report.md).
+Working folder for organizing the desk research. **Not submitted.** It collects everything from the team's Google Doc ("Desk Research" tab) in one structure, so it can be reviewed and then condensed into section A.1 of [../sections/a1-field-research.md](../sections/a1-field-research.md).
 
 Source: the team Google Doc "HCI Group 3", tabs "Desk Research" and "how might we?". Content is copied as written there. Nothing was added: gaps are marked `TODO`.
 
