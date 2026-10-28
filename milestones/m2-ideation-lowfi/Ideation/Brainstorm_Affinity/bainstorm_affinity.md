@@ -19,46 +19,46 @@ These are the ideas we came up with, sorted by their corresponding how might we 
 
 
 ### HMW 1: How might we make AI provide step-by-step solutions for educational prompts?
-The moodle to markdown should outline exercise solutions by steps, and thus go one by one guiding the user, hence following the approach of the course
-Generate a breakdown of the problem and give small inputs to each step
-Create a harness that penalizes lengthy responses (user defined)
-Reveal one step at a time. The AI shows step 1, and the student taps “next step” or “I’ll try the next one” to continue. Maybe have intermediate questions to go to next step
-Force the AI answers to have some specific format, there could be multiple formats. like one for ensuring that the question was understood correctly and one for a deep dive answer.
-Goes through the steps until solution is reached. User is guided through the solution steps and can give input.
+- The moodle to markdown should outline exercise solutions by steps, and thus go one by one guiding the user, hence following the approach of the course
+- Generate a breakdown of the problem and give small inputs to each step
+- Create a harness that penalizes lengthy responses (user defined)
+- Reveal one step at a time. The AI shows step 1, and the student taps “next step” or “I’ll try the next one” to continue. Maybe have intermediate questions to go to next step
+- Force the AI answers to have some specific format, there could be multiple formats. like one for ensuring that the question was understood correctly and one for a deep dive answer.
+- Goes through the steps until solution is reached. User is guided through the solution steps and can give input.
 
 
 ### HMW 2: How might we find out what a student already understands without making it feel like a boring test?
-Generate a summary based on provided material and ask student to self rate
-Have expand option in a step by step answer
-Start from the student’s own attempt. The student pastes their partial work or a one-line explanation, and the AI infers their level from it.
-having a record of courses taken; performance; and current lecture notes
-Interview the user in the way Tony Ojeda goes about starting a project
-Make a fun and exciting test to find out what a student already knows.
-track learning progress by writing down a user's confidence levels for subtopics of their studies.
-Have a user_profile file that is updated with each chat that contains info about the user's knowledge level about subjects
-Just test them and see if they can solve the tests for specific subjects/problems.
-Strongly incentivise the student to do a test before going into the topic (firewall of some sort)
+- Generate a summary based on provided material and ask student to self rate
+- Have expand option in a step by step answer
+- Start from the student’s own attempt. The student pastes their partial work or a one-line explanation, and the AI infers their level from it.
+- having a record of courses taken; performance; and current lecture notes
+- Interview the user in the way Tony Ojeda goes about starting a project
+- Make a fun and exciting test to find out what a student already knows.
+- track learning progress by writing down a user's confidence levels for subtopics of their studies.
+- Have a user_profile file that is updated with each chat that contains info about the user's knowledge level about subjects
+- Just test them and see if they can solve the tests for specific subjects/problems.
+- Strongly incentivise the student to do a test before going into the topic (firewall of some sort)
 
 
 ### HMW 3: How might we ensure that an AIs answers are based on the course material? (how might we make good use of uploaded course material)
-Responses need to point to a line or slide or section
-Upload material and make guardrails to avoid answering outside of the scope
-Moodle to markdown tool that gives the AI the necessary course material without saturating context window
-Upload your own documents and the AI references them thus one knows from where the response was generated.
+- Responses need to point to a line or slide or section
+- Upload material and make guardrails to avoid answering outside of the scope
+- Moodle to markdown tool that gives the AI the necessary course material without saturating context window
+- Upload your own documents and the AI references them thus one knows from where the response was generated.
 
 
 ### HMW 4: How might we adapt AI so that it doesn’t only provide the answer but instead supports the student more?
-Give hint based on course material, only give the solution when specifically asked (not as the default)
-Intermediate exercise solving to see if the student comprehends
-Khan academy style guardrails
-Instead of immediately giving the answer, the AI progressively increases its support from a small hint, to a concept explanation, to a similar example and eventually a full solution. Learning ladder
+- Give hint based on course material, only give the solution when specifically asked (not as the default)
+- Intermediate exercise solving to see if the student comprehends
+- Khan academy style guardrails
+- Instead of immediately giving the answer, the AI progressively increases its support from a small hint, to a concept explanation, to a similar example and eventually a full solution. Learning ladder
 
 
 ### HMW 5: How might we help students verify whether AI-generated help is trustworthy?
-When gathering outside sources, have a list of good websites and a blacklist of bad websites (user defined?)
-Confidence and source markers. Confidence score is based on our judgment (human-judgment). Each claim is labeled as “from your course material”, “general knowledge” or “unsure”.
-Go back to the moodle to markdown file and give cross reference on the course material of the produced answers, or some level of source that the user can go and check for themselves
-Upload your own documents and the AI references them thus one knows from where the response was generated. Use Scite if an outside source is used.
+- When gathering outside sources, have a list of good websites and a blacklist of bad websites (user defined?)
+- Confidence and source markers. Confidence score is based on our judgment (human-judgment). Each claim is labeled as “from your course material”, “general knowledge” or “unsure”.
+- Go back to the moodle to markdown file and give cross reference on the course material of the produced answers, or some level of source that the user can go and check for themselves
+- Upload your own documents and the AI references them thus one knows from where the response was generated. Use Scite if an outside source is used.
 
 
 
