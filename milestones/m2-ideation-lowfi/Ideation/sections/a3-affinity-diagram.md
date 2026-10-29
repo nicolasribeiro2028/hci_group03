@@ -9,9 +9,11 @@ The following image shows the affinity diagram we ended up with. The same board 
 ```{=latex}
 \begin{landscape}
 \thispagestyle{empty}
-\begin{center}
-\includegraphics[width=\linewidth,height=0.92\textheight,keepaspectratio]{figures/affinity-diagram.png}
-\end{center}
+\vspace*{-0.8cm}
+\noindent\makebox[\linewidth]{\includegraphics[width=\dimexpr\paperheight-3.5cm\relax]{figures/affinity-top-row.png}}
+
+\smallskip
+\noindent\makebox[\linewidth]{\includegraphics[width=\dimexpr\paperheight-3.5cm\relax]{figures/affinity-bottom-row.png}}
 \end{landscape}
 ```
 
@@ -46,24 +48,4 @@ Each team member had four stars to place on the sections the prototypes should f
 \item Trusting the source
 \end{itemize}
 \end{hmwbox}
-```
-
-## Diagram close-ups
-
-The following pages show the top and bottom rows of the board separately.
-
-```{=latex}
-\begin{landscape}
-\thispagestyle{empty}
-\begin{center}
-\includegraphics[width=\linewidth,height=0.92\textheight,keepaspectratio]{figures/affinity-top-row.png}
-\end{center}
-\end{landscape}
-
-\begin{landscape}
-\thispagestyle{empty}
-\begin{center}
-\includegraphics[width=\linewidth,height=0.92\textheight,keepaspectratio]{figures/affinity-bottom-row.png}
-\end{center}
-\end{landscape}
 ```
