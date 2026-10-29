@@ -29,33 +29,18 @@ The following two pages show the affinity diagram we ended up with, split into i
 
 ## Key themes and insights
 
-Grouping the sticky notes produced seven sections. A few of those sit inside larger groups on the diagram. We did not sort the notes by the how-might-we questions again. References is closely related to trusting the source.
+The key sections that emerged from the affinity diagram are:
 
-```{=latex}
-\begin{hmwbox}
-\textbf{Key sections}
-\begin{itemize}
-\item Memory of the student's knowledge
-\item Testing the student
-\item Trusting the source
-\item References
-\item Adding course context
-\item AI answer format
-\item Step-by-step guidance and support
-\end{itemize}
-\end{hmwbox}
-```
+- Memory of student's knowledge
+- Testing the student
+- Trusting the source
+- References (although this one is closely related to "Trusting the source")
+- Adding course context
+- AI Answer format
+- Step-by-step guidance / support
 
-Each team member had four stars to place on the sections the prototypes should focus on. The sections we want to focus on are below.
+We also grouped a few of those into larger sections as can be seen in the image of the diagram. We made sure not to group the sticky notes based on the how might we questions again. After grouping the sticky notes each team member was given a budget of four stars to place on the sections that they thought should be focused on for our prototypes. The main insight we gained from this diagram is that we want to focus on the following topics when designing our prototypes:
 
-```{=latex}
-\begin{hmwbox}
-\textbf{Focus for the prototypes}
-\begin{itemize}
-\item Step-by-step guidance
-\item Memory of the student's knowledge
-\item Adding course context
-\item Trusting the source
-\end{itemize}
-\end{hmwbox}
-```
+- Step-by-step guidance
+- Memory of Student's knowledge
+- Adding course context
