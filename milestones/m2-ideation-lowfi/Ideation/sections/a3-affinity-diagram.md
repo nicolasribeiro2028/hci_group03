@@ -47,3 +47,37 @@ Each team member had four stars to place on the sections the prototypes should f
 \end{itemize}
 \end{hmwbox}
 ```
+
+## Diagram close-ups
+
+The following pages show each part of the board at a larger size so the sticky notes can be read.
+
+```{=latex}
+\begin{landscape}
+\thispagestyle{empty}
+\begin{center}
+\includegraphics[width=\linewidth,height=0.92\textheight,keepaspectratio]{figures/affinity-students-context.png}
+\end{center}
+\end{landscape}
+
+\begin{landscape}
+\thispagestyle{empty}
+\begin{center}
+\includegraphics[width=\linewidth,height=0.92\textheight,keepaspectratio]{figures/affinity-verifiable-answers.png}
+\end{center}
+\end{landscape}
+
+\begin{landscape}
+\thispagestyle{empty}
+\begin{center}
+\includegraphics[width=\linewidth,height=0.92\textheight,keepaspectratio]{figures/affinity-ai-answer-format.png}
+\end{center}
+\end{landscape}
+
+\begin{landscape}
+\thispagestyle{empty}
+\begin{center}
+\includegraphics[width=\linewidth,height=0.92\textheight,keepaspectratio]{figures/affinity-step-by-step.png}
+\end{center}
+\end{landscape}
+```
