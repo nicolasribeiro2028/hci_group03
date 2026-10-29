@@ -1,20 +1,30 @@
 # A.3 Affinity Diagram Summary
 
-The following image shows the affinity diagram we ended up with. The same board is in [Figma](https://www.figma.com/board/dYRAUKB9vxvuUj4JEBFl6F/Affinity-Diagram---HCI-Group-03).
+The following two pages show the affinity diagram we ended up with, split into its left and right halves. The same board is in [Figma](https://www.figma.com/board/dYRAUKB9vxvuUj4JEBFl6F/Affinity-Diagram---HCI-Group-03).
 
 - **Green** sticky notes represent ideas from our brainstorming session.
 - **Red** sticky notes represent findings from our desk research.
 - **Yellow** sticky notes are the five key needs from Milestone 1.
 
 ```{=latex}
-\begin{landscape}
+\clearpage
 \thispagestyle{empty}
-\vspace*{-0.8cm}
-\noindent\makebox[\linewidth]{\includegraphics[width=\dimexpr\paperheight-3.5cm\relax]{figures/affinity-top-row.png}}
+\begin{center}
+\makebox[\linewidth]{\includegraphics[width=\dimexpr\paperwidth-3.5cm\relax,height=0.4\textheight,keepaspectratio]{figures/affinity-students-context.png}}
 
-\smallskip
-\noindent\makebox[\linewidth]{\includegraphics[width=\dimexpr\paperheight-3.5cm\relax]{figures/affinity-bottom-row.png}}
-\end{landscape}
+\bigskip
+\includegraphics[width=\linewidth,height=0.52\textheight,keepaspectratio]{figures/affinity-ai-answer-format.png}
+\end{center}
+
+\clearpage
+\thispagestyle{empty}
+\begin{center}
+\makebox[\linewidth]{\includegraphics[width=\dimexpr\paperwidth-3.5cm\relax,height=0.5\textheight,keepaspectratio]{figures/affinity-verifiable-answers.png}}
+
+\bigskip
+\makebox[\linewidth]{\includegraphics[width=\dimexpr\paperwidth-3.5cm\relax,height=0.4\textheight,keepaspectratio]{figures/affinity-step-by-step.png}}
+\end{center}
+\clearpage
 ```
 
 ## Key themes and insights
