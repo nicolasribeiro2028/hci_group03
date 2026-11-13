@@ -10,6 +10,10 @@ Thumbs.db
 .env
 *.key
 
+# prototype-building local state (do not commit)
+app-building/master.local.json
+app-building/agent/log.md
+
 # Common build/dependency dirs (uncomment once implementation stack is chosen)
 # node_modules/
 # __pycache__/
