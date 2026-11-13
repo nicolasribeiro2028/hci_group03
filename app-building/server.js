@@ -82,10 +82,90 @@ function serveStatic(req, res) {
   });
 }
 
+const logPath = path.join(root, "agent", "log.md");
+
+function readBody(req) {
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    req.on("data", (chunk) => chunks.push(chunk));
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+    req.on("error", reject);
+  });
+}
+
+function nextQuestionId(text) {
+  let max = 0;
+  for (const match of text.matchAll(/^## q-(\d+)\s*$/gm)) {
+    max = Math.max(max, Number(match[1]));
+  }
+  return `q-${max + 1}`;
+}
+
+function appendQuestion(req, res) {
+  readBody(req)
+    .then((raw) => {
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        sendJson(res, 400, { error: "Bad request" });
+        return;
+      }
+      const question = typeof data.question === "string" ? data.question.replace(/\s+/g, " ").trim() : "";
+      const context = typeof data.context === "string" ? data.context.replace(/\s+/g, " ").trim() : "";
+      if (!question) {
+        sendJson(res, 400, { error: "Missing question" });
+        return;
+      }
+      const notes = Array.isArray(data.notes) ? data.notes : [];
+      const noteLines = notes.map((item) => {
+        const name = item && typeof item.name === "string" ? item.name.replace(/\s+/g, " ").trim() : "";
+        const note = item && typeof item.note === "string" ? item.note.replace(/\s+/g, " ").trim() : "";
+        return `- ${name}: ${note}`.trimEnd();
+      });
+      let existing = "";
+      try {
+        existing = fs.readFileSync(logPath, "utf8");
+      } catch {
+        existing = "";
+      }
+      const id = nextQuestionId(existing);
+      const block = [
+        `## ${id}`,
+        `question: ${question}`,
+        `context: ${context}`,
+        "notes:",
+        ...(noteLines.length ? noteLines : ["-"]),
+        "",
+      ].join("\n");
+      fs.mkdirSync(path.dirname(logPath), { recursive: true });
+      const prefix = existing && !existing.endsWith("\n") ? "\n" : "";
+      fs.appendFileSync(logPath, `${prefix}${block}`);
+      sendJson(res, 200, { id });
+    })
+    .catch(() => {
+      sendJson(res, 500, { error: "Could not write the log" });
+    });
+}
+
+function readLog(res) {
+  fs.readFile(logPath, "utf8", (err, text) => {
+    sendJson(res, 200, { text: err ? "" : text });
+  });
+}
+
 const server = http.createServer((req, res) => {
   const url = new URL(req.url, "http://127.0.0.1");
   if (req.method === "GET" && url.pathname === "/master") {
     readMaster(res);
+    return;
+  }
+  if (req.method === "GET" && url.pathname === "/log") {
+    readLog(res);
+    return;
+  }
+  if (req.method === "POST" && url.pathname === "/ask") {
+    appendQuestion(req, res);
     return;
   }
   if (req.method === "GET") {

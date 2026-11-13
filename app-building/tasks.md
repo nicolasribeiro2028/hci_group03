@@ -15,85 +15,6 @@ Before you move a task to Done, run `git status` from the repo root. Those two p
 
 ## Unclaimed
 
-### 3. workspace
-
-Claim: unclaimed
-
-Build the shell around the empty states. Match the 1512 by 982 frame in `DESIGN.md`: header 72 tall, then course material 260, document 480, and chat 692, with a 24px page margin and 16px gaps.
-
-- Header: the muted label "Context:", a course dropdown 200 by 36, "+ Add context", and Profile on the right.
-- The dropdown lists every context for this email. Choosing one shows only that context's files, topics, open documents, and chats.
-- "+ Add context" opens a dialog on a `#222222` cover. The white panel is 760 by 223, radius 14, centered. Title "Add a course context". Line "Each context keeps its own course material, topics and chats." One text field, Cancel, and Add context. Add context creates an empty context with that name and switches to it. Cancel closes the dialog. An empty name does nothing.
-- A new email's first context can be created here. The master login already has Calculus I.
-- Empty document column: "No document open" and "Add your course material on the left, then click a file to read it here."
-- Empty chat: a switcher reading "Chat: Getting started", "+ New chat", the profile greeting, and a composer. "+ New chat" adds an empty thread and selects it. Sending a message waits for the chat task.
-- Footer, centered, 11px, `#6b6b6b`: "Lo-fi prototype · AI answers and confidence scores are scripted".
-
-Done when two contexts keep separate files and chats, and the add-context dialog creates an empty one.
-
-### 4. material
-
-Claim: unclaimed
-
-This task fills `data/lectures.js` and the course-material and document columns.
-
-`data/lectures.js` exports the two known lectures and nothing else:
-
-- `Calculus I – Lecture 3: Derivatives.pdf`. Note: "Differentiate the outside, then multiply by the derivative of the inside." Topics: Basic derivative rules, Product and quotient rule, Chain rule.
-- `Calculus I – Lecture 4: Applications of derivatives.pdf`. Note: "The tangent line to f at x = a is y = f(a) + f'(a)(x − a). Its slope is the derivative f'(a)." Topics: Tangent lines, Optimization. Slide label: "Slide 20 of 28 · preview". Slide title: "Tangent lines".
-
-Upload:
-
-- The left column has the heading "Course material", the file list, a drop zone ("Drag and drop your files here", "PDF, slides or documents", "Choose files"), and "Add sample lectures".
-- Choose files and the drop zone use one `<input type="file" accept=".pdf" multiple>`. A file whose name does not end in `.pdf` is refused with "Please choose a PDF".
-- Store only the file name on the open context in `localStorage`. Discard the bytes. After a refresh the name is still in the list.
-- The same name twice in one context is skipped. The same name may exist on another context.
-- "Add sample lectures" adds the two known names without a file picker.
-- A known name adds that lecture's topics, each "Not rated". An unknown PDF is listed by name and adds no topics.
-
-Topics and the reader:
-
-- Under the files, the heading "Topics found" and a "Rate my knowledge" control. The line under the list: "Ratings come from your self-assessment and update as you practice."
-- Rate my knowledge opens a panel of 0 to 10 sliders, one per topic. The legend is "0 = never seen it" and "10 = could explain it to someone". Save stores the scores on that context. The list then shows values such as "7/10".
-- Clicking a file opens a tab in the document column. A tab can be closed. A known lecture shows its slide card on `#fafafa`. Lecture 4 shows the tangent-line text and "Slide 20 of 28 · preview". Any other PDF shows its name and "This prototype does not open the file."
-- The active file row and the active tab use `#f0f0f0`.
-
-Done when a known lecture name shows its topics and slide card, an unknown PDF shows the name only, and a refresh keeps the names.
-
-### 5. chat
-
-Claim: unclaimed
-
-A question is general. The person does not choose a file, a slide, or a topic. This task fills `agent/PROMPT.md` and the log routes in `server.js`.
-
-Log:
-
-- On Send, `server.js` appends one entry to `agent/log.md` and does not call a model. The entry has an id, the question, the context name, and one note per file on that context. A known lecture includes the note from `data/lectures.js`. An unknown PDF is a name with an empty note. Files from other contexts are not included.
-- Shape of an entry:
-
-```
-## q-1
-question: What is the chain rule?
-context: Calculus I
-notes:
-- Calculus I – Lecture 3: Derivatives.pdf: Differentiate the outside, then multiply by the derivative of the inside.
-```
-
-- The reply, written later by the terminal agent, uses the same id:
-
-```
-## q-1 reply
-The chain rule is for a function inside another function. From Calculus I – Lecture 3: Derivatives.pdf.
-```
-
-- `agent/PROMPT.md` tells that agent: watch `agent/log.md`; when a question id has no reply, answer only from the notes in that entry; name the file used; say when the question is not in the material; append the reply under that id. The page does not start the agent.
-- The page polls `GET /log` until a reply with the same id exists, then shows that text as the assistant message. Until then the thread says it is waiting. One question at a time. No streaming and no API key.
-- The student's message is a `#d9d9d9` bubble on the right. The reply is a `#f0f0f0` bubble on the left. The composer placeholder is "Write your attempt or ask a question…". Send stays disabled while a question is waiting.
-- "+ New chat" starts a thread that does not include the previous questions. The greeting still uses the profile courses.
-- `agent/log.md` stays gitignored. Do not commit a log that contains questions.
-
-Done when a sent question appears in `agent/log.md`, the thread shows the reply text once a matching reply block is in that file, and `git status` does not list the log.
-
 ### 6. graph
 
 Claim: unclaimed
@@ -113,6 +34,22 @@ Done when the master Calculus I context shows both lectures, their topics, and t
 None.
 
 ## Done
+
+### 3. workspace
+
+Claim:
+
+Build the shell around the empty states. Match the 1512 by 982 frame in `DESIGN.md`: header 72 tall, then course material 260, document 480, and chat 692, with a 24px page margin and 16px gaps.
+
+- Header: the muted label "Context:", a course dropdown 200 by 36, "+ Add context", and Profile on the right.
+- The dropdown lists every context for this email. Choosing one shows only that context's files, topics, open documents, and chats.
+- "+ Add context" opens a dialog on a `#222222` cover. The white panel is 760 by 223, radius 14, centered. Title "Add a course context". Line "Each context keeps its own course material, topics and chats." One text field, Cancel, and Add context. Add context creates an empty context with that name and switches to it. Cancel closes the dialog. An empty name does nothing.
+- A new email's first context can be created here. The master login already has Calculus I.
+- Empty document column: "No document open" and "Add your course material on the left, then click a file to read it here."
+- Empty chat: a switcher reading "Chat: Getting started", "+ New chat", the profile greeting, and a composer. "+ New chat" adds an empty thread and selects it. Sending a message waits for the chat task.
+- Footer, centered, 11px, `#6b6b6b`: "Lo-fi prototype · AI answers and confidence scores are scripted".
+
+Done when two contexts keep separate files and chats, and the add-context dialog creates an empty one.
 
 ### 1. login
 
@@ -144,3 +81,66 @@ Build the profile screen and the way back to it. This is a centered column, 560 
 - The Profile button in the header opens this same form with the saved values. Saving again updates the chat greeting. The greeting names the saved courses and says the help will not start from zero.
 
 Done when Continue stores the profile, Profile in the header edits it, and the greeting uses the saved course names.
+
+### 4. material
+
+Claim:
+
+This task fills `data/lectures.js` and the course-material and document columns.
+
+`data/lectures.js` exports the two known lectures and nothing else:
+
+- `Calculus I – Lecture 3: Derivatives.pdf`. Note: "Differentiate the outside, then multiply by the derivative of the inside." Topics: Basic derivative rules, Product and quotient rule, Chain rule.
+- `Calculus I – Lecture 4: Applications of derivatives.pdf`. Note: "The tangent line to f at x = a is y = f(a) + f'(a)(x − a). Its slope is the derivative f'(a)." Topics: Tangent lines, Optimization. Slide label: "Slide 20 of 28 · preview". Slide title: "Tangent lines".
+
+Upload:
+
+- The left column has the heading "Course material", the file list, a drop zone ("Drag and drop your files here", "PDF, slides or documents", "Choose files"), and "Add sample lectures".
+- Choose files and the drop zone use one `<input type="file" accept=".pdf" multiple>`. A file whose name does not end in `.pdf` is refused with "Please choose a PDF".
+- Store only the file name on the open context in `localStorage`. Discard the bytes. After a refresh the name is still in the list.
+- The same name twice in one context is skipped. The same name may exist on another context.
+- "Add sample lectures" adds the two known names without a file picker.
+- A known name adds that lecture's topics, each "Not rated". An unknown PDF is listed by name and adds no topics.
+
+Topics and the reader:
+
+- Under the files, the heading "Topics found" and a "Rate my knowledge" control. The line under the list: "Ratings come from your self-assessment and update as you practice."
+- Rate my knowledge opens a panel of 0 to 10 sliders, one per topic. The legend is "0 = never seen it" and "10 = could explain it to someone". Save stores the scores on that context. The list then shows values such as "7/10".
+- Clicking a file opens a tab in the document column. A tab can be closed. A known lecture shows its slide card on `#fafafa`. Lecture 4 shows the tangent-line text and "Slide 20 of 28 · preview". Any other PDF shows its name and "This prototype does not open the file."
+- The active file row and the active tab use `#f0f0f0`.
+
+Done when a known lecture name shows its topics and slide card, an unknown PDF shows the name only, and a refresh keeps the names.
+
+### 5. chat
+
+Claim:
+
+A question is general. The person does not choose a file, a slide, or a topic. This task fills `agent/PROMPT.md` and the log routes in `server.js`.
+
+Log:
+
+- On Send, `server.js` appends one entry to `agent/log.md` and does not call a model. The entry has an id, the question, the context name, and one note per file on that context. A known lecture includes the note from `data/lectures.js`. An unknown PDF is a name with an empty note. Files from other contexts are not included.
+- Shape of an entry:
+
+```
+## q-1
+question: What is the chain rule?
+context: Calculus I
+notes:
+- Calculus I – Lecture 3: Derivatives.pdf: Differentiate the outside, then multiply by the derivative of the inside.
+```
+
+- The reply, written later by the terminal agent, uses the same id:
+
+```
+## q-1 reply
+The chain rule is for a function inside another function. From Calculus I – Lecture 3: Derivatives.pdf.
+```
+
+- `agent/PROMPT.md` tells that agent: watch `agent/log.md`; when a question id has no reply, answer only from the notes in that entry; name the file used; say when the question is not in the material; append the reply under that id. The page does not start the agent.
+- The page polls `GET /log` until a reply with the same id exists, then shows that text as the assistant message. Until then the thread says it is waiting. One question at a time. No streaming and no API key.
+- The student's message is a `#d9d9d9` bubble on the right. The reply is a `#f0f0f0` bubble on the left. The composer placeholder is "Write your attempt or ask a question…". Send stays disabled while a question is waiting.
+- "+ New chat" starts a thread that does not include the previous questions. The greeting still uses the profile courses.
+- `agent/log.md` stays gitignored. Do not commit a log that contains questions.
+
+Done when a sent question appears in `agent/log.md`, the thread shows the reply text once a matching reply block is in that file, and `git status` does not list the log.
