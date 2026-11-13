@@ -17,6 +17,7 @@ const BASE_COURSES = [
 
 const SAMPLE_BIO = "I'm a first year cs student. I struggle with maths";
 
+const DEMO_EMAIL = "demo@local.test";
 const SEEDED_CONTEXT = "Calculus I";
 const SEEDED_FILES = [
   "Calculus I – Lecture 3: Derivatives.pdf",
@@ -39,6 +40,9 @@ const state = {
   dialog: false,
   contextDraft: "",
   pending: null,
+  graphOpen: false,
+  graphNode: null,
+  graphFile: null,
 };
 
 function currentEmail() {
@@ -123,6 +127,52 @@ function resetProfileDraft() {
   state.extraCourses = [];
   state.none = false;
   state.draftCourse = "";
+}
+
+function ensureDemoSeed(email) {
+  const users = readUsers();
+  if (users[email]?.profile && Array.isArray(users[email].contexts) && users[email].contexts.length) {
+    return;
+  }
+  const lecture = SEEDED_FILES[1];
+  users[email] = {
+    profile: {
+      bio: SAMPLE_BIO,
+      courses: ["Calculus I", "Linear Algebra", "Statistics"],
+    },
+    activeContext: SEEDED_CONTEXT,
+    contexts: [
+      {
+        name: SEEDED_CONTEXT,
+        files: [...SEEDED_FILES],
+        topics: [],
+        ratings: {
+          "Basic derivative rules": 7,
+          "Product and quotient rule": 4,
+          "Chain rule": 2,
+          "Tangent lines": 3,
+          Optimization: 2,
+        },
+        tabs: [lecture],
+        activeFile: lecture,
+        activeChatId: "demo-chat",
+        chats: [
+          {
+            id: "demo-chat",
+            name: "Getting started",
+            messages: [
+              { role: "user", text: "What is the chain rule?" },
+              {
+                role: "assistant",
+                text: "Differentiate the outside, then multiply by the derivative of the inside. From Calculus I – Lecture 3: Derivatives.pdf.",
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
 }
 
 function ensureMasterSeed(email) {
@@ -301,6 +351,7 @@ function closeTab(name) {
 }
 
 function openSaved(email) {
+  if (email === DEMO_EMAIL) ensureDemoSeed(email);
   if (isMaster(email)) {
     ensureMasterSeed(email);
     state.seeded = true;
@@ -340,6 +391,87 @@ async function boot() {
   render();
 }
 
+const TOPIC_LINKS = [
+  ["Chain rule", "Basic derivative rules"],
+  ["Tangent lines", "Basic derivative rules"],
+  ["Optimization", "Tangent lines"],
+];
+
+function graphModel(context) {
+  const nodes = [
+    ...context.files.map((name) => ({ id: `file:${name}`, kind: "file", name })),
+    ...topicsFor(context).map((topic) => ({ id: `topic:${topic.name}`, kind: "topic", name: topic.name })),
+  ];
+  const ids = new Set(nodes.map((node) => node.id));
+  const edges = [];
+  for (const file of context.files) {
+    const lecture = lectureFor(file);
+    if (!lecture) continue;
+    for (const topic of lecture.topics) {
+      const to = `topic:${topic}`;
+      if (ids.has(to)) edges.push([`file:${file}`, to]);
+    }
+  }
+  for (const [fromName, toName] of TOPIC_LINKS) {
+    const from = `topic:${fromName}`;
+    const to = `topic:${toName}`;
+    if (ids.has(from) && ids.has(to)) edges.push([from, to]);
+  }
+  nodes.forEach((node, index) => {
+    const angle = -Math.PI / 2 + (index * 2 * Math.PI) / Math.max(nodes.length, 1);
+    node.x = 220 + Math.cos(angle) * 150;
+    node.y = 250 + Math.sin(angle) * 150;
+  });
+  return { nodes, edges };
+}
+
+function graphMarkup(context) {
+  if (!context.files.length) {
+    return `<p class="graph-empty">Add course material to see how the topics connect.</p>`;
+  }
+  const { nodes, edges } = graphModel(context);
+  const selected = state.graphNode;
+  const neighborIds = new Set();
+  if (selected) {
+    neighborIds.add(selected);
+    for (const [from, to] of edges) {
+      if (from === selected) neighborIds.add(to);
+      if (to === selected) neighborIds.add(from);
+    }
+  }
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  const lines = edges
+    .map(([from, to]) => {
+      const a = byId.get(from);
+      const b = byId.get(to);
+      const hot = selected && (from === selected || to === selected);
+      return `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" class="graph-line${hot ? " hot" : ""}" />`;
+    })
+    .join("");
+  const circles = nodes
+    .map((node) => {
+      const hot = !selected || neighborIds.has(node.id);
+      const label = node.name.length > 22 ? `${node.name.slice(0, 20)}…` : node.name;
+      return `
+        <g class="graph-hit${hot ? "" : " dim"}${node.id === selected ? " selected" : ""}" data-action="select-node" data-node="${escapeHtml(node.id)}">
+          <circle class="graph-node ${node.kind}" cx="${node.x}" cy="${node.y}" r="16" />
+          <text class="graph-label" x="${node.x}" y="${node.y + 32}" text-anchor="middle">${escapeHtml(label)}</text>
+        </g>
+      `;
+    })
+    .join("");
+  const selectedNode = nodes.find((node) => node.id === selected);
+  return `
+    <div class="graph-view">
+      <svg class="graph-svg" viewBox="0 0 440 520" role="img" aria-label="Content graph">
+        ${lines}
+        ${circles}
+      </svg>
+      <p class="graph-caption">${selectedNode ? escapeHtml(selectedNode.name) : "Click a node"}</p>
+    </div>
+  `;
+}
+
 function render() {
   if (state.screen === "boot") {
     app.innerHTML = "";
@@ -353,12 +485,14 @@ function render() {
     app.innerHTML = `
       <form class="login">
         <h1>Sign in</h1>
+        <p class="lede">Enter your email. There is no password and no separate account page. A new email starts a profile.</p>
         ${notice}
         <div class="field">
           <label for="email">Email</label>
           <input class="text-input" id="email" name="email" type="text" autocomplete="username" value="${escapeHtml(state.emailDraft)}" />
         </div>
         <button class="primary" type="submit">Continue</button>
+        <button class="secondary demo-login" type="button" data-action="use-demo">Continue as demo@local.test</button>
       </form>
     `;
     return;
@@ -402,7 +536,8 @@ function render() {
             .map(
               (topic) => `
                 <label class="slider-row">
-                  <span>${escapeHtml(topic.name)}</span>
+                  <span class="slider-name">${escapeHtml(topic.name)}</span>
+                  <span class="slider-value">${topic.rating ?? 0} / 10</span>
                   <input data-rating="${escapeHtml(topic.name)}" type="range" min="0" max="10" value="${topic.rating ?? 0}" />
                 </label>
               `,
@@ -486,7 +621,9 @@ function render() {
           <span class="context-label">Context:</span>
           <select class="context-select" id="context-select" aria-label="Context">${options}</select>
           <button class="add-context" type="button" data-action="open-context">+ Add context</button>
+          <button class="graph-button" type="button" data-action="toggle-graph" aria-pressed="${state.graphOpen}">Graph</button>
           <button class="profile-button" type="button" data-action="edit-profile">Profile</button>
+          <button class="sign-out" type="button" data-action="sign-out">Sign out</button>
         </header>
         <section class="column material">
           <h2>Course material</h2>
@@ -508,8 +645,7 @@ function render() {
           ${ratingPanel}
         </section>
         <section class="column document">
-          <div class="tabs">${tabs}</div>
-          ${reader}
+          ${state.graphOpen ? graphMarkup(context) : `<div class="tabs">${tabs}</div>${reader}`}
         </section>
         <section class="column chat-column">
           <div class="chat-toolbar">
@@ -518,12 +654,19 @@ function render() {
           </div>
           ${greeting}
           <div class="messages">
-            ${(context.chats?.find((chat) => chat.id === context.activeChatId)?.messages || [])
-              .map(
-                (message) =>
-                  `<p class="bubble ${message.role === "user" ? "user" : "assistant"}">${escapeHtml(message.text)}</p>`,
-              )
-              .join("")}
+            ${(() => {
+              const thread = context.chats?.find((chat) => chat.id === context.activeChatId);
+              const messages = thread?.messages || [];
+              if (!messages.length && !(state.pending && state.pending.chatId === context.activeChatId)) {
+                return `<p class="chat-empty">No messages in this chat yet. Write a question below.</p>`;
+              }
+              return messages
+                .map(
+                  (message) =>
+                    `<p class="bubble ${message.role === "user" ? "user" : "assistant"}">${escapeHtml(message.text)}</p>`,
+                )
+                .join("");
+            })()}
             ${
               state.pending && state.pending.chatId === context.activeChatId
                 ? `<p class="waiting">Waiting…</p>`
@@ -567,6 +710,7 @@ function render() {
         <button class="secondary" type="button" data-action="add-course">Add</button>
       </div>
       <button class="primary" type="submit">Continue</button>
+      <button class="text-button sign-link" type="button" data-action="sign-out">Back to sign in</button>
     </form>
   `;
 }
@@ -643,6 +787,48 @@ app.addEventListener("click", (event) => {
   }
   if (action === "new-chat") addThread();
   if (action === "send") sendQuestion();
+  if (action === "use-demo") {
+    localStorage.setItem(SESSION_KEY, DEMO_EMAIL);
+    ensureDemoSeed(DEMO_EMAIL);
+    openSaved(DEMO_EMAIL);
+    render();
+  }
+  if (action === "sign-out") {
+    localStorage.removeItem(SESSION_KEY);
+    state.emailDraft = "";
+    state.screen = "login";
+    state.graphOpen = false;
+    state.pending = null;
+    render();
+  }
+  if (action === "toggle-graph") {
+    if (state.graphOpen) {
+      const file = state.graphFile;
+      state.graphOpen = false;
+      state.graphNode = null;
+      state.graphFile = null;
+      if (file) openFile(file);
+      else render();
+    } else {
+      state.graphOpen = true;
+      state.graphNode = null;
+      state.graphFile = null;
+      render();
+    }
+  }
+  if (action === "select-node") {
+    const id = button.dataset.node;
+    state.graphNode = id;
+    state.graphFile = id.startsWith("file:") ? id.slice("file:".length) : null;
+    render();
+  }
+});
+
+app.addEventListener("input", (event) => {
+  const input = event.target;
+  if (input.type !== "range" || !input.dataset.rating) return;
+  const value = input.parentElement?.querySelector(".slider-value");
+  if (value) value.textContent = `${input.value} / 10`;
 });
 
 app.addEventListener("change", (event) => {

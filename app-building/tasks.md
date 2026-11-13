@@ -15,19 +15,7 @@ Before you move a task to Done, run `git status` from the repo root. Those two p
 
 ## Unclaimed
 
-### 6. graph
-
-Claim: unclaimed
-
-Add a Graph control in the header. It replaces the document column only. The header, course material, and chat stay put. Closing Graph shows the document column again.
-
-- Nodes are the files and topics on the open context. Files and topics use two different fills.
-- Draw them on a circle with plain SVG lines. Do not add a physics library. Nodes do not move.
-- Links are fixed. A known lecture links to its own topics. Also link Chain rule to Basic derivative rules, Tangent lines to Basic derivative rules, and Optimization to Tangent lines. An unknown PDF is a node with no links.
-- Clicking a node highlights it and its neighbors and shows the name. Clicking a file node opens that file when Graph is closed.
-- A context with no files shows "Add course material to see how the topics connect."
-
-Done when the master Calculus I context shows both lectures, their topics, and those links, and an empty context shows the empty line.
+None.
 
 ## Claimed
 
@@ -144,3 +132,17 @@ The chain rule is for a function inside another function. From Calculus I – Le
 - `agent/log.md` stays gitignored. Do not commit a log that contains questions.
 
 Done when a sent question appears in `agent/log.md`, the thread shows the reply text once a matching reply block is in that file, and `git status` does not list the log.
+
+### 6. graph
+
+Claim:
+
+Add a Graph control in the header. It replaces the document column only. The header, course material, and chat stay put. Closing Graph shows the document column again.
+
+- Nodes are the files and topics on the open context. Files and topics use two different fills.
+- Draw them on a circle with plain SVG lines. Do not add a physics library. Nodes do not move.
+- Links are fixed. A known lecture links to its own topics. Also link Chain rule to Basic derivative rules, Tangent lines to Basic derivative rules, and Optimization to Tangent lines. An unknown PDF is a node with no links.
+- Clicking a node highlights it and its neighbors and shows the name. Clicking a file node opens that file when Graph is closed.
+- A context with no files shows "Add course material to see how the topics connect."
+
+Done when the master Calculus I context shows both lectures, their topics, and those links, and an empty context shows the empty line.

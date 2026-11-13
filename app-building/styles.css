@@ -20,8 +20,8 @@ textarea {
 
 .login,
 .profile {
-  width: 560px;
-  margin: 244px auto 48px;
+  width: min(560px, calc(100% - 32px));
+  margin: 48px auto;
 }
 
 .login h1,
@@ -125,6 +125,7 @@ textarea {
   width: 1512px;
   height: 982px;
   margin: 0 auto;
+  zoom: min(1, calc(100vw / 1512));
 }
 
 .workspace-header {
@@ -205,6 +206,78 @@ textarea {
   top: 20px;
 }
 
+.graph-button {
+  position: absolute;
+  left: 1324px;
+  top: 20px;
+  width: 74px;
+  height: 36px;
+  border: 1px solid #bdbdbd;
+  border-radius: 8px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.graph-button[aria-pressed="true"] {
+  border-color: #222222;
+  background: #222222;
+  color: #ffffff;
+}
+
+.graph-svg {
+  width: 100%;
+  height: 520px;
+}
+
+.graph-line {
+  stroke: #bdbdbd;
+  stroke-width: 1.5;
+}
+
+.graph-line.hot {
+  stroke: #222222;
+  stroke-width: 2.5;
+}
+
+.graph-node.file {
+  fill: #222222;
+}
+
+.graph-node.topic {
+  fill: #f0f0f0;
+  stroke: #bdbdbd;
+}
+
+.graph-hit {
+  cursor: pointer;
+}
+
+.graph-hit.selected .graph-node {
+  stroke: #222222;
+  stroke-width: 3;
+}
+
+.graph-hit.dim {
+  opacity: 0.35;
+}
+
+.graph-label {
+  fill: #222222;
+  font-size: 11px;
+  font-family: Arial, sans-serif;
+}
+
+.graph-empty,
+.graph-caption {
+  margin: 8px 0 0;
+  text-align: center;
+}
+
+.graph-empty {
+  margin-top: 48px;
+  color: #6b6b6b;
+}
+
 .empty-doc {
   display: flex;
   flex-direction: column;
@@ -263,8 +336,13 @@ textarea {
   flex-direction: column;
   gap: 8px;
   flex: 1;
+  min-height: 160px;
   margin-top: 16px;
+  padding: 12px;
   overflow: auto;
+  border: 1px solid #bdbdbd;
+  border-radius: 12px;
+  background: #fafafa;
 }
 
 .bubble {
@@ -285,7 +363,8 @@ textarea {
   background: #f0f0f0;
 }
 
-.waiting {
+.waiting,
+.chat-empty {
   margin: 0;
   color: #6b6b6b;
 }
@@ -511,8 +590,41 @@ textarea {
 
 .slider-row {
   display: grid;
-  gap: 4px;
+  grid-template-columns: 1fr auto;
+  gap: 4px 8px;
   margin-top: 12px;
+}
+
+.slider-name {
+  font-weight: 700;
+}
+
+.slider-value {
+  color: #222222;
+  font-variant-numeric: tabular-nums;
+}
+
+.slider-row input {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.sign-out {
+  position: absolute;
+  left: 1236px;
+  top: 20px;
+  height: 36px;
+  border: 1px solid #bdbdbd;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.sign-link,
+.demo-login {
+  display: block;
+  margin: 16px auto 0;
 }
 
 .tabs {
