@@ -110,9 +110,13 @@ Done when the master Calculus I context shows both lectures, their topics, and t
 
 ## Claimed
 
+None.
+
+## Done
+
 ### 1. login
 
-Claim: Nicolas
+Claim:
 
 Build the first screen in `index.html`, `styles.css`, and `app.js`. A person types an email and presses Continue. There is no password, no Auth0, and no account server.
 
@@ -124,8 +128,6 @@ Build the first screen in `index.html`, `styles.css`, and `app.js`. A person typ
 - `server.js` may grow a static file server and `GET /master` that returns only `{ "email" }` from `master.local.json`. It must not call a model and must not write the master file into git.
 
 Done when a new email reaches profile setup, the master email reaches the seeded workspace, and `git status` does not list `master.local.json`.
-
-## Done
 
 ### 2. profile
 
