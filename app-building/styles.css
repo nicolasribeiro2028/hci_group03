@@ -1,3 +1,170 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
+  background: #ffffff;
+  color: #222222;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+.login,
+.profile {
+  width: 560px;
+  margin: 244px auto 48px;
+}
+
+.login h1,
+.profile h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.lede {
+  margin: 0 0 28px;
+  color: #6b6b6b;
+  text-align: center;
+}
+
+.field {
+  margin: 0 0 20px;
+}
+
+.field label,
+.courses-label {
+  display: block;
+  margin: 0 0 8px;
+  font-weight: 700;
+}
+
+textarea,
+.text-input {
+  width: 100%;
+  border: 1px solid #bdbdbd;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+textarea {
+  min-height: 88px;
+  padding: 12px;
+  resize: vertical;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid #bdbdbd;
+  border-radius: 999px;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.chip[aria-pressed="true"] {
+  border-color: #222222;
+  background: #222222;
+  color: #ffffff;
+}
+
+.add-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.text-input {
+  height: 36px;
+  padding: 0 12px;
+}
+
+.secondary,
+.primary {
+  height: 36px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.secondary {
+  padding: 0 14px;
+  border: 1px solid #bdbdbd;
+  background: #ffffff;
+}
+
+.primary {
+  margin-top: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border: 0;
+  background: #222222;
+  color: #ffffff;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 72px;
+  padding: 0 24px;
+}
+
+.profile-button {
+  width: 74px;
+  height: 36px;
+  border: 1px solid #bdbdbd;
+  border-radius: 8px;
+  background: #ffffff;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.greeting {
+  max-width: 560px;
+  margin: 32px 24px;
+  line-height: 1.5;
+}
+
+.notice {
+  margin: 0 0 16px;
+  color: #6b6b6b;
+  text-align: center;
+}
+
+.seed {
+  margin: 0 24px;
+}
+
+.context-name {
+  margin: 0;
+  color: #6b6b6b;
+}
+
+.seed h2 {
+  margin: 24px 0 8px;
+  font-size: 14px;
+}
+
+.files,
+.topics {
+  margin: 0;
+  padding-left: 18px;
 }

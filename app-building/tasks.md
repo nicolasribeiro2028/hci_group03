@@ -15,37 +15,6 @@ Before you move a task to Done, run `git status` from the repo root. Those two p
 
 ## Unclaimed
 
-### 1. login
-
-Claim: unclaimed
-
-Build the first screen in `index.html`, `styles.css`, and `app.js`. A person types an email and presses Continue. There is no password, no Auth0, and no account server.
-
-- One email field and a Continue button. Continue is `#222222` with white text, radius 8. An empty field does nothing.
-- Save the signed-in email in `localStorage`. A later visit with the same email opens that person's saved state.
-- Read the master email from `master.local.json` through the local server. Do not hardcode the address in `app.js`. If the file is missing, show that the master login is not set, and still accept any other email.
-- The master email skips profile setup and opens a seeded Calculus I workspace: the context is named Calculus I and already lists `Calculus I – Lecture 3: Derivatives.pdf` and `Calculus I – Lecture 4: Applications of derivatives.pdf`. Topics and notes for those names come from `data/lectures.js` once the material task fills that file. Until then, show the file names and leave topics empty.
-- Any other email with no saved profile goes to the profile screen. An email that already has a profile goes to the workspace.
-- `server.js` may grow a static file server and `GET /master` that returns only `{ "email" }` from `master.local.json`. It must not call a model and must not write the master file into git.
-
-Done when a new email reaches profile setup, the master email reaches the seeded workspace, and `git status` does not list `master.local.json`.
-
-### 2. profile
-
-Claim: unclaimed
-
-Build the profile screen and the way back to it. This is a centered column, 560 wide, on the white page, not the three-column shell. See `DESIGN.md`.
-
-- Title: "Hey, ready to study?"
-- Line under it: "Tell us a little about you, so the help can start at the right place."
-- Label "About you" and a text area. The sample text in the design is "I'm a first year cs student. I struggle with maths".
-- Label "Math courses you took before". Chips, fully round: Calculus I, Calculus II, Linear Algebra, Statistics, Probability, Discrete Mathematics, Differential Equations, Numerical Methods, and None of these. Calculus I starts selected. A selected chip is `#222222` with white text. The others are white with a `#bdbdbd` border. "None of these" clears the other chips.
-- A field labeled "Add another course" and an Add button. Add appends a chip and selects it.
-- Continue stores the bio and the selected course names on that email in `localStorage`, then opens the workspace. The workspace starts empty for a new email.
-- The Profile button in the header opens this same form with the saved values. Saving again updates the chat greeting. The greeting names the saved courses and says the help will not start from zero.
-
-Done when Continue stores the profile, Profile in the header edits it, and the greeting uses the saved course names.
-
 ### 3. workspace
 
 Claim: unclaimed
@@ -141,8 +110,35 @@ Done when the master Calculus I context shows both lectures, their topics, and t
 
 ## Claimed
 
-None.
+### 1. login
+
+Claim: Nicolas
+
+Build the first screen in `index.html`, `styles.css`, and `app.js`. A person types an email and presses Continue. There is no password, no Auth0, and no account server.
+
+- One email field and a Continue button. Continue is `#222222` with white text, radius 8. An empty field does nothing.
+- Save the signed-in email in `localStorage`. A later visit with the same email opens that person's saved state.
+- Read the master email from `master.local.json` through the local server. Do not hardcode the address in `app.js`. If the file is missing, show that the master login is not set, and still accept any other email.
+- The master email skips profile setup and opens a seeded Calculus I workspace: the context is named Calculus I and already lists `Calculus I – Lecture 3: Derivatives.pdf` and `Calculus I – Lecture 4: Applications of derivatives.pdf`. Topics and notes for those names come from `data/lectures.js` once the material task fills that file. Until then, show the file names and leave topics empty.
+- Any other email with no saved profile goes to the profile screen. An email that already has a profile goes to the workspace.
+- `server.js` may grow a static file server and `GET /master` that returns only `{ "email" }` from `master.local.json`. It must not call a model and must not write the master file into git.
+
+Done when a new email reaches profile setup, the master email reaches the seeded workspace, and `git status` does not list `master.local.json`.
 
 ## Done
 
-None.
+### 2. profile
+
+Claim:
+
+Build the profile screen and the way back to it. This is a centered column, 560 wide, on the white page, not the three-column shell. See `DESIGN.md`.
+
+- Title: "Hey, ready to study?"
+- Line under it: "Tell us a little about you, so the help can start at the right place."
+- Label "About you" and a text area. The sample text in the design is "I'm a first year cs student. I struggle with maths".
+- Label "Math courses you took before". Chips, fully round: Calculus I, Calculus II, Linear Algebra, Statistics, Probability, Discrete Mathematics, Differential Equations, Numerical Methods, and None of these. Calculus I starts selected. A selected chip is `#222222` with white text. The others are white with a `#bdbdbd` border. "None of these" clears the other chips.
+- A field labeled "Add another course" and an Add button. Add appends a chip and selects it.
+- Continue stores the bio and the selected course names on that email in `localStorage`, then opens the workspace. The workspace starts empty for a new email.
+- The Profile button in the header opens this same form with the saved values. Saving again updates the chat greeting. The greeting names the saved courses and says the help will not start from zero.
+
+Done when Continue stores the profile, Profile in the header edits it, and the greeting uses the saved course names.
