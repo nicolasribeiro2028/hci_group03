@@ -34,7 +34,7 @@
     if (saved && saved.courses) { S = acctClean(saved); C = S.courses[S.ctx] || S.courses[Object.keys(S.courses)[0]]; }
     else { fresh(); if (email === DEMO) demoSeed(); }
     dropHci(); lsSet(AK, email); lastSaved = '';
-    if (email === DEMO && C.chats[0] && C.chats[0].msgs.length === 1 && !C.chats[0].msgs[0].acts) C.chats[0].msgs[0] = demoGreeting();   /* a demo saved before the buttons existed */
+    if (email === DEMO && C.chats[0] && C.chats[0].msgs.length === 1 && /^Hi! You have already taken/.test(C.chats[0].msgs[0].text || '')) C.chats[0].msgs[0] = demoGreeting();   /* a demo saved by an earlier version gets the current greeting */
     $('#login').hidden = true; $('#login').removeAttribute('inert');
     renderAll(); setFocus(false); applyLayout();
     var who = $('#whoami'); if (who) who.textContent = email;
@@ -60,9 +60,7 @@
   }
   /* The first chat of the demo workspace offers things to click, so nobody is left in an empty chat. */
   function demoGreeting() {
-    return { r: 'ai', text: 'Hi! You have already taken Calculus I, Linear Algebra and Statistics, so I will not start from zero. Pick something to try, or ask your own question.', acts: [
-      { label: 'What is the chain rule?', act: 'ask', arg: 'What is the chain rule?', dark: true }, { label: 'What is a tangent line?', act: 'ask', arg: 'What is a tangent line?' },
-      { label: 'Practice the chain rule', act: 'practice', arg: 'p1' }, { label: 'Rate my knowledge', act: 'assess' }, { label: 'Open Exercise mode', act: 'exmode' }] };
+    return { r: 'ai', text: 'Hi! You have already taken Calculus I, Linear Algebra and Statistics, so I will not start from zero. Try one of these questions, or ask your own.', acts: starterActs() };
   }
   function acctOut() {
     acctSave(); lsDel(AK); lastSaved = '';

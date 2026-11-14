@@ -19,7 +19,7 @@
       h.pdfDemo = true; h.nid = 2; h.pdfPage = 1;
       h.files.push({ id: 'f1', defId: d.id, name: d.name, short: d.short, mb: d.mb, pages: d.pages, kind: 'pdf', url: d.url, slides: [], topics: [], status: 'added', pct: 100 });
       h.tabs = ['f1']; h.active = 'f1';
-      h.chats[0].msgs.push({ r: 'ai', text: 'Ask about the slides. I mark the passage I used.', acts: [{ label: 'What is Moore’s law?', act: 'ask', arg: 'What is Moore’s law?', dark: true }, { label: 'What are the goals of the course?', act: 'ask', arg: 'What are the goals of the course?' }, { label: 'Who proposed Moore’s law?', act: 'ask', arg: 'Who proposed Moore’s law?' }] });
+      h.chats[0].msgs.push({ r: 'ai', text: 'Ask about the slides. I mark the passage I used.', acts: [{ label: 'What is Moore’s law?', act: 'ask', arg: 'What is Moore’s law?' }, { label: 'What are the goals of the course?', act: 'ask', arg: 'What are the goals of the course?' }, { label: 'Who proposed Moore’s law?', act: 'ask', arg: 'Who proposed Moore’s law?' }] });
     }
     greet(S.courses.calc); greet(S.courses.linalg);
   }
@@ -28,6 +28,8 @@
   function greetText() {
         return 'Hi! Add your course material to get started. I can answer without it, but I cannot point to your slides.';
   }
+  /* The questions a student can click to start. The same four are offered wherever a chat begins (the first chat, after material is added, a new chat) and they all look alike. */
+  function starterActs() { return ['What is the chain rule?', 'What are the product and quotient rules?', 'What is a tangent line?', 'What is optimization?'].map(function (q) { return { label: q, act: 'ask', arg: q }; }); }
   function greet(c) { c.chats[0].msgs.push({ r: 'ai', text: greetText() }); }
   function chat() { return C.chats[C.chat]; }
   function hasMaterial() { return C.files.some(function (f) { return f.status === 'added'; }); }
@@ -456,8 +458,8 @@
       c.topics = c.topics.concat(fr);
       var d = defById(f.defId), msgs = c.chats[0].msgs;
       if (f.kind === 'lecture') {
-        if (!had) msgs.push({ r: 'ai', text: 'I found ' + fr.length + ' topics.', acts: [{ label: 'Rate my knowledge', act: 'assess', dark: true }, { label: 'Practice the chain rule', act: 'practice', arg: 'p1' }, { label: 'Practice the product rule', act: 'practice', arg: 'p2' }] });
-        else msgs.push({ r: 'ai', text: 'I found ' + fr.length + ' new topics in ' + d.short + ': ' + fr.map(function (t) { return t.name; }).join(', ') + '.', acts: [{ label: 'Rate my knowledge', act: 'assess', dark: true }] });
+        if (!had) msgs.push({ r: 'ai', text: 'I found ' + fr.length + ' topics. Try one of these questions, or ask your own.', acts: starterActs() });
+        else msgs.push({ r: 'ai', text: 'I found ' + fr.length + ' new topics in ' + d.short + ': ' + fr.map(function (t) { return t.name; }).join(', ') + '. Try one of these questions, or ask your own.', acts: starterActs() });
       } else if (f.kind === 'scan') {
         c.empty = !c.topics.length;
         msgs.push({ r: 'ai', text: 'I could not find topics in that file.', acts: [{ label: 'Add another file', act: 'upload' }] });
@@ -603,7 +605,7 @@
     if (t.id === 'b-addctx') { openAddCtx(); return; }
     if (t.id === 'ctx-add') { doAddCtx(); return; }
     if (t.closest('#newchat, [data-newchat]')) {
-      var nc = newChat('New chat'); nc.msgs.push({ r: 'ai', text: 'What would you like to work on?', acts: [{ label: 'Practice the chain rule', act: 'practice', arg: 'p1' }, { label: 'Practice the product rule', act: 'practice', arg: 'p2' }] });
+      var nc = newChat('New chat'); nc.msgs.push(C.pdfDemo ? { r: 'ai', text: 'What would you like to ask?', acts: [{ label: 'What is Moore’s law?', act: 'ask', arg: 'What is Moore’s law?' }, { label: 'What are the goals of the course?', act: 'ask', arg: 'What are the goals of the course?' }, { label: 'Who proposed Moore’s law?', act: 'ask', arg: 'Who proposed Moore’s law?' }] } : hasMaterial() ? { r: 'ai', text: 'What would you like to ask?', acts: starterActs() } : { r: 'ai', text: 'Add your course material first, so I can answer from your slides.' });
       C.chats.push(nc); C.chat = C.chats.length - 1; renderLeft(); renderMsgs(); $('#inp').focus(); return;
     }
   });
