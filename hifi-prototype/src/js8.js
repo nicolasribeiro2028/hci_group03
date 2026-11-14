@@ -228,6 +228,9 @@
     if (!S.ex || S.ex.ctx !== S.ctx || (S.ex.phase === 'setup' && !Object.keys(S.ex.topics).length)) S.ex = exNew();
     if (S.focus) setFocus(false);
     S.gOn = false; renderViewer();
+    if (S.ctx === 'calc' && !exTopicsAvail().length && !C.files.length) {   /* demo: no material yet, so bring in the sample lectures at once */
+      defsFor('calc').forEach(function (d) { addFile(d); }); toast('Sample lectures added for the demo.'); S.ex = exNew(); S.exOn = true; exRender(); setTimeout(function () { exWaitTopics(0); }, 300); return;
+    }
     S.exOn = true; exRender(); var b = $('#exview .exh h2'); if (b) b.focus();
     announce('Exercise mode open');
   }
@@ -311,12 +314,13 @@
     var s = S.ex, av = exTopicsAvail(), ctxName = (S.ctxs.filter(function (c) { return c.key === S.ctx; })[0] || {}).name;
     if (!av.length) {
       var reading = C.loading > 0 || C.files.some(function (f) { return f.status === 'uploading'; });
-      return exHead(ctxName) + '<div class="exbody"><div class="excard narrow center"><div class="extrophy" aria-hidden="true">xⁿ</div><h3 class="exbig">' + (reading ? 'Reading your lectures…' : 'Let\u2019s get your material in') + '</h3><p class="soft">' + (S.ctx === 'calc' ? 'The exercises in this prototype are about derivatives. Add the sample lectures to try Exercise mode right away, or add your own PDF.' : 'The exercises in this prototype are about derivatives, in the Calculus I course.') + '</p><div class="row" style="gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap">' +
-        (reading ? '' : S.ctx === 'calc' ? '<button class="btn dark exbigbtn" data-ex="samples">Add sample lectures</button><button class="btn" style="height:44px" data-ex="material">Add my own PDF</button>' : '<button class="btn dark exbigbtn" data-ex="calc">Switch to Calculus I</button>') + '</div></div></div>';
+      if (S.ctx !== 'calc') return exHead(ctxName) + '<div class="exbody"><div class="excard narrow center"><div class="extrophy" aria-hidden="true">xⁿ</div><h3 class="exbig">Exercise mode is in Calculus I for now</h3><p class="soft">This demo has exercises for Calculus I only.</p><div class="row" style="margin-top:16px;justify-content:center"><button class="btn dark exbigbtn" data-ex="calc">Go to Calculus I to test</button></div></div></div>';
+      return exHead(ctxName) + '<div class="exbody"><div class="excard narrow center"><div class="extrophy" aria-hidden="true">xⁿ</div><h3 class="exbig">' + (reading ? 'Reading the sample lectures…' : 'Let\u2019s get your material in') + '</h3><p class="soft">The exercises in this prototype are about derivatives. Use the sample lectures to try Exercise mode, or add your own PDF.</p><div class="row" style="gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap">' +
+        (reading ? '' : '<button class="btn dark exbigbtn" data-ex="samples">Use sample lectures</button><button class="btn" style="height:44px" data-ex="material">Add my own PDF</button>') + '</div></div></div>';
     }
     var pills = av.map(function (t) {
       var r = C.ratings[t.id];
-      return '<button type="button" class="expill' + (s.topics[t.id] ? ' on' : '') + '" data-ex="topic" data-v="' + t.id + '" aria-pressed="' + !!s.topics[t.id] + '"><span class="pgl">' + GLYPH[t.id] + '</span>' + esc(TNAME[t.id]) + '<span class="expr">' + (r == null ? '–' : fmt(r)) + '</span></button>';
+      return '<button type="button" class="expill' + (s.topics[t.id] ? ' on' : '') + '" data-ex="topic" data-v="' + t.id + '" aria-pressed="' + !!s.topics[t.id] + '">' + esc(TNAME[t.id]) + '<span class="expr">' + (r == null ? '–' : fmt(r)) + '</span></button>';
     }).join('');
     return exHead(ctxName) + '<div class="exbody"><div class="excard narrow setup">' +
       '<h3 class="exbig">Plan your practice</h3>' +
@@ -329,18 +333,21 @@
   /* The path: a winding road of stops. Each stop is one exercise, drawn as its topic symbol. The student sees the topic and
      the minutes, nothing else. Order is the order of the road, from top to bottom. */
   function roadHtml(items, budget) {
-    var n = items.length, DX = [0, -56, 0, 56], W = 560, cx = W / 2, GAP = 108, H = (n + 1) * GAP + 30;
-    var pts = items.map(function (it, i) { return { x: cx + DX[i % 4], y: 52 + i * GAP }; }); pts.push({ x: cx, y: 52 + n * GAP });
+    /* The road is read from the bottom up: Start at the bottom, then the stops in order, the end of the path at the top. */
+    var n = items.length, DX = [0, -56, 0, 56], W = 560, cx = W / 2, GAP = 108, H = (n + 2) * GAP + 24;
+    function Y(k) { return H - 56 - k * GAP; }   /* k = 0 is Start, 1..n the stops, n + 1 the end */
+    var pts = [{ x: cx, y: Y(0) }]; items.forEach(function (it, i) { pts.push({ x: cx + DX[i % 4], y: Y(i + 1) }); }); pts.push({ x: cx, y: Y(n + 1) });
     var d = 'M' + pts[0].x + ' ' + pts[0].y;
-    for (var i = 1; i < pts.length; i++) d += ' C' + pts[i - 1].x + ' ' + (pts[i - 1].y + 52) + ' ' + pts[i].x + ' ' + (pts[i].y - 52) + ' ' + pts[i].x + ' ' + pts[i].y;
+    for (var i = 1; i < pts.length; i++) d += ' C' + pts[i - 1].x + ' ' + (pts[i - 1].y - 52) + ' ' + pts[i].x + ' ' + (pts[i].y + 52) + ' ' + pts[i].x + ' ' + pts[i].y;
     var tot = items.reduce(function (a, b) { return a + b.min; }, 0);
     var h = '<div class="exroad" style="height:' + H + 'px"><svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><path d="' + d + '"/></svg>';
+    h += '<span class="stop start" style="left:' + pts[0].x + 'px;top:' + pts[0].y + 'px" aria-hidden="true">Start</span>';
     items.forEach(function (it, k) {
-      var e = xById(it.id), p = pts[k], right = p.x <= cx;
+      var e = xById(it.id), p = pts[k + 1], right = p.x <= cx;
       h += '<span class="stop' + (k === 0 ? ' next' : '') + '" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-hidden="true">' + GLYPH[e.topic] + '</span>' +
         '<span class="stoplab ' + (right ? 'r' : 'l') + '" style="left:' + (right ? p.x + 46 : p.x - 46 - 170) + 'px;top:' + (p.y - 26) + 'px" aria-hidden="true"><b>' + TNAME[e.topic] + '</b><span class="tz">' + esc(teaser(e)) + '</span>' + e.min + ' min</span>';
     });
-    var f = pts[n], more = budget - tot >= 5;   /* time is left: the path is not over, more stops appear as the student progresses */
+    var f = pts[n + 1], more = budget - tot >= 5;   /* time is left: the path is not over, more stops appear as the student progresses */
     h += '<span class="stop finish' + (more ? ' more' : '') + '" style="left:' + f.x + 'px;top:' + f.y + 'px" aria-hidden="true">' + (more ? '…' : '⚑') + '</span><span class="stoplab r" style="left:' + (f.x + 46) + 'px;top:' + (f.y - 20) + 'px" aria-hidden="true"><b>' + (more ? 'More ahead' : 'Finish') + '</b>' + (more ? 'new stops appear as you go' : 'about ' + tot + ' min') + '</span></div>';
     h += '<ol class="sr">' + items.map(function (it, k) { var e = xById(it.id); return '<li>Stop ' + (k + 1) + ': ' + TNAME[e.topic] + ', ' + e.min + ' minutes</li>'; }).join('') + '</ol>';
     return h;
@@ -351,7 +358,7 @@
   }
   function exPlanView() {
     var s = S.ex, tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0);
-    return exHead('') + '<div class="exbody road"><div class="exroadwrap"><div class="exsumline"><b>Your path</b><span>' + s.plan.length + ' stops · about ' + tot + ' min</span></div>' + roadHtml(s.plan, s.time) + devPlan(s.plan) + '</div></div>' +
+    return exHead(s.plan.length + ' stops · about ' + tot + ' min') + '<div class="exbody road"><div class="exroadwrap">' + roadHtml(s.plan, s.time) + devPlan(s.plan) + '</div></div>' +
       '<div class="exfoot"><button class="btn" data-ex="back">Change</button><button class="btn dark exbigbtn" data-ex="start">Start</button></div>';
   }
   function stepperHtml(s, r) {
@@ -395,6 +402,7 @@
     var had = keepFocus && document.activeElement && document.activeElement.id === 'ex-in', pos = had ? document.activeElement.selectionStart : 0;
     var ph = S.ex.phase;
     v.innerHTML = ph === 'setup' ? exSetup() : ph === 'plan' ? exPlanView() : ph === 'run' ? exRun() : exDone();
+    var eb = v.querySelector('.exbody.road'); if (eb) eb.scrollTop = eb.scrollHeight;   /* the road starts at the bottom */
     if (had) { var i = $('#ex-in'); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (x) { } } }
   }
   document.addEventListener('click', function (e) {

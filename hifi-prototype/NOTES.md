@@ -55,3 +55,8 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 - **New accounts** open Calculus I (HCI is only a choice in the course menu, and only on a machine that has the course PDF). Empty Material shows "Use sample lectures". Exercise mode opens even without material and offers "Add sample lectures" itself.
 - **Exercise mode:** "Cancel" in the header while a path is planned or running (asks first if exercises were already done; earned ratings stay). Each stop on the road shows a glimpse of the exercise (the expression, not the answer).
 - **Chat help:** an answer shows only a small coloured tag with its own level (Hint, Concept, Example, Solution). The four-step ladder is gone.
+
+## Update: Exercise mode entry and road direction
+- In courses other than Calculus I, Exercise mode says it is Calculus-only for now and offers "Go to Calculus I to test".
+- In Calculus I with no material, opening Exercise mode loads the sample lectures at once (demo), instead of opening a file chooser.
+- Topic pills have no icon. The path is read from the bottom up: a Start stop, then the exercises, then the end of the path ("More ahead" or a flag) at the top. The view opens scrolled to the bottom so Start is visible.

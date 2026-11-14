@@ -130,7 +130,7 @@
 .exsec { margin-bottom: 20px; }
 .exbigbtn { height: 44px; padding: 0 26px; font-size: 15px; }
 .expills { display: flex; flex-wrap: wrap; gap: 8px; }
-.expill { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px 0 6px; border: 1px solid var(--line); border-radius: 99px; background: #fff; font: inherit; font-size: 14px; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.expill { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 99px; background: #fff; font: inherit; font-size: 14px; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
 .expill:hover { background: var(--fill); }
 .expill.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 .expill:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
@@ -138,7 +138,7 @@
 .expill.on .pgl { background: rgba(255, 255, 255, .18); color: #fff; }
 .expill .expr { font-size: 12px; opacity: .7; margin-left: 2px; }
 /* the road */
-.exbody.road { align-items: flex-start; padding-bottom: 96px; }
+.exbody.road { align-items: flex-start; padding-bottom: 12px; }
 .exroadwrap { width: 100%; max-width: 440px; margin: 0 auto; }
 .exsumline { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 6px; padding: 0 4px; }
 .exsumline b { font-size: 20px; font-weight: 600; }
@@ -147,7 +147,8 @@
 .exroad svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 .exroad path { fill: none; stroke: var(--line); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1 11; }
 .stop { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); display: grid; place-items: center; font-weight: 700; font-size: 16px; box-shadow: 0 4px 0 var(--line); }
-.stop.next { background: var(--ink); color: #fff; box-shadow: 0 4px 0 #000, 0 0 0 7px var(--sel); }
+.stop.next { box-shadow: 0 4px 0 var(--line), 0 0 0 7px var(--sel); }
+.stop.start { background: var(--ink); color: #fff; font-size: 14px; letter-spacing: .02em; box-shadow: 0 4px 0 #000, 0 0 0 7px var(--sel); }
 .stop.finish { background: var(--sel); border-style: dashed; font-size: 22px; }
 .stop.finish.more { font-size: 26px; letter-spacing: 1px; background: #fff; border-color: var(--line); color: var(--soft); box-shadow: none; }
 .stoplab { position: absolute; width: 150px; font-size: 13px; line-height: 1.3; color: var(--soft); }
