@@ -21,7 +21,7 @@
   }
   function acctClean(s) {
     delete s.dock; delete s.vh; s.focus = false; s.map = false; s.exOn = false; s.gOn = false; s.gNode = null; s.editing = false; delete s.snap;
-    if (s.ex) { s.ex.busy = false; if (s.ex.res && s.ex.res.pending) { s.ex.res.pending = false; s.ex.res.more = s.ex.plan.length > s.ex.cur + 1; s.ex.res.note = 'Planning was interrupted by a reload.'; } }
+    if (s.ex) { s.ex.t0 = null; s.ex.view = 'ex'; s.ex.busy = false; if (s.ex.res && s.ex.res.pending) { s.ex.res.pending = false; s.ex.res.more = s.ex.plan.length > s.ex.cur + 1; s.ex.res.note = 'Planning was interrupted by a reload.'; } }
     Object.keys(s.courses).forEach(function (k) {
       var c = s.courses[k]; c.loading = 0; c.timers = [];
       c.files.forEach(function (f) { if (f.status === 'uploading') { f.status = 'added'; f.pct = 100; } });

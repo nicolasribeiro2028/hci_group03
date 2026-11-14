@@ -78,3 +78,8 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 ## Online copy (Vercel) with Gurobi
 - The same page can be hosted as a static site plus one Python function: `api/plan.py` runs `solver/plan.py` (Gurobi) and `vercel.json` rewrites `/plan` to it. The page already asks `/plan`, so Exercise mode uses Gurobi on the link too. If the function fails the page falls back to its own search.
 - The pip Gurobi licence is size limited, for non-production use, and expires 2026-11-23 for the version used here. After that date the link uses the in-page search until a licence (for example the free academic WLS one) is set up.
+
+## Update: real time and the full path during a session
+- **Time is measured.** The clock counts only the time the student spends working on an exercise (it stops while the result or the full path is shown, when Exercise mode is closed, or when the tab is hidden). The session clock shows `m:ss of N min`. The minutes written on a stop are estimates.
+- **Pace.** After two exercises the student actually worked on (solved, with or without a hint, not skipped), the planner scales the estimated minutes by the ratio of real to estimated time (between 0.5 and 2), so a fast student gets more stops and a slow one fewer. The time left in the plan is the real time left.
+- **Full path.** A "Full path" button in the header of a session shows the whole road: done stops (with the time taken), the current one, what is ahead, and a "Since your last exercise" box that lists the stops added and removed by the last re-plan and whether the order changed. New stops carry a "new" tag. After a result that changed the path, "See what changed" opens the same view.

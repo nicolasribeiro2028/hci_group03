@@ -247,3 +247,14 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
 .exrate { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: -8px 0 20px; padding: 10px 14px; border-radius: 10px; background: var(--fill); font-size: 14px; }
 .exrate b { font-weight: 600; }
 .exrelink { margin: -10px 0 18px; font-size: 13px; }
+
+/* full path during a session */
+.stop.done { background: var(--ink); color: #fff; border-color: var(--ink); box-shadow: 0 3px 0 #000; }
+.stop.sm.cur { box-shadow: 0 3px 0 var(--line), 0 0 0 7px var(--sel); }
+.newtag { display: inline-block; margin-left: 6px; padding: 0 7px; border-radius: 99px; background: #fff3b8; color: #6b5200; font-size: 11px; font-weight: 600; }
+.exchg { margin: 0 0 14px; padding: 12px 16px; border: 1px solid var(--line2); border-radius: 12px; background: #fff; font-size: 14px; }
+.exchg ul { margin: 4px 0 8px; padding-left: 18px; }
+.exchg p { margin: 2px 0 8px; }
+.chgk { display: inline-block; margin-right: 8px; padding: 0 8px; border-radius: 99px; font-size: 11px; font-weight: 600; background: var(--sel); }
+.chgk.add { background: #fff3b8; color: #6b5200; }
+.exseechg { font-size: 13px; }
