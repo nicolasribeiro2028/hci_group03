@@ -555,6 +555,7 @@
       else if (a === 'ok4') { var m4 = chat().mode; if (m4) { m4.ok4 = true; help(4); } }
       else if (a === 'focus') $('#inp').focus();
       else if (a === 'upload') openPicker();
+      else if (a === 'exmode') exOpen();
       else if (a === 'samples') { defsFor(S.ctx).forEach(function (d) { addFile(d); }); }
       else if (a === 'ask') { userSay(arg); answer(arg); }
       else if (a === 'retry') { var mr = chat().mode; if (mr && !mr.solved) { mr.heat = []; post({ r: 'ai', kick: 'Problem', strong: PROBLEMS[mr.pid].text, text: 'Your turn. Write your own attempt now. I will note that you saw the solution first.' }); $('#inp').focus(); } }
