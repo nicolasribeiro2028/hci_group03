@@ -87,7 +87,8 @@
     chev: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
   };
   function renderActbar() {
-    $('#actbar').innerHTML = '<button type="button" class="act' + (S.side ? ' on' : '') + '" data-side="all" aria-pressed="' + (!!S.side) + '" aria-label="Sidebar" title="Show or hide the sidebar (Ctrl or Cmd + B)">' + ICONS.side + '</button>';
+    var b = $('#b-side'); if (!b) return;
+    b.innerHTML = ICONS.side; b.hidden = !!S.side;
   }
   function filesHtml() {
     var h = C.files.map(function (f) {
@@ -136,7 +137,7 @@
     var ws = $('#ws'); if (ws) ws.classList.toggle('sb-off', !S.side);
     var pad0 = $('#left .p-pad'), scroll = pad0 ? pad0.scrollTop : 0, h = '';
     if (S.side) {
-      h = '<div class="p-pad">' +
+      h = '<div class="p-pad"><div class="sbtop"><button type="button" class="btn icon sbtog" data-side="all" aria-label="Hide sidebar" title="Hide sidebar (Ctrl or Cmd + B)">' + ICONS.side + '</button></div>' +
         sbSection('chats', 'Chats', '<button class="btn small icon" data-newchat="1" title="New chat" aria-label="New chat">' + UI.plus + '</button>', chatsHtml()) +
         sbSection('material', 'Material', '<button class="btn small" data-addfiles="1">Add files</button>', materialHtml()) +
         sbSection('assess', 'Self-assessment', C.topics.length ? '<button class="btn small icon" data-act="assess" title="Rate my knowledge" aria-label="Rate my knowledge">' + UI.sliders + '</button>' : '', topicsHtml()) + '</div>';

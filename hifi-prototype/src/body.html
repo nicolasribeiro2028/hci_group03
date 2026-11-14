@@ -32,6 +32,7 @@
 
 <div id="app">
   <header class="top">
+    <button class="btn icon" id="b-side" data-side="all" aria-label="Show sidebar" title="Show sidebar (Ctrl or Cmd + B)" hidden></button>
     <select class="sel" id="ctx" aria-label="Course context"></select>
     <button class="btn small icon" id="b-addctx" aria-label="Add context" title="Add context"></button>
     <span class="spacer"></span>
@@ -42,7 +43,6 @@
   </header>
 
   <main class="ws" id="ws">
-    <nav class="actbar" id="actbar" aria-label="Sidebar views"></nav>
     <aside class="panel sidebar" id="left" aria-label="Sidebar"></aside>
     <div class="editor" id="editor">
       <section class="exview" id="exview" aria-label="Exercise mode" hidden></section>

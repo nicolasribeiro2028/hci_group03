@@ -629,6 +629,13 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 .gkey i.file { background: var(--ink); } .gkey i.topic { background: var(--blue); }
 .gcap { margin: 0; text-align: center; font-size: 14px; min-height: 30px; display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
 #b-graph.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* sidebar toggle lives inside the sidebar (and in the header while the sidebar is hidden) */
+.ws { padding-left: 24px; }
+#left .sbtop { display: flex; align-items: center; margin: 0 0 2px; }
+#left .sbtog { border-color: transparent; background: none; color: var(--soft); }
+#left .sbtog:hover { background: var(--sel); color: var(--ink); border-color: transparent; box-shadow: none; }
+#b-side { color: var(--soft); }
 </style>
 
 <div id="login" hidden>
@@ -663,6 +670,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 
 <div id="app">
   <header class="top">
+    <button class="btn icon" id="b-side" data-side="all" aria-label="Show sidebar" title="Show sidebar (Ctrl or Cmd + B)" hidden></button>
     <select class="sel" id="ctx" aria-label="Course context"></select>
     <button class="btn small icon" id="b-addctx" aria-label="Add context" title="Add context"></button>
     <span class="spacer"></span>
@@ -673,7 +681,6 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   </header>
 
   <main class="ws" id="ws">
-    <nav class="actbar" id="actbar" aria-label="Sidebar views"></nav>
     <aside class="panel sidebar" id="left" aria-label="Sidebar"></aside>
     <div class="editor" id="editor">
       <section class="exview" id="exview" aria-label="Exercise mode" hidden></section>
@@ -994,7 +1001,8 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     chev: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
   };
   function renderActbar() {
-    $('#actbar').innerHTML = '<button type="button" class="act' + (S.side ? ' on' : '') + '" data-side="all" aria-pressed="' + (!!S.side) + '" aria-label="Sidebar" title="Show or hide the sidebar (Ctrl or Cmd + B)">' + ICONS.side + '</button>';
+    var b = $('#b-side'); if (!b) return;
+    b.innerHTML = ICONS.side; b.hidden = !!S.side;
   }
   function filesHtml() {
     var h = C.files.map(function (f) {
@@ -1043,7 +1051,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     var ws = $('#ws'); if (ws) ws.classList.toggle('sb-off', !S.side);
     var pad0 = $('#left .p-pad'), scroll = pad0 ? pad0.scrollTop : 0, h = '';
     if (S.side) {
-      h = '<div class="p-pad">' +
+      h = '<div class="p-pad"><div class="sbtop"><button type="button" class="btn icon sbtog" data-side="all" aria-label="Hide sidebar" title="Hide sidebar (Ctrl or Cmd + B)">' + ICONS.side + '</button></div>' +
         sbSection('chats', 'Chats', '<button class="btn small icon" data-newchat="1" title="New chat" aria-label="New chat">' + UI.plus + '</button>', chatsHtml()) +
         sbSection('material', 'Material', '<button class="btn small" data-addfiles="1">Add files</button>', materialHtml()) +
         sbSection('assess', 'Self-assessment', C.topics.length ? '<button class="btn small icon" data-act="assess" title="Rate my knowledge" aria-label="Rate my knowledge">' + UI.sliders + '</button>' : '', topicsHtml()) + '</div>';

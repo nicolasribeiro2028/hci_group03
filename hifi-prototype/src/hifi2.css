@@ -125,3 +125,10 @@
 .gkey i.file { background: var(--ink); } .gkey i.topic { background: var(--blue); }
 .gcap { margin: 0; text-align: center; font-size: 14px; min-height: 30px; display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
 #b-graph.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+/* sidebar toggle lives inside the sidebar (and in the header while the sidebar is hidden) */
+.ws { padding-left: 24px; }
+#left .sbtop { display: flex; align-items: center; margin: 0 0 2px; }
+#left .sbtog { border-color: transparent; background: none; color: var(--soft); }
+#left .sbtog:hover { background: var(--sel); color: var(--ink); border-color: transparent; box-shadow: none; }
+#b-side { color: var(--soft); }
