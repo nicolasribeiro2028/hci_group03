@@ -224,7 +224,9 @@ ul.why { margin: 8px 0 0; padding-left: 18px; }
   --ease: cubic-bezier(.2, .7, .2, 1);
   --shadow: 0 10px 32px rgba(20, 24, 32, .16);
 }
-body { background: #f6f7f9; -webkit-font-smoothing: antialiased; }
+body { background: #f6f7f9; -webkit-font-smoothing: antialiased; overflow: hidden; }
+html { overflow: hidden; }
+#app { position: fixed; inset: 0; height: auto; overflow-x: auto; overflow-y: hidden; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .panel { border-color: var(--line2); box-shadow: 0 1px 2px rgba(20, 24, 32, .04); }
 .btn, .link, .chip, .cpill, .vbtn, .xbtn, .lv { transition: background .15s, border-color .15s, color .15s, transform .1s, box-shadow .15s; }
@@ -547,24 +549,12 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 .exsum { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 14px; }
 .exbudget { flex: 1; height: 8px; border-radius: 99px; background: var(--line2); overflow: hidden; min-width: 80px; }
 .exbudget i { display: block; height: 100%; background: var(--blue); border-radius: 99px; transition: width .4s var(--ease); }
-.exlist { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
-.exit { display: flex; gap: 12px; padding: 12px 14px; border: 1px solid var(--line2); border-radius: 10px; background: #fff; }
-.exit.now { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
-.exit.done { background: var(--fill); }
-.exn { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--sel); display: grid; place-items: center; font-size: 12px; font-weight: 600; }
-.exit.now .exn { background: var(--ink); color: #fff; }
-.exit.done .exn { background: var(--green-bg); color: var(--green); }
-.exm { display: grid; gap: 3px; min-width: 0; }
-.exm b { font-weight: 600; font-size: 14px; }
 .exmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .exwhy { color: var(--ink); }
 .exsrc { display: inline-block; margin: 0; color: var(--ink); padding: 1px 8px; border-radius: 99px; font-size: 11px; border: 1px solid var(--line); background: #fff; }
 .exsrc.ai { border-color: var(--blue-line); background: var(--blue-bg); color: var(--blue); }
 .exbody.run { align-items: flex-start; }
 .exrail { flex: 0 1 340px; position: sticky; top: 0; }
-.exrail .exit { padding: 9px 11px; }
-.exrail .exm .soft, .exrail .exwhy, .exrail .exsrc { display: none; }
-.exrail .exit.now .exwhy { display: block; }
 .excur { flex: 1 1 520px; max-width: 700px; border: 1px solid var(--line2); border-radius: 12px; padding: 22px 24px; }
 .exq { font-size: 22px; line-height: 1.35; margin: 12px 0 16px; font-weight: 500; }
 .exans { display: grid; gap: 8px; }
@@ -630,6 +620,50 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 #left .sbtog { border-color: transparent; background: none; color: var(--soft); }
 #left .sbtog:hover { background: var(--sel); color: var(--ink); border-color: transparent; box-shadow: none; }
 #b-side { color: var(--soft); }
+
+/* ---- learning path ---- */
+.excard.wide { max-width: 780px; }
+.exh3 { margin: 18px 0 10px; font-size: 14px; font-weight: 600; }
+.extl { display: flex; gap: 3px; height: 36px; margin: 6px 0 4px; }
+.tseg { display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--tc); color: #fff; font-size: 12px; min-width: 22px; overflow: hidden; transition: opacity .2s; }
+.tseg.done { opacity: .4; }
+.tseg.now { outline: 2px solid var(--ink); outline-offset: 1px; }
+.tseg.free { background: repeating-linear-gradient(45deg, var(--fill), var(--fill) 6px, #fff 6px, #fff 12px); border: 1px dashed var(--line); color: var(--soft); }
+.tseg em { font-style: normal; font-size: 11px; white-space: nowrap; padding: 0 6px; }
+.extlk { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.tkeys { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; color: var(--soft); }
+.tk { display: inline-flex; align-items: center; gap: 5px; }
+.tk i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.exlimit { margin: 10px 0 0; padding: 9px 12px; border-radius: 8px; background: var(--fill); color: var(--soft); font-size: 13px; }
+.expath { list-style: none; margin: 0 0 10px; padding: 0; position: relative; }
+.expath::before { content: ''; position: absolute; left: 14px; top: 16px; bottom: 16px; width: 2px; background: var(--line); }
+.exp { display: grid; grid-template-columns: 30px 1fr; gap: 14px; position: relative; }
+.exnode { position: relative; z-index: 1; width: 30px; height: 30px; margin-top: 8px; border-radius: 50%; background: var(--tc); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 13px; box-shadow: 0 0 0 4px #fff; }
+.exp.todo .exnode { background: #fff; color: var(--tc); border: 2px solid var(--tc); }
+.exp.now .exnode { box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--tc); }
+.exconn { position: relative; z-index: 1; padding: 4px 0 4px 44px; display: flex; }
+.exconn span { font-size: 11px; color: var(--soft); background: #fff; padding: 2px 10px; border: 1px solid var(--line2); border-radius: 99px; }
+.expc { border: 1px solid var(--line2); border-left: 4px solid var(--tc); border-radius: 10px; padding: 10px 14px; background: #fff; margin: 2px 0; min-width: 0; }
+.exp.now .expc { box-shadow: 0 0 0 1px var(--tc); }
+.exp.done .expc { background: var(--fill); }
+.exph { display: flex; align-items: center; gap: 10px; }
+.exph b { color: var(--tc); font-size: 14px; }
+.expips { display: inline-flex; gap: 2px; margin-left: auto; }
+.expips i { width: 5px; height: 12px; border-radius: 2px; background: var(--line2); }
+.expips i.on { background: var(--tc); }
+.expq { margin: 4px 0 6px; font-size: 14px; }
+.exwhy { margin: 6px 0 0; color: var(--ink); }
+.exrail { flex: 0 1 360px; }
+.exrail .expq, .exrail .exmeta, .exrail .exwhy { display: none; }
+.exrail .exp.now .expq, .exrail .exp.now .exwhy { display: block; }
+.exrail .expc { padding: 7px 12px; }
+.exrail .expips { display: none; }
+.exrail .exp.now .expips { display: inline-flex; }
+
+.editor { position: relative; }
+.tseg.free { min-width: 48px; }
+
+.extlk > .soft { white-space: nowrap; }
 </style>
 
 <div id="login" hidden>
@@ -2087,27 +2121,56 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   function XE(id, topic, d, min, src, el, q, fn, sol) { return { id: id, topic: topic, d: d, min: min, src: src, el: el, q: q, fn: fn, sol: sol }; }
   var EXB = [
     XE('b1', 'basic', 2, 3, 'up', ['power'], 'Find f′(x) for f(x) = x⁵.', function (x) { return 5 * Math.pow(x, 4); }, 'f′(x) = 5x⁴.'),
-    XE('b2', 'basic', 3, 4, 'up', ['power', 'sum', 'cm'], 'Find f′(x) for f(x) = 4x³ − 2x + 7.', function (x) { return 12 * x * x - 2; }, 'f′(x) = 12x² − 2. The constant 7 has derivative 0.'),
-    XE('b3', 'basic', 4, 5, 'up', ['power', 'sum', 'cm'], 'Find f′(x) for f(x) = 3x⁴ + x²/2 − 5x.', function (x) { return 12 * Math.pow(x, 3) + x - 5; }, 'f′(x) = 12x³ + x − 5.'),
-    XE('b4', 'basic', 5, 5, 'ai', ['power', 'sum', 'cm'], 'Find f′(x) for f(x) = 5x⁷ − 3x⁵ + 2x³.', function (x) { return 35 * Math.pow(x, 6) - 15 * Math.pow(x, 4) + 6 * x * x; }, 'f′(x) = 35x⁶ − 15x⁴ + 6x².'),
+    XE('b2', 'basic', 3, 4, 'up', ['power', 'sum', 'cm', 'cubic'], 'Find f′(x) for f(x) = 4x³ − 2x + 7.', function (x) { return 12 * x * x - 2; }, 'f′(x) = 12x² − 2. The constant 7 has derivative 0.'),
+    XE('b3', 'basic', 4, 5, 'up', ['power', 'sum', 'cm', 'fraction-coef'], 'Find f′(x) for f(x) = 3x⁴ + x²/2 − 5x.', function (x) { return 12 * Math.pow(x, 3) + x - 5; }, 'f′(x) = 12x³ + x − 5.'),
+    XE('b4', 'basic', 5, 5, 'ai', ['power', 'sum', 'cm', 'odd-powers', 'three-terms'], 'Find f′(x) for f(x) = 5x⁷ − 3x⁵ + 2x³.', function (x) { return 35 * Math.pow(x, 6) - 15 * Math.pow(x, 4) + 6 * x * x; }, 'f′(x) = 35x⁶ − 15x⁴ + 6x².'),
     XE('q1', 'pq', 4, 5, 'up', ['power', 'product'], 'Find f′(x) for f(x) = x² · (x + 3).', function (x) { return 3 * x * x + 6 * x; }, 'Product rule: 2x(x + 3) + x² · 1 = 3x² + 6x.'),
-    XE('q2', 'pq', 5, 6, 'up', ['power', 'product', 'sum'], 'Find f′(x) for f(x) = (2x + 1)(x² − 4).', function (x) { return 6 * x * x + 2 * x - 8; }, 'Product rule: 2(x² − 4) + (2x + 1)(2x) = 6x² + 2x − 8.'),
+    XE('q2', 'pq', 5, 6, 'up', ['power', 'product', 'sum', 'linear'], 'Find f′(x) for f(x) = (2x + 1)(x² − 4).', function (x) { return 6 * x * x + 2 * x - 8; }, 'Product rule: 2(x² − 4) + (2x + 1)(2x) = 6x² + 2x − 8.'),
     XE('q3', 'pq', 6, 7, 'ai', ['power', 'quotient'], 'Find f′(x) for f(x) = x / (x + 1).', function (x) { return 1 / ((x + 1) * (x + 1)); }, 'Quotient rule: ((x + 1) − x) / (x + 1)² = 1 / (x + 1)².'),
     XE('q4', 'pq', 7, 8, 'ai', ['power', 'quotient', 'sum'], 'Find f′(x) for f(x) = (x² + 1) / (x − 2).', function (x) { return (x * x - 4 * x - 1) / ((x - 2) * (x - 2)); }, 'Quotient rule: (2x(x − 2) − (x² + 1)) / (x − 2)² = (x² − 4x − 1) / (x − 2)².'),
-    XE('c0', 'chain', 2, 3, 'up', ['power', 'chain', 'sum'], 'Find f′(x) for f(x) = (x + 1)³.', function (x) { return 3 * Math.pow(x + 1, 2); }, 'Outside: 3(x + 1)². Inside: x + 1, derivative 1. So f′(x) = 3(x + 1)².'),
-    XE('c1', 'chain', 4, 4, 'up', ['power', 'chain', 'sum'], 'Find f′(x) for f(x) = (4x − 1)³.', function (x) { return 12 * Math.pow(4 * x - 1, 2); }, 'Outside: 3(4x − 1)². Inside: 4x − 1, derivative 4. So f′(x) = 12(4x − 1)².'),
-    XE('c2', 'chain', 5, 5, 'up', ['power', 'chain'], 'Find f′(x) for f(x) = (x² + 3)⁵.', function (x) { return 10 * x * Math.pow(x * x + 3, 4); }, 'Outside: 5(x² + 3)⁴. Inside derivative: 2x. So f′(x) = 10x(x² + 3)⁴.'),
-    XE('c3', 'chain', 6, 6, 'ai', ['power', 'chain', 'cm'], 'Find f′(x) for f(x) = (5x² − 2)³.', function (x) { return 30 * x * Math.pow(5 * x * x - 2, 2); }, 'Outside: 3(5x² − 2)². Inside derivative: 10x. So f′(x) = 30x(5x² − 2)².'),
+    XE('c0', 'chain', 2, 3, 'up', ['power', 'chain', 'linear-inside'], 'Find f′(x) for f(x) = (x + 1)³.', function (x) { return 3 * Math.pow(x + 1, 2); }, 'Outside: 3(x + 1)². Inside: x + 1, derivative 1. So f′(x) = 3(x + 1)².'),
+    XE('c1', 'chain', 4, 4, 'up', ['power', 'chain', 'linear-inside', 'sum'], 'Find f′(x) for f(x) = (4x − 1)³.', function (x) { return 12 * Math.pow(4 * x - 1, 2); }, 'Outside: 3(4x − 1)². Inside: 4x − 1, derivative 4. So f′(x) = 12(4x − 1)².'),
+    XE('c2', 'chain', 5, 5, 'up', ['power', 'chain', 'quad-inside'], 'Find f′(x) for f(x) = (x² + 3)⁵.', function (x) { return 10 * x * Math.pow(x * x + 3, 4); }, 'Outside: 5(x² + 3)⁴. Inside derivative: 2x. So f′(x) = 10x(x² + 3)⁴.'),
+    XE('c3', 'chain', 6, 6, 'ai', ['power', 'chain', 'quad-inside', 'cm'], 'Find f′(x) for f(x) = (5x² − 2)³.', function (x) { return 30 * x * Math.pow(5 * x * x - 2, 2); }, 'Outside: 3(5x² − 2)². Inside derivative: 10x. So f′(x) = 30x(5x² − 2)².'),
     XE('c4', 'chain', 8, 8, 'ai', ['power', 'chain', 'product'], 'Find f′(x) for f(x) = x · (x² + 1)³.', function (x) { return Math.pow(x * x + 1, 2) * (7 * x * x + 1); }, 'Product and chain rule: (x² + 1)³ + x · 3(x² + 1)² · 2x = (x² + 1)²(7x² + 1).'),
-    XE('c5', 'chain', 7, 7, 'ai', ['power', 'chain', 'sum'], 'Find f′(x) for f(x) = (x³ − x)⁴.', function (x) { return 4 * Math.pow(x * x * x - x, 3) * (3 * x * x - 1); }, 'Outside: 4(x³ − x)³. Inside derivative: 3x² − 1. So f′(x) = 4(x³ − x)³(3x² − 1).'),
+    XE('c5', 'chain', 7, 7, 'ai', ['power', 'chain', 'cubic-inside', 'sum'], 'Find f′(x) for f(x) = (x³ − x)⁴.', function (x) { return 4 * Math.pow(x * x * x - x, 3) * (3 * x * x - 1); }, 'Outside: 4(x³ − x)³. Inside derivative: 3x² − 1. So f′(x) = 4(x³ − x)³(3x² − 1).'),
     XE('t1', 'tangent', 3, 3, 'up', ['power', 'sum', 'tangent'], 'Find the slope of the tangent line to f(x) = x² + 3x at x = 2.', function () { return 7; }, 'f′(x) = 2x + 3, so the slope at x = 2 is 7.'),
     XE('t2', 'tangent', 5, 6, 'ai', ['power', 'chain', 'tangent'], 'Find the slope of the tangent line to f(x) = (x² + 1)³ at x = 1.', function () { return 24; }, 'f′(x) = 3(x² + 1)² · 2x, so at x = 1 the slope is 3 · 4 · 2 = 24.'),
-    XE('t3', 'tangent', 6, 5, 'up', ['power', 'sum', 'tangent'], 'Find the slope of the tangent line to f(x) = x³ − 4x at x = 2.', function () { return 8; }, 'f′(x) = 3x² − 4, so at x = 2 the slope is 8.'),
+    XE('t3', 'tangent', 6, 5, 'up', ['power', 'sum', 'tangent', 'cubic'], 'Find the slope of the tangent line to f(x) = x³ − 4x at x = 2.', function () { return 8; }, 'f′(x) = 3x² − 4, so at x = 2 the slope is 8.'),
     XE('o0', 'optim', 2, 3, 'up', ['power', 'sum', 'critical'], 'At which x does f(x) = x² − 4x have its smallest value?', function () { return 2; }, 'f′(x) = 2x − 4 = 0 gives x = 2.'),
-    XE('o1', 'optim', 4, 4, 'up', ['power', 'sum', 'critical'], 'At which x does f(x) = x² − 6x + 4 have its smallest value?', function () { return 3; }, 'f′(x) = 2x − 6 = 0 gives x = 3.'),
-    XE('o2', 'optim', 6, 6, 'up', ['power', 'sum', 'critical'], 'At which x > 0 does f(x) = x³ − 12x have a local minimum?', function () { return 2; }, 'f′(x) = 3x² − 12 = 0 gives x = 2. The sign of f′ changes from negative to positive there.'),
+    XE('o1', 'optim', 4, 4, 'up', ['power', 'sum', 'critical', 'constant'], 'At which x does f(x) = x² − 6x + 4 have its smallest value?', function () { return 3; }, 'f′(x) = 2x − 6 = 0 gives x = 3.'),
+    XE('o2', 'optim', 6, 6, 'up', ['power', 'sum', 'critical', 'cubic'], 'At which x > 0 does f(x) = x³ − 12x have a local minimum?', function () { return 2; }, 'f′(x) = 3x² − 12 = 0 gives x = 2. The sign of f′ changes from negative to positive there.'),
     XE('o3', 'optim', 5, 5, 'ai', ['power', 'critical'], 'What is the largest possible product of two numbers whose sum is 20?', function () { return 100; }, 'With the numbers x and 20 − x, the product x(20 − x) is largest at x = 10, so the product is 100.')
   ];
+
+  /* More made-up exercises, built by small helpers so the answers are computed, not typed. */
+  function sup(n) { return String(n).replace(/\d/g, function (d) { return '⁰¹²³⁴⁵⁶⁷⁸⁹'.charAt(+d); }); }
+  function ptxt(ts) { return ts.filter(function (t) { return t[0] !== 0; }).map(function (t, i) { var c = t[0], e = t[1], a = Math.abs(c), b = e === 0 ? String(a) : (a === 1 ? '' : String(a)) + 'x' + (e === 1 ? '' : sup(e)); return i === 0 ? (c < 0 ? '−' : '') + b : (c < 0 ? ' − ' : ' + ') + b; }).join(''); }
+  function pder(ts) { return ts.filter(function (t) { return t[1] > 0; }).map(function (t) { return [t[0] * t[1], t[1] - 1]; }); }
+  function pev(ts, x) { return ts.reduce(function (sm, t) { return sm + t[0] * Math.pow(x, t[1]); }, 0); }
+  function XP(id, d, min, src, el, ts) { var dr = pder(ts); return XE(id, 'basic', d, min, src, el, 'Find f′(x) for f(x) = ' + ptxt(ts) + '.', function (x) { return pev(dr, x); }, 'f′(x) = ' + ptxt(dr) + '.'); }
+  function XT(id, d, min, src, el, ts, k) { var dr = pder(ts), v = pev(dr, k); return XE(id, 'tangent', d, min, src, el, 'Find the slope of the tangent line to f(x) = ' + ptxt(ts) + ' at x = ' + k + '.', function () { return v; }, 'f′(x) = ' + ptxt(dr) + ', so at x = ' + k + ' the slope is ' + v + '.'); }
+  function XO(id, d, min, src, el, a, b, c) { var x0 = -b / (2 * a); return XE(id, 'optim', d, min, src, el, 'At which x does f(x) = ' + ptxt([[a, 2], [b, 1], [c, 0]]) + ' have its smallest value?', function () { return x0; }, 'f′(x) = ' + ptxt([[2 * a, 1], [b, 0]]) + ' = 0 gives x = ' + x0 + '.'); }
+  EXB = EXB.concat([
+    XP('b5', 4, 4, 'up', ['power', 'sum', 'cm', 'odd-powers'], [[6, 5], [-2, 3], [1, 1]]),
+    XP('b6', 3, 3, 'up', ['power', 'sum', 'even-powers'], [[1, 6], [4, 2]]),
+    XP('b7', 5, 5, 'ai', ['power', 'sum', 'cm', 'constant'], [[2, 4], [-1, 3], [5, 1], [-9, 0]]),
+    XE('q5', 'pq', 3, 4, 'up', ['product', 'linear'], 'Find f′(x) for f(x) = (x + 2)(x − 5).', function (x) { return 2 * x - 3; }, 'Product rule: 1 · (x − 5) + (x + 2) · 1 = 2x − 3.'),
+    XE('q6', 'pq', 5, 5, 'ai', ['power', 'product', 'cm'], 'Find f′(x) for f(x) = x³ · (2x − 1).', function (x) { return 8 * Math.pow(x, 3) - 3 * x * x; }, 'Product rule: 3x²(2x − 1) + x³ · 2 = 8x³ − 3x².'),
+    XE('q7', 'pq', 6, 6, 'ai', ['quotient', 'power', 'quad-num'], 'Find f′(x) for f(x) = x² / (x + 1).', function (x) { return (x * x + 2 * x) / ((x + 1) * (x + 1)); }, 'Quotient rule: (2x(x + 1) − x²) / (x + 1)² = (x² + 2x) / (x + 1)².'),
+    XE('q8', 'pq', 5, 5, 'up', ['quotient', 'linear'], 'Find f′(x) for f(x) = (x − 1) / (x + 2).', function (x) { return 3 / ((x + 2) * (x + 2)); }, 'Quotient rule: ((x + 2) − (x − 1)) / (x + 2)² = 3 / (x + 2)².'),
+    XE('c6', 'chain', 3, 4, 'up', ['power', 'chain', 'linear-inside'], 'Find f′(x) for f(x) = (2x + 3)⁴.', function (x) { return 8 * Math.pow(2 * x + 3, 3); }, 'Outside: 4(2x + 3)³. Inside derivative: 2. So f′(x) = 8(2x + 3)³.'),
+    XE('c7', 'chain', 4, 4, 'up', ['power', 'chain', 'quad-inside'], 'Find f′(x) for f(x) = (x² − 1)³.', function (x) { return 6 * x * Math.pow(x * x - 1, 2); }, 'Outside: 3(x² − 1)². Inside derivative: 2x. So f′(x) = 6x(x² − 1)².'),
+    XE('c8', 'chain', 4, 4, 'ai', ['power', 'chain', 'linear-inside'], 'Find f′(x) for f(x) = (3x + 1)⁵.', function (x) { return 15 * Math.pow(3 * x + 1, 4); }, 'Outside: 5(3x + 1)⁴. Inside derivative: 3. So f′(x) = 15(3x + 1)⁴.'),
+    XE('c9', 'chain', 6, 5, 'up', ['power', 'chain', 'cubic-inside'], 'Find f′(x) for f(x) = (x³ + 2x)².', function (x) { return 2 * (x * x * x + 2 * x) * (3 * x * x + 2); }, 'Outside: 2(x³ + 2x). Inside derivative: 3x² + 2. So f′(x) = 2(x³ + 2x)(3x² + 2).'),
+    XT('t4', 2, 3, 'up', ['power', 'sum', 'tangent'], [[1, 2], [-5, 1]], 3),
+    XT('t5', 4, 4, 'up', ['power', 'sum', 'tangent', 'cubic'], [[2, 3], [1, 1]], 1),
+    XT('t6', 5, 5, 'ai', ['power', 'sum', 'tangent', 'quartic'], [[1, 4], [-2, 1]], 2),
+    XO('o4', 3, 3, 'up', ['power', 'sum', 'critical'], 1, -8, 3),
+    XO('o5', 5, 5, 'ai', ['power', 'sum', 'critical', 'coef'], 2, -12, 1)
+  ]);
+  var TCOL = { basic: '#2150d8', pq: '#b4540a', chain: '#16703f', tangent: '#7b3fb8', optim: '#0e7c86' };
+  var TNAME = { basic: 'Basic rules', pq: 'Product and quotient', chain: 'Chain rule', tangent: 'Tangent lines', optim: 'Optimization' };
   var SRC = { both: 'Uploaded and AI-generated', up: 'Uploaded only', ai: 'AI-generated only' };
   var PM = { QPEAK: 0.6, S: 1.5, W0: 2, W1: 2, B0: 2, FLOOR: 0.05, BETA: 0.5, TREF: 5, ETA: 0.35, LREM: 0.8, LRED: 0.4, LGEN: 0.15, LHRED: 0.3, SIMR: 0.6, WIDTH: 250 };
   function cl(x, a, b) { return Math.min(b, Math.max(a, x)); }
@@ -2220,7 +2283,10 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
       s.busy = false;
       if (!r.items.length) { s.note = 'No exercise fits these settings. Try more time, another source or more topics.'; exRender(); return; }
       s.solver = r.solver; s.solverInfo = r.info;
-      s.plan = r.items.map(function (it, i, a) { it.why = xWhy(it, i, a, inp); return it; }); s.phase = 'plan'; exRender();
+      s.plan = r.items.map(function (it, i, a) { it.why = xWhy(it, i, a, inp); return it; }); s.phase = 'plan';
+      var tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0), pool = EXB.filter(function (e) { return inp.topics.indexOf(e.topic) >= 0 && (s.source === 'both' || e.src === s.source); }), poolMin = pool.reduce(function (a, b) { return a + b.min; }, 0);
+      s.limitNote = s.time - tot < 4 ? '' : poolMin < s.time ? 'Only ' + pool.length + ' exercises (' + poolMin + ' min) exist for these topics and this source, so the path cannot fill the time. Add topics or allow AI-generated exercises.' : 'The rest of the time is free: the planner left out exercises that nearly repeat ones already on the path, or that would teach you little right now.';
+      exRender();
     });
   }
   function exStart() { var s = S.ex; s.phase = 'run'; s.cur = 0; s.hist = []; s.used = 0; s.tries = 0; s.hint = false; s.sol = false; s.input = ''; s.fb = ''; s.res = null; exRender(); var i = $('#ex-in'); if (i) i.focus(); }
@@ -2258,7 +2324,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     if ((kind === 'solution' || kind === 'skip') && xSim(cur, nx) > 0.4) return ', because it is related to the one you just missed.';
     return ', because your estimated level changed after this result.';
   }
-  function exTitle(e) { return e ? ({ basic: 'Basic rules', pq: 'Product and quotient', chain: 'Chain rule', tangent: 'Tangent lines', optim: 'Optimization' })[e.topic] + ' (' + e.min + ' min)' : ''; }
+  function exTitle(e) { return e ? TNAME[e.topic] + ' (' + e.min + ' min)' : ''; }
   function exNext() {
     var s = S.ex; if (!s.res) return;
     if (!s.res.more) { s.phase = 'done'; exRender(); return; }
@@ -2289,22 +2355,37 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
       '<div class="row" style="gap:10px;margin-top:6px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="build"' + (s.busy ? ' disabled' : '') + '>' + (s.busy ? 'Planning…' : 'Build my plan') + '</button><span class="soft small">The plan picks exercises and their order for ' + s.time + ' minutes.</span></div></div>' +
       '<aside class="exside"><h3>How it works</h3><ol><li>You choose time, topics and how hard it should feel.</li><li>The planner picks which exercises to do and in what order.</li><li>After every exercise it plans again with what happened.</li></ol><p class="fine">Plans are made for you from your ratings and results, not from a fixed list.</p></aside></div>';
   }
-  function itemRow(it, i, state) {
-    var e = xById(it.id), h = S.ex.hist[i];
-    return '<li class="exit ' + state + '"><span class="exn">' + (state === 'done' ? '✓' : i + 1) + '</span><span class="exm"><b>' + esc(exTitle(e)) + '</b><span class="soft small">' + esc(e.q) + '</span>' +
-      '<span class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span>' + (state === 'done' ? '<span class="soft">' + esc(RES[h.kind][2]) + '</span>' : '<span class="soft">' + xFeel(it.p) + ' · about ' + Math.round(it.p * 10) + ' in 10 solved on your own (estimate)</span>') + '</span>' +
-      (state !== 'done' && it.why ? '<span class="exwhy small">' + esc(it.why) + '</span>' : '') + '</span></li>';
+  function pips(d) { var h = ''; for (var i = 1; i <= 10; i++) h += '<i' + (i <= d ? ' class="on"' : '') + '></i>'; return '<span class="expips" role="img" aria-label="Difficulty ' + d + ' of 10" title="Difficulty ' + d + ' of 10">' + h + '</span>'; }
+  /* The session as a line of time: one block per exercise, sized by its minutes, coloured by topic. */
+  function timelineHtml(plan, budget, done, cur) {
+    var used = plan.reduce(function (a, b) { return a + b.min; }, 0), free = Math.max(0, budget - used);
+    var segs = plan.map(function (it, i) { var e = xById(it.id), st = i < done ? 'done' : i === cur ? 'now' : 'todo'; return '<span class="tseg ' + st + '" style="flex:' + it.min + ';--tc:' + TCOL[e.topic] + '" title="' + esc(exTitle(e)) + '"><b>' + (i + 1) + '</b></span>'; }).join('');
+    if (free) segs += '<span class="tseg free" style="flex:' + free + '" title="Time not used"><em>' + free + ' min</em></span>';
+    var tp = []; plan.forEach(function (it) { var t = xById(it.id).topic; if (tp.indexOf(t) < 0) tp.push(t); });
+    var key = tp.map(function (t) { return '<span class="tk"><i style="background:' + TCOL[t] + '"></i>' + TNAME[t] + '</span>'; }).join('');
+    return '<div class="extl" role="img" aria-label="Session timeline, ' + used + ' of ' + budget + ' minutes planned">' + segs + '</div><div class="extlk small"><span class="soft">0</span><span class="tkeys">' + key + '</span><span class="soft">' + budget + ' min</span></div>';
+  }
+  /* The path itself: numbered stops joined by a line, with what changes between two stops. */
+  function pathHtml(items, st) {
+    return '<ol class="expath">' + items.map(function (it, i) {
+      var e = xById(it.id), state = st(i), prev = i ? xById(items[i - 1].id) : null, conn = '', h = S.ex.hist[i];
+      if (prev) { var dd = e.d - prev.d, lab = prev.topic !== e.topic ? 'Switch to ' + TNAME[e.topic] : dd > 0 ? 'A step harder' : dd < 0 ? 'A step easier' : 'Same level'; conn = '<li class="exconn" aria-hidden="true"><span>' + lab + '</span></li>'; }
+      return conn + '<li class="exp ' + state + '" style="--tc:' + TCOL[e.topic] + '"><span class="exnode">' + (state === 'done' ? '✓' : i + 1) + '</span><div class="expc"><div class="exph"><b>' + TNAME[e.topic] + '</b><span class="soft small">' + e.min + ' min</span>' + pips(e.d) + '</div><p class="expq">' + esc(e.q) + '</p>' +
+        '<div class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span>' + (state === 'done' && h ? '<span class="soft">' + esc(RES[h.kind][2]) + '</span>' : '<span class="soft">' + xFeel(it.p) + ' · about ' + Math.round(it.p * 10) + ' in 10 solved on your own (estimate)</span>') + '</div>' +
+        (state !== 'done' && it.why ? '<p class="exwhy small">' + esc(it.why) + '</p>' : '') + '</div></li>';
+    }).join('') + '</ol>';
   }
   function exPlanView() {
     var s = S.ex, tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0);
-    return exHead('Your plan for ' + s.time + ' minutes') + '<div class="exbody"><div class="excard"><div class="exsum"><b>' + s.plan.length + ' exercises, about ' + tot + ' of ' + s.time + ' minutes</b><span class="exbudget"><i style="width:' + Math.round(100 * tot / s.time) + '%"></i></span></div>' +
-      '<ol class="exlist">' + s.plan.map(function (it, i) { return itemRow(it, i, 'todo'); }).join('') + '</ol>' +
+    return exHead('Your learning path for ' + s.time + ' minutes') + '<div class="exbody"><div class="excard wide"><div class="exsum"><b>' + s.plan.length + ' exercises · ' + tot + ' of ' + s.time + ' minutes planned</b></div>' + timelineHtml(s.plan, s.time, 0, -1) +
+      (s.limitNote ? '<p class="exlimit">' + esc(s.limitNote) + '</p>' : '') +
+      '<h3 class="exh3">The path, in order</h3>' + pathHtml(s.plan, function () { return 'todo'; }) +
       '<p class="fine">Minutes are estimates. Only the next exercise is certain: after each one, the plan is made again with your result.</p>' + solverNote() +
       '<div class="row" style="gap:10px;margin-top:8px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="start">Start</button><button class="btn" style="height:40px" data-ex="back">Change settings</button></div></div></div>';
   }
   function exRun() {
     var s = S.ex, e = exCur(), r = s.res;
-    var list = s.plan.map(function (it, i) { return itemRow(it, i, i < s.cur || (i === s.cur && r) ? 'done' : i === s.cur ? 'now' : 'todo'); }).join('');
+    var list = pathHtml(s.plan, function (i) { return i < s.cur || (i === s.cur && r) ? 'done' : i === s.cur ? 'now' : 'todo'; });
     var keys = [['x', 'x'], ['x²', '^2'], ['xⁿ', '^'], ['(', '('], [')', ')'], ['×', '*'], ['÷', '/']].map(function (k) { return '<button type="button" class="mk" data-ex="key" data-v="' + k[1] + '" aria-label="Insert ' + esc(k[0]) + '">' + k[0] + '</button>'; }).join('');
     var main = '<div class="excur"><div class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span><span class="soft">' + esc(exTitle(e)) + ' · exercise ' + (s.cur + 1) + '</span></div><p class="exq">' + esc(e.q) + '</p>';
     if (!r) {
@@ -2319,7 +2400,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     }
     main += '</div>';
     var left = S.ex.time - s.used;
-    return exHead('Session in progress') + '<div class="exbody run"><aside class="exrail"><div class="exsum"><b>' + s.used + ' of ' + s.time + ' min</b><span class="exbudget"><i style="width:' + Math.min(100, Math.round(100 * s.used / s.time)) + '%"></i></span></div><ol class="exlist small">' + list + '</ol><p class="fine">' + left + ' min left. Exercises below may change after your next answer.</p>' + solverNote() + '</aside>' + main + '</div>';
+    return exHead('Session in progress') + '<div class="exbody run"><aside class="exrail"><div class="exsum"><b>' + s.used + ' of ' + s.time + ' min</b></div>' + timelineHtml(s.plan, s.time, s.cur + (r ? 1 : 0), r ? -1 : s.cur) + list + '<p class="fine">' + left + ' min left. Exercises below may change after your next answer.</p>' + solverNote() + '</aside>' + main + '</div>';
   }
   function exDone() {
     var s = S.ex, solved = s.hist.filter(function (h) { return h.r >= 0.5; }).length, clean = s.hist.filter(function (h) { return h.kind === 'clean' || h.kind === 'retry'; }).length, tp = {};

@@ -13,27 +13,56 @@
   function XE(id, topic, d, min, src, el, q, fn, sol) { return { id: id, topic: topic, d: d, min: min, src: src, el: el, q: q, fn: fn, sol: sol }; }
   var EXB = [
     XE('b1', 'basic', 2, 3, 'up', ['power'], 'Find f′(x) for f(x) = x⁵.', function (x) { return 5 * Math.pow(x, 4); }, 'f′(x) = 5x⁴.'),
-    XE('b2', 'basic', 3, 4, 'up', ['power', 'sum', 'cm'], 'Find f′(x) for f(x) = 4x³ − 2x + 7.', function (x) { return 12 * x * x - 2; }, 'f′(x) = 12x² − 2. The constant 7 has derivative 0.'),
-    XE('b3', 'basic', 4, 5, 'up', ['power', 'sum', 'cm'], 'Find f′(x) for f(x) = 3x⁴ + x²/2 − 5x.', function (x) { return 12 * Math.pow(x, 3) + x - 5; }, 'f′(x) = 12x³ + x − 5.'),
-    XE('b4', 'basic', 5, 5, 'ai', ['power', 'sum', 'cm'], 'Find f′(x) for f(x) = 5x⁷ − 3x⁵ + 2x³.', function (x) { return 35 * Math.pow(x, 6) - 15 * Math.pow(x, 4) + 6 * x * x; }, 'f′(x) = 35x⁶ − 15x⁴ + 6x².'),
+    XE('b2', 'basic', 3, 4, 'up', ['power', 'sum', 'cm', 'cubic'], 'Find f′(x) for f(x) = 4x³ − 2x + 7.', function (x) { return 12 * x * x - 2; }, 'f′(x) = 12x² − 2. The constant 7 has derivative 0.'),
+    XE('b3', 'basic', 4, 5, 'up', ['power', 'sum', 'cm', 'fraction-coef'], 'Find f′(x) for f(x) = 3x⁴ + x²/2 − 5x.', function (x) { return 12 * Math.pow(x, 3) + x - 5; }, 'f′(x) = 12x³ + x − 5.'),
+    XE('b4', 'basic', 5, 5, 'ai', ['power', 'sum', 'cm', 'odd-powers', 'three-terms'], 'Find f′(x) for f(x) = 5x⁷ − 3x⁵ + 2x³.', function (x) { return 35 * Math.pow(x, 6) - 15 * Math.pow(x, 4) + 6 * x * x; }, 'f′(x) = 35x⁶ − 15x⁴ + 6x².'),
     XE('q1', 'pq', 4, 5, 'up', ['power', 'product'], 'Find f′(x) for f(x) = x² · (x + 3).', function (x) { return 3 * x * x + 6 * x; }, 'Product rule: 2x(x + 3) + x² · 1 = 3x² + 6x.'),
-    XE('q2', 'pq', 5, 6, 'up', ['power', 'product', 'sum'], 'Find f′(x) for f(x) = (2x + 1)(x² − 4).', function (x) { return 6 * x * x + 2 * x - 8; }, 'Product rule: 2(x² − 4) + (2x + 1)(2x) = 6x² + 2x − 8.'),
+    XE('q2', 'pq', 5, 6, 'up', ['power', 'product', 'sum', 'linear'], 'Find f′(x) for f(x) = (2x + 1)(x² − 4).', function (x) { return 6 * x * x + 2 * x - 8; }, 'Product rule: 2(x² − 4) + (2x + 1)(2x) = 6x² + 2x − 8.'),
     XE('q3', 'pq', 6, 7, 'ai', ['power', 'quotient'], 'Find f′(x) for f(x) = x / (x + 1).', function (x) { return 1 / ((x + 1) * (x + 1)); }, 'Quotient rule: ((x + 1) − x) / (x + 1)² = 1 / (x + 1)².'),
     XE('q4', 'pq', 7, 8, 'ai', ['power', 'quotient', 'sum'], 'Find f′(x) for f(x) = (x² + 1) / (x − 2).', function (x) { return (x * x - 4 * x - 1) / ((x - 2) * (x - 2)); }, 'Quotient rule: (2x(x − 2) − (x² + 1)) / (x − 2)² = (x² − 4x − 1) / (x − 2)².'),
-    XE('c0', 'chain', 2, 3, 'up', ['power', 'chain', 'sum'], 'Find f′(x) for f(x) = (x + 1)³.', function (x) { return 3 * Math.pow(x + 1, 2); }, 'Outside: 3(x + 1)². Inside: x + 1, derivative 1. So f′(x) = 3(x + 1)².'),
-    XE('c1', 'chain', 4, 4, 'up', ['power', 'chain', 'sum'], 'Find f′(x) for f(x) = (4x − 1)³.', function (x) { return 12 * Math.pow(4 * x - 1, 2); }, 'Outside: 3(4x − 1)². Inside: 4x − 1, derivative 4. So f′(x) = 12(4x − 1)².'),
-    XE('c2', 'chain', 5, 5, 'up', ['power', 'chain'], 'Find f′(x) for f(x) = (x² + 3)⁵.', function (x) { return 10 * x * Math.pow(x * x + 3, 4); }, 'Outside: 5(x² + 3)⁴. Inside derivative: 2x. So f′(x) = 10x(x² + 3)⁴.'),
-    XE('c3', 'chain', 6, 6, 'ai', ['power', 'chain', 'cm'], 'Find f′(x) for f(x) = (5x² − 2)³.', function (x) { return 30 * x * Math.pow(5 * x * x - 2, 2); }, 'Outside: 3(5x² − 2)². Inside derivative: 10x. So f′(x) = 30x(5x² − 2)².'),
+    XE('c0', 'chain', 2, 3, 'up', ['power', 'chain', 'linear-inside'], 'Find f′(x) for f(x) = (x + 1)³.', function (x) { return 3 * Math.pow(x + 1, 2); }, 'Outside: 3(x + 1)². Inside: x + 1, derivative 1. So f′(x) = 3(x + 1)².'),
+    XE('c1', 'chain', 4, 4, 'up', ['power', 'chain', 'linear-inside', 'sum'], 'Find f′(x) for f(x) = (4x − 1)³.', function (x) { return 12 * Math.pow(4 * x - 1, 2); }, 'Outside: 3(4x − 1)². Inside: 4x − 1, derivative 4. So f′(x) = 12(4x − 1)².'),
+    XE('c2', 'chain', 5, 5, 'up', ['power', 'chain', 'quad-inside'], 'Find f′(x) for f(x) = (x² + 3)⁵.', function (x) { return 10 * x * Math.pow(x * x + 3, 4); }, 'Outside: 5(x² + 3)⁴. Inside derivative: 2x. So f′(x) = 10x(x² + 3)⁴.'),
+    XE('c3', 'chain', 6, 6, 'ai', ['power', 'chain', 'quad-inside', 'cm'], 'Find f′(x) for f(x) = (5x² − 2)³.', function (x) { return 30 * x * Math.pow(5 * x * x - 2, 2); }, 'Outside: 3(5x² − 2)². Inside derivative: 10x. So f′(x) = 30x(5x² − 2)².'),
     XE('c4', 'chain', 8, 8, 'ai', ['power', 'chain', 'product'], 'Find f′(x) for f(x) = x · (x² + 1)³.', function (x) { return Math.pow(x * x + 1, 2) * (7 * x * x + 1); }, 'Product and chain rule: (x² + 1)³ + x · 3(x² + 1)² · 2x = (x² + 1)²(7x² + 1).'),
-    XE('c5', 'chain', 7, 7, 'ai', ['power', 'chain', 'sum'], 'Find f′(x) for f(x) = (x³ − x)⁴.', function (x) { return 4 * Math.pow(x * x * x - x, 3) * (3 * x * x - 1); }, 'Outside: 4(x³ − x)³. Inside derivative: 3x² − 1. So f′(x) = 4(x³ − x)³(3x² − 1).'),
+    XE('c5', 'chain', 7, 7, 'ai', ['power', 'chain', 'cubic-inside', 'sum'], 'Find f′(x) for f(x) = (x³ − x)⁴.', function (x) { return 4 * Math.pow(x * x * x - x, 3) * (3 * x * x - 1); }, 'Outside: 4(x³ − x)³. Inside derivative: 3x² − 1. So f′(x) = 4(x³ − x)³(3x² − 1).'),
     XE('t1', 'tangent', 3, 3, 'up', ['power', 'sum', 'tangent'], 'Find the slope of the tangent line to f(x) = x² + 3x at x = 2.', function () { return 7; }, 'f′(x) = 2x + 3, so the slope at x = 2 is 7.'),
     XE('t2', 'tangent', 5, 6, 'ai', ['power', 'chain', 'tangent'], 'Find the slope of the tangent line to f(x) = (x² + 1)³ at x = 1.', function () { return 24; }, 'f′(x) = 3(x² + 1)² · 2x, so at x = 1 the slope is 3 · 4 · 2 = 24.'),
-    XE('t3', 'tangent', 6, 5, 'up', ['power', 'sum', 'tangent'], 'Find the slope of the tangent line to f(x) = x³ − 4x at x = 2.', function () { return 8; }, 'f′(x) = 3x² − 4, so at x = 2 the slope is 8.'),
+    XE('t3', 'tangent', 6, 5, 'up', ['power', 'sum', 'tangent', 'cubic'], 'Find the slope of the tangent line to f(x) = x³ − 4x at x = 2.', function () { return 8; }, 'f′(x) = 3x² − 4, so at x = 2 the slope is 8.'),
     XE('o0', 'optim', 2, 3, 'up', ['power', 'sum', 'critical'], 'At which x does f(x) = x² − 4x have its smallest value?', function () { return 2; }, 'f′(x) = 2x − 4 = 0 gives x = 2.'),
-    XE('o1', 'optim', 4, 4, 'up', ['power', 'sum', 'critical'], 'At which x does f(x) = x² − 6x + 4 have its smallest value?', function () { return 3; }, 'f′(x) = 2x − 6 = 0 gives x = 3.'),
-    XE('o2', 'optim', 6, 6, 'up', ['power', 'sum', 'critical'], 'At which x > 0 does f(x) = x³ − 12x have a local minimum?', function () { return 2; }, 'f′(x) = 3x² − 12 = 0 gives x = 2. The sign of f′ changes from negative to positive there.'),
+    XE('o1', 'optim', 4, 4, 'up', ['power', 'sum', 'critical', 'constant'], 'At which x does f(x) = x² − 6x + 4 have its smallest value?', function () { return 3; }, 'f′(x) = 2x − 6 = 0 gives x = 3.'),
+    XE('o2', 'optim', 6, 6, 'up', ['power', 'sum', 'critical', 'cubic'], 'At which x > 0 does f(x) = x³ − 12x have a local minimum?', function () { return 2; }, 'f′(x) = 3x² − 12 = 0 gives x = 2. The sign of f′ changes from negative to positive there.'),
     XE('o3', 'optim', 5, 5, 'ai', ['power', 'critical'], 'What is the largest possible product of two numbers whose sum is 20?', function () { return 100; }, 'With the numbers x and 20 − x, the product x(20 − x) is largest at x = 10, so the product is 100.')
   ];
+
+  /* More made-up exercises, built by small helpers so the answers are computed, not typed. */
+  function sup(n) { return String(n).replace(/\d/g, function (d) { return '⁰¹²³⁴⁵⁶⁷⁸⁹'.charAt(+d); }); }
+  function ptxt(ts) { return ts.filter(function (t) { return t[0] !== 0; }).map(function (t, i) { var c = t[0], e = t[1], a = Math.abs(c), b = e === 0 ? String(a) : (a === 1 ? '' : String(a)) + 'x' + (e === 1 ? '' : sup(e)); return i === 0 ? (c < 0 ? '−' : '') + b : (c < 0 ? ' − ' : ' + ') + b; }).join(''); }
+  function pder(ts) { return ts.filter(function (t) { return t[1] > 0; }).map(function (t) { return [t[0] * t[1], t[1] - 1]; }); }
+  function pev(ts, x) { return ts.reduce(function (sm, t) { return sm + t[0] * Math.pow(x, t[1]); }, 0); }
+  function XP(id, d, min, src, el, ts) { var dr = pder(ts); return XE(id, 'basic', d, min, src, el, 'Find f′(x) for f(x) = ' + ptxt(ts) + '.', function (x) { return pev(dr, x); }, 'f′(x) = ' + ptxt(dr) + '.'); }
+  function XT(id, d, min, src, el, ts, k) { var dr = pder(ts), v = pev(dr, k); return XE(id, 'tangent', d, min, src, el, 'Find the slope of the tangent line to f(x) = ' + ptxt(ts) + ' at x = ' + k + '.', function () { return v; }, 'f′(x) = ' + ptxt(dr) + ', so at x = ' + k + ' the slope is ' + v + '.'); }
+  function XO(id, d, min, src, el, a, b, c) { var x0 = -b / (2 * a); return XE(id, 'optim', d, min, src, el, 'At which x does f(x) = ' + ptxt([[a, 2], [b, 1], [c, 0]]) + ' have its smallest value?', function () { return x0; }, 'f′(x) = ' + ptxt([[2 * a, 1], [b, 0]]) + ' = 0 gives x = ' + x0 + '.'); }
+  EXB = EXB.concat([
+    XP('b5', 4, 4, 'up', ['power', 'sum', 'cm', 'odd-powers'], [[6, 5], [-2, 3], [1, 1]]),
+    XP('b6', 3, 3, 'up', ['power', 'sum', 'even-powers'], [[1, 6], [4, 2]]),
+    XP('b7', 5, 5, 'ai', ['power', 'sum', 'cm', 'constant'], [[2, 4], [-1, 3], [5, 1], [-9, 0]]),
+    XE('q5', 'pq', 3, 4, 'up', ['product', 'linear'], 'Find f′(x) for f(x) = (x + 2)(x − 5).', function (x) { return 2 * x - 3; }, 'Product rule: 1 · (x − 5) + (x + 2) · 1 = 2x − 3.'),
+    XE('q6', 'pq', 5, 5, 'ai', ['power', 'product', 'cm'], 'Find f′(x) for f(x) = x³ · (2x − 1).', function (x) { return 8 * Math.pow(x, 3) - 3 * x * x; }, 'Product rule: 3x²(2x − 1) + x³ · 2 = 8x³ − 3x².'),
+    XE('q7', 'pq', 6, 6, 'ai', ['quotient', 'power', 'quad-num'], 'Find f′(x) for f(x) = x² / (x + 1).', function (x) { return (x * x + 2 * x) / ((x + 1) * (x + 1)); }, 'Quotient rule: (2x(x + 1) − x²) / (x + 1)² = (x² + 2x) / (x + 1)².'),
+    XE('q8', 'pq', 5, 5, 'up', ['quotient', 'linear'], 'Find f′(x) for f(x) = (x − 1) / (x + 2).', function (x) { return 3 / ((x + 2) * (x + 2)); }, 'Quotient rule: ((x + 2) − (x − 1)) / (x + 2)² = 3 / (x + 2)².'),
+    XE('c6', 'chain', 3, 4, 'up', ['power', 'chain', 'linear-inside'], 'Find f′(x) for f(x) = (2x + 3)⁴.', function (x) { return 8 * Math.pow(2 * x + 3, 3); }, 'Outside: 4(2x + 3)³. Inside derivative: 2. So f′(x) = 8(2x + 3)³.'),
+    XE('c7', 'chain', 4, 4, 'up', ['power', 'chain', 'quad-inside'], 'Find f′(x) for f(x) = (x² − 1)³.', function (x) { return 6 * x * Math.pow(x * x - 1, 2); }, 'Outside: 3(x² − 1)². Inside derivative: 2x. So f′(x) = 6x(x² − 1)².'),
+    XE('c8', 'chain', 4, 4, 'ai', ['power', 'chain', 'linear-inside'], 'Find f′(x) for f(x) = (3x + 1)⁵.', function (x) { return 15 * Math.pow(3 * x + 1, 4); }, 'Outside: 5(3x + 1)⁴. Inside derivative: 3. So f′(x) = 15(3x + 1)⁴.'),
+    XE('c9', 'chain', 6, 5, 'up', ['power', 'chain', 'cubic-inside'], 'Find f′(x) for f(x) = (x³ + 2x)².', function (x) { return 2 * (x * x * x + 2 * x) * (3 * x * x + 2); }, 'Outside: 2(x³ + 2x). Inside derivative: 3x² + 2. So f′(x) = 2(x³ + 2x)(3x² + 2).'),
+    XT('t4', 2, 3, 'up', ['power', 'sum', 'tangent'], [[1, 2], [-5, 1]], 3),
+    XT('t5', 4, 4, 'up', ['power', 'sum', 'tangent', 'cubic'], [[2, 3], [1, 1]], 1),
+    XT('t6', 5, 5, 'ai', ['power', 'sum', 'tangent', 'quartic'], [[1, 4], [-2, 1]], 2),
+    XO('o4', 3, 3, 'up', ['power', 'sum', 'critical'], 1, -8, 3),
+    XO('o5', 5, 5, 'ai', ['power', 'sum', 'critical', 'coef'], 2, -12, 1)
+  ]);
+  var TCOL = { basic: '#2150d8', pq: '#b4540a', chain: '#16703f', tangent: '#7b3fb8', optim: '#0e7c86' };
+  var TNAME = { basic: 'Basic rules', pq: 'Product and quotient', chain: 'Chain rule', tangent: 'Tangent lines', optim: 'Optimization' };
   var SRC = { both: 'Uploaded and AI-generated', up: 'Uploaded only', ai: 'AI-generated only' };
   var PM = { QPEAK: 0.6, S: 1.5, W0: 2, W1: 2, B0: 2, FLOOR: 0.05, BETA: 0.5, TREF: 5, ETA: 0.35, LREM: 0.8, LRED: 0.4, LGEN: 0.15, LHRED: 0.3, SIMR: 0.6, WIDTH: 250 };
   function cl(x, a, b) { return Math.min(b, Math.max(a, x)); }
@@ -146,7 +175,10 @@
       s.busy = false;
       if (!r.items.length) { s.note = 'No exercise fits these settings. Try more time, another source or more topics.'; exRender(); return; }
       s.solver = r.solver; s.solverInfo = r.info;
-      s.plan = r.items.map(function (it, i, a) { it.why = xWhy(it, i, a, inp); return it; }); s.phase = 'plan'; exRender();
+      s.plan = r.items.map(function (it, i, a) { it.why = xWhy(it, i, a, inp); return it; }); s.phase = 'plan';
+      var tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0), pool = EXB.filter(function (e) { return inp.topics.indexOf(e.topic) >= 0 && (s.source === 'both' || e.src === s.source); }), poolMin = pool.reduce(function (a, b) { return a + b.min; }, 0);
+      s.limitNote = s.time - tot < 4 ? '' : poolMin < s.time ? 'Only ' + pool.length + ' exercises (' + poolMin + ' min) exist for these topics and this source, so the path cannot fill the time. Add topics or allow AI-generated exercises.' : 'The rest of the time is free: the planner left out exercises that nearly repeat ones already on the path, or that would teach you little right now.';
+      exRender();
     });
   }
   function exStart() { var s = S.ex; s.phase = 'run'; s.cur = 0; s.hist = []; s.used = 0; s.tries = 0; s.hint = false; s.sol = false; s.input = ''; s.fb = ''; s.res = null; exRender(); var i = $('#ex-in'); if (i) i.focus(); }
@@ -184,7 +216,7 @@
     if ((kind === 'solution' || kind === 'skip') && xSim(cur, nx) > 0.4) return ', because it is related to the one you just missed.';
     return ', because your estimated level changed after this result.';
   }
-  function exTitle(e) { return e ? ({ basic: 'Basic rules', pq: 'Product and quotient', chain: 'Chain rule', tangent: 'Tangent lines', optim: 'Optimization' })[e.topic] + ' (' + e.min + ' min)' : ''; }
+  function exTitle(e) { return e ? TNAME[e.topic] + ' (' + e.min + ' min)' : ''; }
   function exNext() {
     var s = S.ex; if (!s.res) return;
     if (!s.res.more) { s.phase = 'done'; exRender(); return; }
@@ -215,22 +247,37 @@
       '<div class="row" style="gap:10px;margin-top:6px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="build"' + (s.busy ? ' disabled' : '') + '>' + (s.busy ? 'Planning…' : 'Build my plan') + '</button><span class="soft small">The plan picks exercises and their order for ' + s.time + ' minutes.</span></div></div>' +
       '<aside class="exside"><h3>How it works</h3><ol><li>You choose time, topics and how hard it should feel.</li><li>The planner picks which exercises to do and in what order.</li><li>After every exercise it plans again with what happened.</li></ol><p class="fine">Plans are made for you from your ratings and results, not from a fixed list.</p></aside></div>';
   }
-  function itemRow(it, i, state) {
-    var e = xById(it.id), h = S.ex.hist[i];
-    return '<li class="exit ' + state + '"><span class="exn">' + (state === 'done' ? '✓' : i + 1) + '</span><span class="exm"><b>' + esc(exTitle(e)) + '</b><span class="soft small">' + esc(e.q) + '</span>' +
-      '<span class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span>' + (state === 'done' ? '<span class="soft">' + esc(RES[h.kind][2]) + '</span>' : '<span class="soft">' + xFeel(it.p) + ' · about ' + Math.round(it.p * 10) + ' in 10 solved on your own (estimate)</span>') + '</span>' +
-      (state !== 'done' && it.why ? '<span class="exwhy small">' + esc(it.why) + '</span>' : '') + '</span></li>';
+  function pips(d) { var h = ''; for (var i = 1; i <= 10; i++) h += '<i' + (i <= d ? ' class="on"' : '') + '></i>'; return '<span class="expips" role="img" aria-label="Difficulty ' + d + ' of 10" title="Difficulty ' + d + ' of 10">' + h + '</span>'; }
+  /* The session as a line of time: one block per exercise, sized by its minutes, coloured by topic. */
+  function timelineHtml(plan, budget, done, cur) {
+    var used = plan.reduce(function (a, b) { return a + b.min; }, 0), free = Math.max(0, budget - used);
+    var segs = plan.map(function (it, i) { var e = xById(it.id), st = i < done ? 'done' : i === cur ? 'now' : 'todo'; return '<span class="tseg ' + st + '" style="flex:' + it.min + ';--tc:' + TCOL[e.topic] + '" title="' + esc(exTitle(e)) + '"><b>' + (i + 1) + '</b></span>'; }).join('');
+    if (free) segs += '<span class="tseg free" style="flex:' + free + '" title="Time not used"><em>' + free + ' min</em></span>';
+    var tp = []; plan.forEach(function (it) { var t = xById(it.id).topic; if (tp.indexOf(t) < 0) tp.push(t); });
+    var key = tp.map(function (t) { return '<span class="tk"><i style="background:' + TCOL[t] + '"></i>' + TNAME[t] + '</span>'; }).join('');
+    return '<div class="extl" role="img" aria-label="Session timeline, ' + used + ' of ' + budget + ' minutes planned">' + segs + '</div><div class="extlk small"><span class="soft">0</span><span class="tkeys">' + key + '</span><span class="soft">' + budget + ' min</span></div>';
+  }
+  /* The path itself: numbered stops joined by a line, with what changes between two stops. */
+  function pathHtml(items, st) {
+    return '<ol class="expath">' + items.map(function (it, i) {
+      var e = xById(it.id), state = st(i), prev = i ? xById(items[i - 1].id) : null, conn = '', h = S.ex.hist[i];
+      if (prev) { var dd = e.d - prev.d, lab = prev.topic !== e.topic ? 'Switch to ' + TNAME[e.topic] : dd > 0 ? 'A step harder' : dd < 0 ? 'A step easier' : 'Same level'; conn = '<li class="exconn" aria-hidden="true"><span>' + lab + '</span></li>'; }
+      return conn + '<li class="exp ' + state + '" style="--tc:' + TCOL[e.topic] + '"><span class="exnode">' + (state === 'done' ? '✓' : i + 1) + '</span><div class="expc"><div class="exph"><b>' + TNAME[e.topic] + '</b><span class="soft small">' + e.min + ' min</span>' + pips(e.d) + '</div><p class="expq">' + esc(e.q) + '</p>' +
+        '<div class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span>' + (state === 'done' && h ? '<span class="soft">' + esc(RES[h.kind][2]) + '</span>' : '<span class="soft">' + xFeel(it.p) + ' · about ' + Math.round(it.p * 10) + ' in 10 solved on your own (estimate)</span>') + '</div>' +
+        (state !== 'done' && it.why ? '<p class="exwhy small">' + esc(it.why) + '</p>' : '') + '</div></li>';
+    }).join('') + '</ol>';
   }
   function exPlanView() {
     var s = S.ex, tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0);
-    return exHead('Your plan for ' + s.time + ' minutes') + '<div class="exbody"><div class="excard"><div class="exsum"><b>' + s.plan.length + ' exercises, about ' + tot + ' of ' + s.time + ' minutes</b><span class="exbudget"><i style="width:' + Math.round(100 * tot / s.time) + '%"></i></span></div>' +
-      '<ol class="exlist">' + s.plan.map(function (it, i) { return itemRow(it, i, 'todo'); }).join('') + '</ol>' +
+    return exHead('Your learning path for ' + s.time + ' minutes') + '<div class="exbody"><div class="excard wide"><div class="exsum"><b>' + s.plan.length + ' exercises · ' + tot + ' of ' + s.time + ' minutes planned</b></div>' + timelineHtml(s.plan, s.time, 0, -1) +
+      (s.limitNote ? '<p class="exlimit">' + esc(s.limitNote) + '</p>' : '') +
+      '<h3 class="exh3">The path, in order</h3>' + pathHtml(s.plan, function () { return 'todo'; }) +
       '<p class="fine">Minutes are estimates. Only the next exercise is certain: after each one, the plan is made again with your result.</p>' + solverNote() +
       '<div class="row" style="gap:10px;margin-top:8px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="start">Start</button><button class="btn" style="height:40px" data-ex="back">Change settings</button></div></div></div>';
   }
   function exRun() {
     var s = S.ex, e = exCur(), r = s.res;
-    var list = s.plan.map(function (it, i) { return itemRow(it, i, i < s.cur || (i === s.cur && r) ? 'done' : i === s.cur ? 'now' : 'todo'); }).join('');
+    var list = pathHtml(s.plan, function (i) { return i < s.cur || (i === s.cur && r) ? 'done' : i === s.cur ? 'now' : 'todo'; });
     var keys = [['x', 'x'], ['x²', '^2'], ['xⁿ', '^'], ['(', '('], [')', ')'], ['×', '*'], ['÷', '/']].map(function (k) { return '<button type="button" class="mk" data-ex="key" data-v="' + k[1] + '" aria-label="Insert ' + esc(k[0]) + '">' + k[0] + '</button>'; }).join('');
     var main = '<div class="excur"><div class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span><span class="soft">' + esc(exTitle(e)) + ' · exercise ' + (s.cur + 1) + '</span></div><p class="exq">' + esc(e.q) + '</p>';
     if (!r) {
@@ -245,7 +292,7 @@
     }
     main += '</div>';
     var left = S.ex.time - s.used;
-    return exHead('Session in progress') + '<div class="exbody run"><aside class="exrail"><div class="exsum"><b>' + s.used + ' of ' + s.time + ' min</b><span class="exbudget"><i style="width:' + Math.min(100, Math.round(100 * s.used / s.time)) + '%"></i></span></div><ol class="exlist small">' + list + '</ol><p class="fine">' + left + ' min left. Exercises below may change after your next answer.</p>' + solverNote() + '</aside>' + main + '</div>';
+    return exHead('Session in progress') + '<div class="exbody run"><aside class="exrail"><div class="exsum"><b>' + s.used + ' of ' + s.time + ' min</b></div>' + timelineHtml(s.plan, s.time, s.cur + (r ? 1 : 0), r ? -1 : s.cur) + list + '<p class="fine">' + left + ' min left. Exercises below may change after your next answer.</p>' + solverNote() + '</aside>' + main + '</div>';
   }
   function exDone() {
     var s = S.ex, solved = s.hist.filter(function (h) { return h.r >= 0.5; }).length, clean = s.hist.filter(function (h) { return h.kind === 'clean' || h.kind === 'retry'; }).length, tp = {};

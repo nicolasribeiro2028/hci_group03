@@ -33,7 +33,7 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 - **Sign-in:** email only, no password. Saved state is kept per email in this browser (localStorage) and saved every 1.5 s. "Open the demo workspace" (demo@local.test) opens Calculus I with both lectures and a rating on every topic. Sign out is in the profile screen. Ported in spirit from Nicolas's `app-building` (login, profile, contexts); the code is new and sits in this prototype's own state.
 - **Real replies:** a switch in the chat header. Off (default) = scripted answers with slide sources and confidence. On = `server.js` writes the question and the notes of the added files to `agent/log.md`, and a terminal agent (see `agent/PROMPT.md`) writes the reply under the same id. The page polls `/log`. Real replies are not matched to slides. If the Node server is not running the switch turns itself off with a message. `agent/log.md` is in `.gitignore`.
 - **Exercise mode:** header button, separate from the chat. Setup (time, topics, source), plan (which exercises, in what order, with a reason each), session (one exercise at a time, one hint, solution on request, skip) and summary. The plan is made again after every result. Contract: `EXERCISE_MODE_CONTRACT.md`. The planner in the page is a beam search of the objective in `EXERCISE_PATH.md` (the notebook uses Gurobi).
-- **Prototype content:** the 21 exercises, their difficulty and minutes, the "Exercise sheet 3" source and the rating rule are made up for the demo.
+- **Prototype content:** the 37 exercises, their difficulty and minutes, the "Exercise sheet 3" source and the rating rule are made up for the demo.
 - **AI use (for the report):** Claude (Sonnet 5.5, Claude Code) wrote the sign-in, saved state, real-reply toggle, server and Exercise mode code and checked the flows in a browser. Nothing here comes from real users.
 
 ## Update: sidebar, uploads, graph, Gurobi
@@ -42,3 +42,9 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 - **Graph:** header button. Files and topics on a circle, plain SVG, fixed links (lecture to its topics, Chain rule and Tangent lines to Basic derivative rules, Optimization to Tangent lines). Click a node to highlight it and its neighbours, "Open file" for a file node. Layout and links follow the group prototype (`app-building`); the styling is ours.
 - **Gurobi:** Exercise mode asks `POST /plan` (see `solver/README.md` for set-up and the licence) and shows on screen whether Gurobi or the in-page search made the plan.
 - **Knowledge map:** not in this repository.
+
+## Update: learning path and fixed screen
+- The plan is drawn as a learning path: a timeline of the session (one block per exercise, sized by minutes, coloured by topic, free time hatched), then numbered stops joined by a line, with what changes between two stops (switch topic, a step harder, a step easier, same level) and the difficulty as pips. The session screen keeps the same path as a rail with done, current and next stops.
+- When the path does not fill the time, the screen says why: either the bank has too few exercises for the chosen topics and source, or the planner left out near-repeats and exercises that teach little.
+- The page no longer scrolls: `#app` is fixed to the window. The exercise view is confined to the editor area (it had been covering the whole window).
+- The bank grew from 21 to 37 exercises, six of them with answers computed by small helpers in `js8.js`. Element tags were made less coarse so fewer exercises count as near-duplicates.
