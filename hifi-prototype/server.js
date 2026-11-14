@@ -2,6 +2,7 @@
 // No model is called here. A terminal agent reads agent/log.md and writes the replies (see agent/PROMPT.md).
 // Run: node server.js   (PORT=8765 by default)
 const fs = require("fs");
+const { spawn } = require("child_process");
 const http = require("http");
 const path = require("path");
 
@@ -72,12 +73,38 @@ function appendQuestion(req, res) {
   }).catch(() => sendJson(res, 500, { error: "Could not write the log" }));
 }
 
+// POST /plan: runs solver/plan.py (Gurobi) for Exercise mode. If Python or gurobipy is missing the page falls back to its own search.
+function pythonPath() {
+  if (process.env.PYTHON) return process.env.PYTHON;
+  const venv = path.join(root, "solver", ".venv", "bin", "python");
+  return fs.existsSync(venv) ? venv : "python3";
+}
+function planWithGurobi(req, res) {
+  readBody(req).then((raw) => {
+    const child = spawn(pythonPath(), [path.join(root, "solver", "plan.py")], { cwd: path.join(root, "solver") });
+    let out = "", err = "", done = false;
+    const finish = (status, data) => { if (done) return; done = true; clearTimeout(timer); sendJson(res, status, data); };
+    const timer = setTimeout(() => { child.kill(); finish(504, { error: "The solver took too long" }); }, 20000);
+    child.stdout.on("data", (c) => (out += c));
+    child.stderr.on("data", (c) => (err += c));
+    child.on("error", () => finish(503, { error: "Python was not found" }));
+    child.on("close", (code) => {
+      const line = out.split("\n").reverse().find((l) => l.startsWith("{"));
+      if (code === 0 && line) { try { return finish(200, JSON.parse(line)); } catch { /* fall through */ } }
+      finish(500, { error: (err || out).split("\n").filter(Boolean).slice(-2).join(" ") || "The solver failed" });
+    });
+    child.stdin.on("error", () => {});
+    child.stdin.end(raw);
+  }).catch(() => sendJson(res, 500, { error: "Bad request" }));
+}
+
 http.createServer((req, res) => {
   const url = new URL(req.url, "http://127.0.0.1");
   if (req.method === "GET" && url.pathname === "/log") {
     return fs.readFile(logPath, "utf8", (err, text) => sendJson(res, 200, { text: err ? "" : text }));
   }
   if (req.method === "POST" && url.pathname === "/ask") return appendQuestion(req, res);
+  if (req.method === "POST" && url.pathname === "/plan") return planWithGurobi(req, res);
   if (req.method === "GET" || req.method === "HEAD") return serveStatic(req, res);
   send(res, 405, "Method not allowed", "text/plain; charset=utf-8");
 }).listen(port, "127.0.0.1", () => console.log(`http://127.0.0.1:${port}`));

@@ -111,6 +111,19 @@
   function xFeel(p, chal) { return p >= chal + 0.2 ? 'Easier than usual' : p >= chal - 0.15 ? 'About right' : 'A stretch'; }
 
   /* ---------------- state and flow ---------------- */
+  /* Asks the local server to solve the integer program with Gurobi (solver/plan.py). If that is not available, searches in the page. */
+  function exPlanner(inp) {
+    var body = JSON.stringify({ bank: EXB.map(function (e) { return { id: e.id, topic: e.topic, d: e.d, min: e.min, src: e.src, el: e.el }; }), remaining: inp.remaining, topics: inp.topics, source: inp.source, chal: inp.chal, rat: inp.rat, hist: inp.hist });
+    var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
+    return fetch('/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { clearTimeout(to); if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || 'solver error'); }); return r.json(); })
+      .then(function (j) { return { items: j.items, solver: 'gurobi', info: j.status + ', ' + j.runtime + ' s, ' + j.nvars + ' variables' }; })
+      .catch(function (err) { clearTimeout(to); var r = xPlan(inp); return { items: r.items, solver: 'search', info: String(err && err.message || 'not available') }; });
+  }
+  function solverNote() {
+    var s = S.ex; if (!s || !s.solver) return '';
+    return s.solver === 'gurobi' ? '<p class="fine exsolver">Planned with Gurobi (' + esc(s.solverInfo) + ').</p>' : '<p class="fine exsolver">Planned with the in-page search, not Gurobi (' + esc(s.solverInfo) + '). Start the Node server with the solver to use Gurobi.</p>';
+  }
   function exTopicsAvail() { return C.topics.filter(function (t) { return EXB.some(function (e) { return e.topic === t.id; }); }); }
   function exNew() {
     var av = exTopicsAvail(), tp = {}; av.forEach(function (t) { tp[t.id] = true; });
@@ -120,18 +133,22 @@
   function exOpen() {
     if (!S.ex || S.ex.ctx !== S.ctx) S.ex = exNew();
     if (S.focus) setFocus(false);
-    if (S.map && typeof mapOpen === 'function') mapOpen(false);
+    S.gOn = false; renderViewer();
     S.exOn = true; exRender(); var b = $('#exview .exh h2'); if (b) b.focus();
     announce('Exercise mode open');
   }
   function exExit() { S.exOn = false; exRender(); renderTop(); }
   function exBuild() {
     var s = S.ex, inp = exInput();
+    if (s.busy) return;
     if (!inp.topics.length) { s.note = 'Pick at least one topic.'; exRender(); return; }
-    s.rat0 = JSON.parse(JSON.stringify(C.ratings)); inp.rat = s.rat0;
-    var r = xPlan(inp);
-    if (!r.items.length) { s.note = 'No exercise fits these settings. Try more time, another source or more topics.'; exRender(); return; }
-    s.note = ''; s.plan = r.items.map(function (it, i, a) { it.why = xWhy(it, i, a, inp); return it; }); s.phase = 'plan'; exRender();
+    s.rat0 = JSON.parse(JSON.stringify(C.ratings)); inp.rat = s.rat0; s.busy = true; s.note = ''; exRender();
+    exPlanner(inp).then(function (r) {
+      s.busy = false;
+      if (!r.items.length) { s.note = 'No exercise fits these settings. Try more time, another source or more topics.'; exRender(); return; }
+      s.solver = r.solver; s.solverInfo = r.info;
+      s.plan = r.items.map(function (it, i, a) { it.why = xWhy(it, i, a, inp); return it; }); s.phase = 'plan'; exRender();
+    });
   }
   function exStart() { var s = S.ex; s.phase = 'run'; s.cur = 0; s.hist = []; s.used = 0; s.tries = 0; s.hint = false; s.sol = false; s.input = ''; s.fb = ''; s.res = null; exRender(); var i = $('#ex-in'); if (i) i.focus(); }
   function exCur() { var s = S.ex; return s.plan[s.cur] ? xById(s.plan[s.cur].id) : null; }
@@ -150,15 +167,19 @@
     var old = C.ratings[tp], base = old == null ? 5 : old, nv = Math.max(0, Math.min(10, base + r[1]));
     if (C.start[tp] == null) C.start[tp] = base;
     C.ratings[tp] = nv; C.last[tp] = nv - base; C.pulse[tp] = true; renderLeft();
-    var inp = exInput(), rest = xPlan(inp), oldNext = s.plan[s.cur + 1] ? s.plan[s.cur + 1].id : null;
-    var kept = s.plan.slice(0, s.cur + 1);
-    rest.items.forEach(function (it, i, a) { it.why = xWhy(it, i, a, inp); });
-    var newNext = rest.items[0] ? rest.items[0].id : null, note;
-    if (!newNext) note = 'No exercise fits in the time left.';
-    else if (oldNext && newNext !== oldNext) note = 'The plan changed. Next is now ' + exTitle(xById(newNext)) + ' instead of ' + exTitle(xById(oldNext)) + (why(kind, e, xById(newNext)));
-    else note = 'The plan was checked again. The next exercise stays.';
-    s.plan = kept.concat(rest.items); s.res = { kind: kind, text: r[2], rating: [base, nv], note: note, more: !!newNext }; s.fb = '';
+    var inp = exInput(), oldNext = s.plan[s.cur + 1] ? s.plan[s.cur + 1].id : null, kept = s.plan.slice(0, s.cur + 1);
+    s.res = { kind: kind, text: r[2], rating: [base, nv], note: 'Planning the next exercises…', more: false, pending: true }; s.fb = '';
     exRender();
+    exPlanner(inp).then(function (rest) {
+      if (S.ex !== s || !s.res) return;
+      rest.items.forEach(function (it, i, a) { it.why = xWhy(it, i, a, inp); });
+      var newNext = rest.items[0] ? rest.items[0].id : null, note;
+      if (!newNext) note = 'No exercise fits in the time left.';
+      else if (oldNext && newNext !== oldNext) note = 'The plan changed. Next is now ' + exTitle(xById(newNext)) + ' instead of ' + exTitle(xById(oldNext)) + why(kind, e, xById(newNext));
+      else note = 'The plan was checked again. The next exercise stays.';
+      s.plan = kept.concat(rest.items); s.solver = rest.solver; s.solverInfo = rest.info;
+      s.res.note = note; s.res.more = !!newNext; s.res.pending = false; exRender();
+    });
   }
   function why(kind, cur, nx) {
     if ((kind === 'solution' || kind === 'skip') && xSim(cur, nx) > 0.4) return ', because it is related to the one you just missed.';
@@ -193,7 +214,7 @@
       '<div class="exsec"><h3>Where can exercises come from?</h3>' + seg('src', [['both', SRC.both], ['up', SRC.up], ['ai', SRC.ai]], s.source) + '<p class="fine">' + nup + ' uploaded from ' + EXQ + ', ' + nai + ' AI-generated for this demo. AI-generated exercises are used when they add something the sheets do not.</p></div>' +
       '<div class="exsec"><h3>How hard should it feel?</h3>' + seg('chal', [[0.75, 'Gentle'], [0.6, 'Balanced'], [0.5, 'Stretch']], s.chal) + '<p class="fine">' + CHAL[s.chal][1] + '</p></div>' +
       (s.note ? '<p class="exwarn" role="alert">' + esc(s.note) + '</p>' : '') +
-      '<div class="row" style="gap:10px;margin-top:6px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="build">Build my plan</button><span class="soft small">The plan picks exercises and their order for ' + s.time + ' minutes.</span></div></div>' +
+      '<div class="row" style="gap:10px;margin-top:6px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="build"' + (s.busy ? ' disabled' : '') + '>' + (s.busy ? 'Planning…' : 'Build my plan') + '</button><span class="soft small">The plan picks exercises and their order for ' + s.time + ' minutes.</span></div></div>' +
       '<aside class="exside"><h3>How it works</h3><ol><li>You choose time, topics and how hard it should feel.</li><li>The planner picks which exercises to do and in what order.</li><li>After every exercise it plans again with what happened.</li></ol><p class="fine">Plans are made for you from your ratings and results, not from a fixed list.</p></aside></div>';
   }
   function itemRow(it, i, state) {
@@ -206,7 +227,7 @@
     var s = S.ex, tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0);
     return exHead('Your plan for ' + s.time + ' minutes') + '<div class="exbody"><div class="excard"><div class="exsum"><b>' + s.plan.length + ' exercises, about ' + tot + ' of ' + s.time + ' minutes</b><span class="exbudget"><i style="width:' + Math.round(100 * tot / s.time) + '%"></i></span></div>' +
       '<ol class="exlist">' + s.plan.map(function (it, i) { return itemRow(it, i, 'todo'); }).join('') + '</ol>' +
-      '<p class="fine">Minutes are estimates. Only the next exercise is certain: after each one, the plan is made again with your result.</p>' +
+      '<p class="fine">Minutes are estimates. Only the next exercise is certain: after each one, the plan is made again with your result.</p>' + solverNote() +
       '<div class="row" style="gap:10px;margin-top:8px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="start">Start</button><button class="btn" style="height:40px" data-ex="back">Change settings</button></div></div></div>';
   }
   function exRun() {
@@ -222,11 +243,11 @@
       main += '<div class="row" style="gap:8px;margin-top:12px"><button class="btn small" data-ex="hint"' + (s.hint ? ' disabled' : '') + '>Show a hint</button><button class="btn small" data-ex="sol"' + (s.sol ? ' disabled' : '') + '>Show the solution</button><button class="btn small ghost" data-ex="skip">Skip</button></div>';
     } else {
       main += '<div class="exres ' + r.kind + '"><b>' + esc(r.text) + '</b><span class="small">' + (r.rating[1] > r.rating[0] ? 'Your rating for this topic went from ' + fmt(r.rating[0]) + ' to ' + fmt(r.rating[1]) + ' of 10.' : 'Your rating for this topic stays at ' + fmt(r.rating[1]) + ' of 10.') + '</span>' + (r.kind !== 'clean' && r.kind !== 'retry' ? '<span class="small">Solution: ' + esc(e.sol) + '</span>' : '') + '</div>' +
-        '<div class="explan"><b>Plan updated</b><span>' + esc(r.note) + '</span></div><div class="row" style="gap:8px;margin-top:12px"><button class="btn dark" style="height:40px;padding:0 20px" data-ex="next">' + (r.more ? 'Next exercise' : 'See summary') + '</button></div>';
+        '<div class="explan"><b>Plan updated</b><span>' + esc(r.note) + '</span></div><div class="row" style="gap:8px;margin-top:12px"><button class="btn dark" style="height:40px;padding:0 20px" data-ex="next"' + (r.pending ? ' disabled' : '') + '>' + (r.pending ? 'Planning…' : r.more ? 'Next exercise' : 'See summary') + '</button></div>';
     }
     main += '</div>';
     var left = S.ex.time - s.used;
-    return exHead('Session in progress') + '<div class="exbody run"><aside class="exrail"><div class="exsum"><b>' + s.used + ' of ' + s.time + ' min</b><span class="exbudget"><i style="width:' + Math.min(100, Math.round(100 * s.used / s.time)) + '%"></i></span></div><ol class="exlist small">' + list + '</ol><p class="fine">' + left + ' min left. Exercises below may change after your next answer.</p></aside>' + main + '</div>';
+    return exHead('Session in progress') + '<div class="exbody run"><aside class="exrail"><div class="exsum"><b>' + s.used + ' of ' + s.time + ' min</b><span class="exbudget"><i style="width:' + Math.min(100, Math.round(100 * s.used / s.time)) + '%"></i></span></div><ol class="exlist small">' + list + '</ol><p class="fine">' + left + ' min left. Exercises below may change after your next answer.</p>' + solverNote() + '</aside>' + main + '</div>';
   }
   function exDone() {
     var s = S.ex, solved = s.hist.filter(function (h) { return h.r >= 0.5; }).length, clean = s.hist.filter(function (h) { return h.kind === 'clean' || h.kind === 'retry'; }).length, tp = {};
@@ -262,7 +283,7 @@
     else if (a === 'skip') exFinish('skip');
     else if (a === 'next') exNext();
     else if (a === 'again') { var keep = { time: s.time, source: s.source, chal: s.chal, topics: s.topics }; S.ex = exNew(); S.ex.time = keep.time; S.ex.source = keep.source; S.ex.chal = keep.chal; S.ex.topics = keep.topics; exRender(); }
-    else if (a === 'material') { S.exOn = false; S.side = 'material'; exRender(); renderLeft(); }
+    else if (a === 'material') { S.exOn = false; S.side = 'all'; exRender(); renderLeft(); }
     else if (a === 'key') {
       var inp = $('#ex-in'); if (!inp) return;
       var st = inp.selectionStart == null ? inp.value.length : inp.selectionStart, en = inp.selectionEnd == null ? st : inp.selectionEnd;
@@ -275,4 +296,4 @@
     if (e.key === 'Escape' && S.exOn && !$('#ov')) exExit();
   });
   document.addEventListener('input', function (e) { if (e.target.id === 'ex-in' && S.ex) S.ex.input = e.target.value; });
-  window.__ex = { bank: EXB, plan: xPlan, ability: xAbility, S: function () { return S.ex; }, open: exOpen };
+  window.__ex = { bank: EXB, plan: xPlan, planner: exPlanner, ability: xAbility, S: function () { return S.ex; }, open: exOpen };

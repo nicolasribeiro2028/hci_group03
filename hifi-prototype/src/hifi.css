@@ -286,4 +286,3 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 .m-strong .m3 i { background: var(--ink); }
 .m-partial .m3 i:nth-child(-n+2) { background: var(--amber-line); }
 .evsum .match b { font-weight: 600; }
-

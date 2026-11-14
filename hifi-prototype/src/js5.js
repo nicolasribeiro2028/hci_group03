@@ -4,13 +4,14 @@
      highlight boxes over the page. Matching is exact first, then tolerant (word overlap), so a slightly
      different quote still lands on the right passage. */
   var PDF = { promise: null, lib: null, doc: null, texts: {}, canvases: {}, tok: 0 };
+  /* One document is open at a time. Opening another file resets the cached pages. */
   function pdfLoad(url) {
-    if (PDF.promise) return PDF.promise;
-    PDF.promise = import('./vendor/pdf.min.mjs').then(function (lib) {
-      lib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.mjs';
-      PDF.lib = lib; return lib.getDocument(url).promise;
-    }).then(function (doc) { PDF.doc = doc; return doc; });
-    return PDF.promise;
+    if (PDF.promise && PDF.url === url) return PDF.promise;
+    PDF.url = url; PDF.doc = null; PDF.texts = {}; PDF.canvases = {}; PDF.order = [];
+    var lib = PDF.lib ? Promise.resolve(PDF.lib) : import('./vendor/pdf.min.mjs').then(function (l) { l.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.mjs'; PDF.lib = l; return l; });
+    var p = lib.then(function (l) { return l.getDocument(url).promise; }).then(function (doc) { if (PDF.url === url) PDF.doc = doc; return doc; });
+    PDF.promise = p; p.catch(function () { if (PDF.promise === p) { PDF.promise = null; PDF.url = null; } });
+    return p;
   }
   function wordsOf(s) { return String(s).toLowerCase().split(/[^a-z0-9äöüéèàçñ′']+/i).filter(Boolean); }
   function pageData(n) {
@@ -102,7 +103,7 @@
   function pdfRender(f) {
     var token = ++PDF.tok;
     if (PDF.io) { PDF.io.disconnect(); PDF.io = null; }
-    pdfLoad(f.url).then(function () {
+    pdfUrl(f).then(pdfLoad).then(function () {
       var sc = $('#pdfscroll'); if (token !== PDF.tok || !sc) return;
       var cit = C.cited && C.cited.pdf ? C.cited : null, N = PDF.doc.numPages, w = sc.clientWidth || 600;
       return pageData(1).then(function (pd1) {
@@ -125,7 +126,7 @@
         sc.addEventListener('scroll', function () { C.pdfScroll = sc.scrollTop; if (raf) return; raf = requestAnimationFrame(function () { raf = 0; updatePill(sc); }); });
       });
     }).catch(function (e) {
-      var h = $('#pdfscroll'); if (h) h.innerHTML = '<div class="pdfload">Could not load the PDF. Open this page through the local server.</div>';
+      var h = $('#pdfscroll'); if (h) h.innerHTML = '<div class="pdfload">Could not load this PDF. If you added it in another browser session, add it again.</div>';
       if (window.console) console.error(e);
     });
   }
@@ -152,10 +153,10 @@
   /* public: mark a quote. hint = page to try first. */
   function markQuote(quote, kind, text, hint, keepMin) {
     var f = C.files.filter(function (x) { return x.status === 'added' && x.kind === 'pdf'; })[0]; if (!f) return Promise.resolve(false);
-    return pdfLoad(f.url).then(function () { return findQuote(quote, hint); }).then(function (r) {
+    return pdfUrl(f).then(pdfLoad).then(function () { return findQuote(quote, hint); }).then(function (r) {
       if (!r) { toast('Not found in your slides. That is what a "not in your slides" answer would look like.'); return false; }
       C.pdfPage = r.page; C.cited = { pdf: true, slide: 'P' + r.page, page: r.page, quote: quote, kind: kind || 's', text: text || quote, scrolled: false };
-      openFile(f.id, null, null, !!keepMin); renderViewer(); markCited(); mapSeenPage(r.page); return true;
+      openFile(f.id, null, null, !!keepMin); renderViewer(); markCited(); return true;
     });
   }
   /* click or hover on a sentence in the chat: normal slide or PDF quote */

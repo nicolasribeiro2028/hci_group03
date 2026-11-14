@@ -75,7 +75,7 @@
   document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('.mk')) e.preventDefault(); });
   document.addEventListener('keydown', function (e) {
     if (!(e.metaKey || e.ctrlKey) || e.altKey || $('#ov') || $('#intro') && !$('#intro').hidden) return;
-    if (e.key === 'b' || e.key === 'B') { e.preventDefault(); S.side = S.side ? null : (S.lastSide || 'material'); renderLeft(); }
+    if (e.key === 'b' || e.key === 'B') { e.preventDefault(); S.side = S.side ? null : 'all'; renderLeft(); }
     else if (e.key === '\\') { e.preventDefault(); S.vmin = !S.vmin; renderViewer(); }
   });
   document.addEventListener('click', function (e) {
@@ -90,7 +90,7 @@
     if (e.target.closest && e.target.closest('#b-exit')) { setFocus(false); return; }
     if (e.target.closest && e.target.closest('#b-practice')) {
       if (S.exOn) { exExit(); return; }
-      if (!hasMaterial()) { toast('Add your course material first, then open exercise mode.'); S.side = 'material'; renderLeft(); openPicker(); return; }
+      if (!hasMaterial()) { toast('Add your course material first, then open exercise mode.'); S.side = 'all'; renderLeft(); openPicker(); return; }
       exOpen();
     }
   });

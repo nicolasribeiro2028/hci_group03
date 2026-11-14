@@ -46,9 +46,8 @@ Only the first item is certain. The rest is a forecast that is replaced after ev
 | Where | Solver |
 |---|---|
 | Notebook (`ui_optimization.ipynb`, Milestone 3) | Gurobi, exact |
-| This page | A beam search of the same objective (`xPlan` in `js8.js`). Gurobi cannot run in a browser. |
-
-To use the real solver in the page later, replace `xPlan` by a call to a small local server that returns the same `items`. The rest of the screens does not change.
+| This page, normally | The same integer program (`solver/model.py`, version 4) solved by Gurobi through `POST /plan` on `server.js` (`solver/plan.py`). Request and answer are the fields above, plus `status`, `gap`, `runtime` for the screen. |
+| This page, if Python or gurobipy is missing | A beam search of the same objective (`xPlan` in `js8.js`). The screen says which one was used. |
 
 ## What may change later (open on purpose)
 

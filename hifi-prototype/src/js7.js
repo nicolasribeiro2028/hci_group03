@@ -20,7 +20,8 @@
     lsSet(UK, JSON.stringify(us));
   }
   function acctClean(s) {
-    s.focus = false; s.map = false; s.exOn = false; s.editing = false; delete s.snap;
+    s.focus = false; s.map = false; s.exOn = false; s.gOn = false; s.gNode = null; s.editing = false; delete s.snap;
+    if (s.ex) { s.ex.busy = false; if (s.ex.res && s.ex.res.pending) { s.ex.res.pending = false; s.ex.res.more = s.ex.plan.length > s.ex.cur + 1; s.ex.res.note = 'Planning was interrupted by a reload.'; } }
     Object.keys(s.courses).forEach(function (k) {
       var c = s.courses[k]; c.loading = 0; c.timers = [];
       c.files.forEach(function (f) { if (f.status === 'uploading') { f.status = 'added'; f.pct = 100; } });
@@ -129,3 +130,48 @@
         })();
       }).catch(function () { fail('The question could not be saved. Is the Node server running?'); });
   }
+
+  /* ---------------- uploads: any PDF, kept in this browser (IndexedDB) so it opens again after a reload ---------------- */
+  var idbP = null, BURL = {};
+  function idb() {
+    if (!idbP) idbP = new Promise(function (res, rej) {
+      var r = indexedDB.open('hifi-files', 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore('blobs'); };
+      r.onsuccess = function () { res(r.result); }; r.onerror = function () { rej(r.error); };
+    });
+    return idbP;
+  }
+  function blobPut(k, blob) { return idb().then(function (db) { return new Promise(function (res, rej) { var tx = db.transaction('blobs', 'readwrite'); tx.objectStore('blobs').put(blob, k); tx.oncomplete = res; tx.onerror = function () { rej(tx.error); }; }); }); }
+  function blobGet(k) { return idb().then(function (db) { return new Promise(function (res, rej) { var rq = db.transaction('blobs').objectStore('blobs').get(k); rq.onsuccess = function () { res(rq.result); }; rq.onerror = function () { rej(rq.error); }; }); }); }
+  function pdfUrl(f) {
+    if (!f.blobKey) return Promise.resolve(f.url);
+    if (BURL[f.blobKey]) return Promise.resolve(BURL[f.blobKey]);
+    return blobGet(f.blobKey).then(function (b) { if (!b) throw new Error('missing file'); BURL[f.blobKey] = URL.createObjectURL(b); return BURL[f.blobKey]; });
+  }
+  function shortName(n) { n = n.replace(/\.pdf$/i, ''); return n.length > 24 ? n.slice(0, 22) + '…' : n; }
+  function knownDef(name) {
+    var all = FILE_DEFS.calc.concat(FILE_DEFS.linalg, FILE_DEFS.hci); Object.keys(S.extraDefs).forEach(function (k) { all = all.concat(S.extraDefs[k]); });
+    return all.filter(function (d) { return d.name === name; })[0];
+  }
+  function addUploads(list) {
+    var files = Array.prototype.slice.call(list), refused = 0, dup = 0, added = 0, last = null;
+    files.forEach(function (file) {
+      if (!/\.pdf$/i.test(file.name)) { refused++; return; }
+      if (C.files.some(function (f) { return f.name === file.name; })) { dup++; return; }
+      var def = knownDef(file.name);
+      if (def && !C.pdfDemo) { addFile(def); added++; return; }          /* a known lecture keeps its slides and topics */
+      var f = { id: 'f' + C.nid++, defId: null, name: file.name, short: shortName(file.name), mb: (file.size / 1048576).toFixed(1), pages: null, kind: 'pdf', url: null, blobKey: 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), slides: [], topics: [], status: 'added', pct: 100 };
+      blobPut(f.blobKey, file).catch(function () { toast('This browser could not keep ' + file.name + ' for later. It will open now but not after a reload.'); });
+      BURL[f.blobKey] = URL.createObjectURL(file);
+      C.files.push(f); last = f; added++;
+    });
+    if (refused) toast('Please choose a PDF.');
+    else if (dup && !added) toast('That file is already in your material.');
+    else if (added) toast(added === 1 ? 'File added.' : added + ' files added.');
+    renderLeft();
+    if (last) openFile(last.id);
+  }
+  document.addEventListener('change', function (e) {
+    if (e.target.id !== 'file-input') return;
+    addUploads(e.target.files); e.target.value = '';
+  });

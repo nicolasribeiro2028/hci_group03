@@ -503,7 +503,6 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 .m-partial .m3 i:nth-child(-n+2) { background: var(--amber-line); }
 .evsum .match b { font-weight: 600; }
 
-
 /* ---- sign-in, real replies toggle, exercise mode ---- */
 #login { position: fixed; inset: 0; background: var(--white, #fff); z-index: 40; display: flex; align-items: center; justify-content: center; animation: fade .3s ease; overflow-y: auto; }
 #login[hidden] { display: none; }
@@ -590,6 +589,46 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 .exrates li { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; border-bottom: 1px solid var(--line2); }
 @media (max-width: 900px) { .exbody { flex-direction: column; align-items: stretch; } .exrail { position: static; flex-basis: auto; } .extopic { grid-template-columns: 20px 1fr 64px; } .extopic .exbar, .extopic .tc { display: none; } }
 @media (prefers-reduced-motion: reduce) { .exview, #login, .explan { animation: none; } .exbudget i, .rtog .trk::after { transition: none; } }
+
+/* ---- single sidebar ---- */
+#left .sbs { border-bottom: 1px solid var(--line2); padding: 6px 0 12px; }
+#left .sbs:last-child { border-bottom: 0; }
+#left .sbh { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0 6px; }
+#left .sbt { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; padding: 4px 6px 4px 0; cursor: pointer; font: inherit; color: var(--ink); border-radius: 6px; }
+#left .sbt:hover { color: #000; }
+#left .sbt .h { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--soft); }
+#left .chv { display: inline-grid; place-items: center; width: 14px; color: var(--faint); transition: transform .15s; }
+#left .chv.shut { transform: rotate(-90deg); }
+#left .sbempty { display: grid; gap: 8px; padding: 14px; border: 1px dashed var(--line); border-radius: 10px; background: var(--fill); font-size: 13px; color: var(--soft); margin-bottom: 10px; }
+#left .sbempty strong { color: var(--ink); }
+#left .sbempty .btn { justify-self: start; }
+#left .sbsample { margin-top: 8px; font-size: 12px; }
+#left .topic .tmain { display: block; width: 100%; border: 0; background: none; text-align: left; padding: 8px 8px 6px; border-radius: 8px; cursor: pointer; font: inherit; color: var(--ink); }
+#left .topic .t1 { font-size: 13px; }
+#left .topic .t2 { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+#left .topic .t2 .bar { flex: 1; }
+#left .topic .val { min-width: 54px; text-align: right; font-size: 12px; color: var(--soft); }
+
+/* ---- graph ---- */
+.gwrap { padding: 12px 18px 18px; display: grid; gap: 10px; overflow-y: auto; }
+.gsvg { width: 100%; max-height: 62vh; }
+.gline { stroke: var(--line); stroke-width: 1.5; }
+.gline.hot { stroke: var(--ink); stroke-width: 2.4; }
+.gnode { stroke: #fff; stroke-width: 2; }
+.gnode.file { fill: var(--ink); }
+.gnode.topic { fill: var(--blue); }
+.ghit { cursor: pointer; transition: opacity .15s; }
+.ghit.dim { opacity: .25; }
+.ghit.sel .gnode { stroke: var(--amber-line); stroke-width: 4; }
+.ghit:focus-visible { outline: 0; }
+.ghit:focus-visible .gnode { stroke: var(--blue-line); stroke-width: 5; }
+.glab { font-size: 12px; fill: var(--ink); pointer-events: none; }
+.gkey { display: flex; gap: 16px; font-size: 12px; color: var(--soft); justify-content: center; }
+.gkey span { display: inline-flex; align-items: center; gap: 6px; }
+.gkey i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; stroke: none; }
+.gkey i.file { background: var(--ink); } .gkey i.topic { background: var(--blue); }
+.gcap { margin: 0; text-align: center; font-size: 14px; min-height: 30px; display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+#b-graph.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 </style>
 
 <div id="login" hidden>
@@ -628,6 +667,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     <button class="btn small icon" id="b-addctx" aria-label="Add context" title="Add context"></button>
     <span class="spacer"></span>
     <button class="btn icon" id="b-slides" data-vtoggle="1" aria-pressed="true" aria-label="Slides"></button>
+    <button class="btn" id="b-graph" aria-pressed="false">Graph</button>
     <button class="btn dark" id="b-practice">Start an exercise</button>
     <button class="btn icon" id="b-profile" aria-label="Profile" title="Profile"></button>
   </header>
@@ -660,6 +700,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   <div class="foot">Prototype · scripted answers</div>
 </div>
 
+<input type="file" id="file-input" accept=".pdf,application/pdf" multiple hidden>
 <div id="modal-root"></div>
 <div id="toasts"></div>
 <div id="sr" class="sr" aria-live="polite"></div>
@@ -878,7 +919,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   function fresh() {
     var ctxs = [{ key: 'calc', name: 'Calculus I' }, { key: 'linalg', name: 'Linear Algebra' }], courses = { calc: newCourse(), linalg: newCourse() };
     if (HAS_PDF) { ctxs.unshift({ key: 'hci', name: 'HCI (real PDF test)' }); courses.hci = newCourse(); }
-    S = { side: 'material', lastSide: 'material', dock: 'right', vw: null, vh: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: HAS_PDF ? 'hci' : 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
+    S = { side: 'all', sbc: {}, dock: 'right', vw: null, vh: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: HAS_PDF ? 'hci' : 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
     C = S.courses[S.ctx];
     if (HAS_PDF) {
       var h = S.courses.hci, d = FILE_DEFS.hci[0];
@@ -949,15 +990,11 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   }
   function fmt(n) { return String(Math.round(n * 10) / 10); }
   var ICONS = {
-    chats: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
-    material: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',
-    assess: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>'
+    side: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9.5 4.5v15"/></svg>',
+    chev: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
   };
-  var SIDES = [['chats', 'Chats'], ['material', 'Material'], ['assess', 'Self-assess']];
   function renderActbar() {
-    $('#actbar').innerHTML = SIDES.map(function (v) {
-      return '<button type="button" class="act' + (S.side === v[0] ? ' on' : '') + '" data-side="' + v[0] + '" aria-pressed="' + (S.side === v[0]) + '" aria-label="' + (v[0] === 'assess' ? 'Self-assessment' : v[1]) + '" title="' + (v[0] === 'assess' ? 'Self-assessment' : v[1]) + ' (click again to hide)">' + ICONS[v[0]] + '</button>';
-    }).join('') + (typeof MAPICON === 'string' && MAPICON ? '<button type="button" class="act' + (S.map ? ' on' : '') + '" data-map="1" aria-pressed="' + (!!S.map) + '" aria-label="Knowledge map" title="Knowledge map">' + MAPICON + '</button>' : '');
+    $('#actbar').innerHTML = '<button type="button" class="act' + (S.side ? ' on' : '') + '" data-side="all" aria-pressed="' + (!!S.side) + '" aria-label="Sidebar" title="Show or hide the sidebar (Ctrl or Cmd + B)">' + ICONS.side + '</button>';
   }
   function filesHtml() {
     var h = C.files.map(function (f) {
@@ -978,8 +1015,8 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     } else if (!C.topics.length && C.loading === 0) h += '<div class="small soft">Add a file in Material and its topics show up here.</div>';
     h += C.topics.map(function (t) {
       var r = C.ratings[t.id], on = chat().mode && chat().mode.topic === t.id;
-      return '<button type="button" class="topic tmain' + (on ? ' on' : '') + '" data-topic="' + t.id + '"><span class="t1"><span' + (on ? ' style="font-weight:600"' : '') + '>' + esc(t.name) + (C.own[t.id] ? '<span class="own">On my own</span>' : '') + '</span></span>' +
-        '<span class="t2"><span class="bar" role="meter" aria-label="' + esc(t.name) + ', your rating" aria-valuemin="0" aria-valuemax="10" aria-valuenow="' + (r == null ? 0 : r) + '" aria-valuetext="' + (r == null ? 'Not rated' : fmt(r) + ' of 10') + '"><i data-bk="' + S.ctx + ':' + t.id + '" data-bw="' + (r == null ? 0 : r * 10) + '"></i></span><span class="val">' + (r == null ? '–' : fmt(r)) + '</span></span></button>';
+      return '<div class="topic' + (on ? ' on' : '') + '"><button type="button" class="tmain" data-topic="' + t.id + '"><span class="t1"><span' + (on ? ' style="font-weight:600"' : '') + '>' + esc(t.name) + (C.own[t.id] ? '<span class="own">On my own</span>' : '') + '</span></span>' +
+        '<span class="t2"><span class="bar" role="meter" aria-label="' + esc(t.name) + ', your rating" aria-valuemin="0" aria-valuemax="10" aria-valuenow="' + (r == null ? 0 : r) + '" aria-valuetext="' + (r == null ? 'Not rated' : fmt(r) + ' of 10') + '"><i data-bk="' + S.ctx + ':' + t.id + '" data-bw="' + (r == null ? 0 : r * 10) + '"></i></span><span class="val">' + (r == null ? 'Not rated' : fmt(r) + '/10') + '</span></span></button></div>';
     }).join('');
     return h;
   }
@@ -989,16 +1026,27 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
       return '<button type="button" class="chatrow' + (i === C.chat ? ' on' : '') + '" data-chat="' + i + '"' + (i === C.chat ? ' aria-current="true"' : '') + '><span class="ct">' + esc(c.title) + '</span><span class="cs">' + esc(sub) + '</span></button>';
     }).join('');
   }
+  function sbSection(key, title, action, body) {
+    var open = !(S.sbc && S.sbc[key]);
+    return '<section class="sbs"><div class="sbh"><button type="button" class="sbt" data-sbt="' + key + '" aria-expanded="' + open + '"><span class="chv' + (open ? '' : ' shut') + '">' + ICONS.chev + '</span><span class="h">' + title + '</span></button>' + (action || '') + '</div>' + (open ? '<div class="sbb">' + body + '</div>' : '') + '</section>';
+  }
+  function materialHtml() {
+    var added = C.files.some(function (f) { return f.status === 'added'; }), defs = defsFor(S.ctx), more = defs.some(function (d) { return !C.files.some(function (f) { return f.defId === d.id; }); });
+    var h = filesHtml();
+    if (!C.files.length) h += '<div class="sbempty"><strong>Start here</strong><span>Add a PDF of your slides. The topics, the graph and Exercise mode build on it.</span><button class="btn dark small" data-addfiles="1">Choose PDF files</button></div>';
+    if (C.files.length) h += DROP_HTML;
+    if (more) h += '<button class="link sbsample" type="button" data-act="samples">' + (added ? 'Add more sample files' : 'Or add sample files') + '</button>';
+    return h;
+  }
   function renderLeft() {
     renderActbar();
     var ws = $('#ws'); if (ws) ws.classList.toggle('sb-off', !S.side);
     var pad0 = $('#left .p-pad'), scroll = pad0 ? pad0.scrollTop : 0, h = '';
-    if (S.side === 'material') {
-      h = '<div class="p-pad"><div class="h sbh">Material</div>' + filesHtml() + DROP_HTML + '</div>';
-    } else if (S.side === 'assess') {
-      h = '<div class="p-pad"><div class="row between sbh"><span class="h">Self-assessment</span>' + (C.topics.length ? '<button class="btn small icon" data-act="assess" title="Rate my knowledge" aria-label="Rate my knowledge">' + UI.sliders + '</button>' : '') + '</div>' + topicsHtml() + '</div>';
-    } else if (S.side === 'chats') {
-      h = '<div class="p-pad"><div class="row between sbh"><span class="h">Chats</span><button class="btn small icon" data-newchat="1" title="New chat" aria-label="New chat">' + UI.plus + '</button></div>' + chatsHtml() + '</div>';
+    if (S.side) {
+      h = '<div class="p-pad">' +
+        sbSection('chats', 'Chats', '<button class="btn small icon" data-newchat="1" title="New chat" aria-label="New chat">' + UI.plus + '</button>', chatsHtml()) +
+        sbSection('material', 'Material', '<button class="btn small" data-addfiles="1">Add files</button>', materialHtml()) +
+        sbSection('assess', 'Self-assessment', C.topics.length ? '<button class="btn small icon" data-act="assess" title="Rate my knowledge" aria-label="Rate my knowledge">' + UI.sliders + '</button>' : '', topicsHtml()) + '</div>';
     }
     $('#left').innerHTML = h;
     var pad = $('#left .p-pad'); if (pad) pad.scrollTop = scroll;
@@ -1007,6 +1055,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 
   /* ---------------- viewer ---------------- */
   function renderViewer() {
+    if (S.gOn) { S.vmin = false; applyLayout(); $('#viewer').innerHTML = graphHtml(); return; }
     var tabs = C.tabs.map(function (id) {
       var f = fileById(id); if (!f) return '';
       return '<div class="tab' + (C.active === id ? ' on' : '') + '"><button type="button" class="tabb" data-tab="' + id + '" title="' + esc(f.name) + '">' + esc(f.short || f.name) + '</button><button type="button" class="x" data-close="' + id + '" aria-label="Close ' + esc(f.short || f.name) + '" title="Close this tab (the file stays in your material)">×</button></div>';
@@ -1107,7 +1156,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   }
   function renderChatbar() {
     $('#ctitle').textContent = chat().title;
-    if (S.side === 'chats') renderLeft();
+    if (S.side) renderLeft();
   }
   function renderCompose() {
     var m = chat().mode;
@@ -1342,15 +1391,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     setInert(true);
     var x = $('#modal-root .xbtn'); if (x) x.focus();
   }
-  function openPicker() {
-    var defs = defsFor(S.ctx);
-    var rows = defs.map(function (d) {
-      var added = C.files.some(function (f) { return f.defId === d.id; });
-      return '<label class="lrow pick' + (added ? ' dis' : '') + '"><input type="checkbox" data-pick="' + d.id + '"' + (added ? ' disabled checked' : '') + '><span class="ico"></span><span class="pn"><strong>' + esc(d.name) + '</strong><span class="small soft">' + d.mb + ' MB · ' + d.pages + ' pages</span></span><span class="small soft">' + (added ? 'Already added' : '') + '</span></label>';
-    }).join('');
-    modal('<div class="mhead"><div><h2 id="mtitle">Choose files to add</h2><p class="lead">Demo: these example files stand in for your own course material.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div>' +
-      '<div class="list">' + rows + '</div><div class="mfoot"><span class="fine" id="pick-n">Select one or more files.</span><button class="btn ghost" id="p-cancel">Cancel</button><button class="btn dark" id="p-add" disabled>Add selected</button></div>');
-  }
+  function openPicker() { var i = $('#file-input'); if (i) i.click(); }
   function ticksHtml() { var s = ''; for (var i = 0; i <= 10; i++) s += '<span>' + i + '</span>'; return '<div class="ticks">' + s + '</div>'; }
   function openAssess(only) {
     var topics = only ? C.topics.filter(function (t) { return t.id === only; }) : C.topics;
@@ -1390,7 +1431,9 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     if ((o = t.closest('[data-undo]'))) { var uid = o.getAttribute('data-undo'); if (undos[uid]) undos[uid](); dismissToast(uid); return; }
     if (t.closest('[data-vtoggle]')) { S.vmin = !S.vmin; renderViewer(); return; }
     if ((o = t.closest('[data-dock]'))) { S.dock = S.dock === 'bottom' ? 'right' : 'bottom'; applyLayout(); renderViewer(); return; }
-    if ((o = t.closest('[data-side]'))) { var sv = o.getAttribute('data-side'); S.side = S.side === sv ? null : sv; if (S.side) S.lastSide = S.side; renderLeft(); return; }
+    if ((o = t.closest('[data-side]'))) { S.side = S.side ? null : 'all'; renderLeft(); return; }
+    if ((o = t.closest('[data-sbt]'))) { var sk = o.getAttribute('data-sbt'); S.sbc = S.sbc || {}; S.sbc[sk] = !S.sbc[sk]; renderLeft(); return; }
+    if (t.closest('[data-addfiles]')) { openPicker(); return; }
     if ((o = t.closest('[data-close]'))) {
       var id = o.getAttribute('data-close'), prevTabs = C.tabs.slice(), prevActive = C.active, cc = C, f0 = fileById(id);
       C.tabs = C.tabs.filter(function (x) { return x !== id; }); if (C.active === id) C.active = C.tabs[C.tabs.length - 1] || null;
@@ -1423,6 +1466,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
       else if (a === 'ok4') { var m4 = chat().mode; if (m4) { m4.ok4 = true; help(4); } }
       else if (a === 'focus') $('#inp').focus();
       else if (a === 'upload') openPicker();
+      else if (a === 'samples') { defsFor(S.ctx).forEach(function (d) { addFile(d); }); }
       else if (a === 'ask') { userSay(arg); answer(arg); }
       else if (a === 'retry') { var mr = chat().mode; if (mr && !mr.solved) { mr.heat = []; post({ r: 'ai', kick: 'Problem', strong: PROBLEMS[mr.pid].text, text: 'Your turn. Write your own attempt now. I will note that you saw the solution first.' }); $('#inp').focus(); } }
       else if (a === 'stopcheck') { chat().mode = null; post({ r: 'ai', text: 'Check stopped. Nothing was marked. You can try it again whenever you like.', acts: [{ label: 'Practice the chain rule', act: 'practice', arg: 'p1' }, { label: 'Practice the product rule', act: 'practice', arg: 'p2' }] }); renderLeft(); }
@@ -1522,7 +1566,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   var dz = $('#left');
   ['dragenter', 'dragover'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); var d = $('#drop'); if (d) d.classList.add('over'); }); });
   ['dragleave', 'drop'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); var d = $('#drop'); if (d) d.classList.remove('over'); }); });
-  dz.addEventListener('drop', function () { openPicker(); });
+  dz.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) addUploads(e.dataTransfer.files); });
   dz.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'drop') { e.preventDefault(); openPicker(); } });
 
   function renderCtx() {
@@ -1644,7 +1688,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('.mk')) e.preventDefault(); });
   document.addEventListener('keydown', function (e) {
     if (!(e.metaKey || e.ctrlKey) || e.altKey || $('#ov') || $('#intro') && !$('#intro').hidden) return;
-    if (e.key === 'b' || e.key === 'B') { e.preventDefault(); S.side = S.side ? null : (S.lastSide || 'material'); renderLeft(); }
+    if (e.key === 'b' || e.key === 'B') { e.preventDefault(); S.side = S.side ? null : 'all'; renderLeft(); }
     else if (e.key === '\\') { e.preventDefault(); S.vmin = !S.vmin; renderViewer(); }
   });
   document.addEventListener('click', function (e) {
@@ -1659,7 +1703,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     if (e.target.closest && e.target.closest('#b-exit')) { setFocus(false); return; }
     if (e.target.closest && e.target.closest('#b-practice')) {
       if (S.exOn) { exExit(); return; }
-      if (!hasMaterial()) { toast('Add your course material first, then open exercise mode.'); S.side = 'material'; renderLeft(); openPicker(); return; }
+      if (!hasMaterial()) { toast('Add your course material first, then open exercise mode.'); S.side = 'all'; renderLeft(); openPicker(); return; }
       exOpen();
     }
   });
@@ -1669,13 +1713,14 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
      highlight boxes over the page. Matching is exact first, then tolerant (word overlap), so a slightly
      different quote still lands on the right passage. */
   var PDF = { promise: null, lib: null, doc: null, texts: {}, canvases: {}, tok: 0 };
+  /* One document is open at a time. Opening another file resets the cached pages. */
   function pdfLoad(url) {
-    if (PDF.promise) return PDF.promise;
-    PDF.promise = import('./vendor/pdf.min.mjs').then(function (lib) {
-      lib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.mjs';
-      PDF.lib = lib; return lib.getDocument(url).promise;
-    }).then(function (doc) { PDF.doc = doc; return doc; });
-    return PDF.promise;
+    if (PDF.promise && PDF.url === url) return PDF.promise;
+    PDF.url = url; PDF.doc = null; PDF.texts = {}; PDF.canvases = {}; PDF.order = [];
+    var lib = PDF.lib ? Promise.resolve(PDF.lib) : import('./vendor/pdf.min.mjs').then(function (l) { l.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.mjs'; PDF.lib = l; return l; });
+    var p = lib.then(function (l) { return l.getDocument(url).promise; }).then(function (doc) { if (PDF.url === url) PDF.doc = doc; return doc; });
+    PDF.promise = p; p.catch(function () { if (PDF.promise === p) { PDF.promise = null; PDF.url = null; } });
+    return p;
   }
   function wordsOf(s) { return String(s).toLowerCase().split(/[^a-z0-9äöüéèàçñ′']+/i).filter(Boolean); }
   function pageData(n) {
@@ -1767,7 +1812,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   function pdfRender(f) {
     var token = ++PDF.tok;
     if (PDF.io) { PDF.io.disconnect(); PDF.io = null; }
-    pdfLoad(f.url).then(function () {
+    pdfUrl(f).then(pdfLoad).then(function () {
       var sc = $('#pdfscroll'); if (token !== PDF.tok || !sc) return;
       var cit = C.cited && C.cited.pdf ? C.cited : null, N = PDF.doc.numPages, w = sc.clientWidth || 600;
       return pageData(1).then(function (pd1) {
@@ -1790,7 +1835,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
         sc.addEventListener('scroll', function () { C.pdfScroll = sc.scrollTop; if (raf) return; raf = requestAnimationFrame(function () { raf = 0; updatePill(sc); }); });
       });
     }).catch(function (e) {
-      var h = $('#pdfscroll'); if (h) h.innerHTML = '<div class="pdfload">Could not load the PDF. Open this page through the local server.</div>';
+      var h = $('#pdfscroll'); if (h) h.innerHTML = '<div class="pdfload">Could not load this PDF. If you added it in another browser session, add it again.</div>';
       if (window.console) console.error(e);
     });
   }
@@ -1817,10 +1862,10 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   /* public: mark a quote. hint = page to try first. */
   function markQuote(quote, kind, text, hint, keepMin) {
     var f = C.files.filter(function (x) { return x.status === 'added' && x.kind === 'pdf'; })[0]; if (!f) return Promise.resolve(false);
-    return pdfLoad(f.url).then(function () { return findQuote(quote, hint); }).then(function (r) {
+    return pdfUrl(f).then(pdfLoad).then(function () { return findQuote(quote, hint); }).then(function (r) {
       if (!r) { toast('Not found in your slides. That is what a "not in your slides" answer would look like.'); return false; }
       C.pdfPage = r.page; C.cited = { pdf: true, slide: 'P' + r.page, page: r.page, quote: quote, kind: kind || 's', text: text || quote, scrolled: false };
-      openFile(f.id, null, null, !!keepMin); renderViewer(); markCited(); mapSeenPage(r.page); return true;
+      openFile(f.id, null, null, !!keepMin); renderViewer(); markCited(); return true;
     });
   }
   /* click or hover on a sentence in the chat: normal slide or PDF quote */
@@ -1856,12 +1901,6 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     return null;
   }
 
-  /* Knowledge map is not part of this build. These no-op names keep the rest of the code working. */
-  var MAPICON = '';
-  function mapSeenPage() { }
-  function mapOpen() { }
-  function renderMap() { }
-
   /* ---------------- account: email sign-in, saved state per email, real replies ----------------
      There is no password and no server account. The email only picks which saved state to open.
      State is kept in this browser (localStorage) and saved a moment after any change.
@@ -1883,7 +1922,8 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     lsSet(UK, JSON.stringify(us));
   }
   function acctClean(s) {
-    s.focus = false; s.map = false; s.exOn = false; s.editing = false; delete s.snap;
+    s.focus = false; s.map = false; s.exOn = false; s.gOn = false; s.gNode = null; s.editing = false; delete s.snap;
+    if (s.ex) { s.ex.busy = false; if (s.ex.res && s.ex.res.pending) { s.ex.res.pending = false; s.ex.res.more = s.ex.plan.length > s.ex.cur + 1; s.ex.res.note = 'Planning was interrupted by a reload.'; } }
     Object.keys(s.courses).forEach(function (k) {
       var c = s.courses[k]; c.loading = 0; c.timers = [];
       c.files.forEach(function (f) { if (f.status === 'uploading') { f.status = 'added'; f.pct = 100; } });
@@ -1992,6 +2032,51 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
         })();
       }).catch(function () { fail('The question could not be saved. Is the Node server running?'); });
   }
+
+  /* ---------------- uploads: any PDF, kept in this browser (IndexedDB) so it opens again after a reload ---------------- */
+  var idbP = null, BURL = {};
+  function idb() {
+    if (!idbP) idbP = new Promise(function (res, rej) {
+      var r = indexedDB.open('hifi-files', 1);
+      r.onupgradeneeded = function () { r.result.createObjectStore('blobs'); };
+      r.onsuccess = function () { res(r.result); }; r.onerror = function () { rej(r.error); };
+    });
+    return idbP;
+  }
+  function blobPut(k, blob) { return idb().then(function (db) { return new Promise(function (res, rej) { var tx = db.transaction('blobs', 'readwrite'); tx.objectStore('blobs').put(blob, k); tx.oncomplete = res; tx.onerror = function () { rej(tx.error); }; }); }); }
+  function blobGet(k) { return idb().then(function (db) { return new Promise(function (res, rej) { var rq = db.transaction('blobs').objectStore('blobs').get(k); rq.onsuccess = function () { res(rq.result); }; rq.onerror = function () { rej(rq.error); }; }); }); }
+  function pdfUrl(f) {
+    if (!f.blobKey) return Promise.resolve(f.url);
+    if (BURL[f.blobKey]) return Promise.resolve(BURL[f.blobKey]);
+    return blobGet(f.blobKey).then(function (b) { if (!b) throw new Error('missing file'); BURL[f.blobKey] = URL.createObjectURL(b); return BURL[f.blobKey]; });
+  }
+  function shortName(n) { n = n.replace(/\.pdf$/i, ''); return n.length > 24 ? n.slice(0, 22) + '…' : n; }
+  function knownDef(name) {
+    var all = FILE_DEFS.calc.concat(FILE_DEFS.linalg, FILE_DEFS.hci); Object.keys(S.extraDefs).forEach(function (k) { all = all.concat(S.extraDefs[k]); });
+    return all.filter(function (d) { return d.name === name; })[0];
+  }
+  function addUploads(list) {
+    var files = Array.prototype.slice.call(list), refused = 0, dup = 0, added = 0, last = null;
+    files.forEach(function (file) {
+      if (!/\.pdf$/i.test(file.name)) { refused++; return; }
+      if (C.files.some(function (f) { return f.name === file.name; })) { dup++; return; }
+      var def = knownDef(file.name);
+      if (def && !C.pdfDemo) { addFile(def); added++; return; }          /* a known lecture keeps its slides and topics */
+      var f = { id: 'f' + C.nid++, defId: null, name: file.name, short: shortName(file.name), mb: (file.size / 1048576).toFixed(1), pages: null, kind: 'pdf', url: null, blobKey: 'b' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), slides: [], topics: [], status: 'added', pct: 100 };
+      blobPut(f.blobKey, file).catch(function () { toast('This browser could not keep ' + file.name + ' for later. It will open now but not after a reload.'); });
+      BURL[f.blobKey] = URL.createObjectURL(file);
+      C.files.push(f); last = f; added++;
+    });
+    if (refused) toast('Please choose a PDF.');
+    else if (dup && !added) toast('That file is already in your material.');
+    else if (added) toast(added === 1 ? 'File added.' : added + ' files added.');
+    renderLeft();
+    if (last) openFile(last.id);
+  }
+  document.addEventListener('change', function (e) {
+    if (e.target.id !== 'file-input') return;
+    addUploads(e.target.files); e.target.value = '';
+  });
 
   /* ---------------- Exercise mode ----------------
      A separate mode from the chat. The student sets a time budget, topics, where exercises may come from and how hard it
@@ -2105,6 +2190,19 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   function xFeel(p, chal) { return p >= chal + 0.2 ? 'Easier than usual' : p >= chal - 0.15 ? 'About right' : 'A stretch'; }
 
   /* ---------------- state and flow ---------------- */
+  /* Asks the local server to solve the integer program with Gurobi (solver/plan.py). If that is not available, searches in the page. */
+  function exPlanner(inp) {
+    var body = JSON.stringify({ bank: EXB.map(function (e) { return { id: e.id, topic: e.topic, d: e.d, min: e.min, src: e.src, el: e.el }; }), remaining: inp.remaining, topics: inp.topics, source: inp.source, chal: inp.chal, rat: inp.rat, hist: inp.hist });
+    var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
+    return fetch('/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, signal: ctl ? ctl.signal : undefined })
+      .then(function (r) { clearTimeout(to); if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || 'solver error'); }); return r.json(); })
+      .then(function (j) { return { items: j.items, solver: 'gurobi', info: j.status + ', ' + j.runtime + ' s, ' + j.nvars + ' variables' }; })
+      .catch(function (err) { clearTimeout(to); var r = xPlan(inp); return { items: r.items, solver: 'search', info: String(err && err.message || 'not available') }; });
+  }
+  function solverNote() {
+    var s = S.ex; if (!s || !s.solver) return '';
+    return s.solver === 'gurobi' ? '<p class="fine exsolver">Planned with Gurobi (' + esc(s.solverInfo) + ').</p>' : '<p class="fine exsolver">Planned with the in-page search, not Gurobi (' + esc(s.solverInfo) + '). Start the Node server with the solver to use Gurobi.</p>';
+  }
   function exTopicsAvail() { return C.topics.filter(function (t) { return EXB.some(function (e) { return e.topic === t.id; }); }); }
   function exNew() {
     var av = exTopicsAvail(), tp = {}; av.forEach(function (t) { tp[t.id] = true; });
@@ -2114,18 +2212,22 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   function exOpen() {
     if (!S.ex || S.ex.ctx !== S.ctx) S.ex = exNew();
     if (S.focus) setFocus(false);
-    if (S.map && typeof mapOpen === 'function') mapOpen(false);
+    S.gOn = false; renderViewer();
     S.exOn = true; exRender(); var b = $('#exview .exh h2'); if (b) b.focus();
     announce('Exercise mode open');
   }
   function exExit() { S.exOn = false; exRender(); renderTop(); }
   function exBuild() {
     var s = S.ex, inp = exInput();
+    if (s.busy) return;
     if (!inp.topics.length) { s.note = 'Pick at least one topic.'; exRender(); return; }
-    s.rat0 = JSON.parse(JSON.stringify(C.ratings)); inp.rat = s.rat0;
-    var r = xPlan(inp);
-    if (!r.items.length) { s.note = 'No exercise fits these settings. Try more time, another source or more topics.'; exRender(); return; }
-    s.note = ''; s.plan = r.items.map(function (it, i, a) { it.why = xWhy(it, i, a, inp); return it; }); s.phase = 'plan'; exRender();
+    s.rat0 = JSON.parse(JSON.stringify(C.ratings)); inp.rat = s.rat0; s.busy = true; s.note = ''; exRender();
+    exPlanner(inp).then(function (r) {
+      s.busy = false;
+      if (!r.items.length) { s.note = 'No exercise fits these settings. Try more time, another source or more topics.'; exRender(); return; }
+      s.solver = r.solver; s.solverInfo = r.info;
+      s.plan = r.items.map(function (it, i, a) { it.why = xWhy(it, i, a, inp); return it; }); s.phase = 'plan'; exRender();
+    });
   }
   function exStart() { var s = S.ex; s.phase = 'run'; s.cur = 0; s.hist = []; s.used = 0; s.tries = 0; s.hint = false; s.sol = false; s.input = ''; s.fb = ''; s.res = null; exRender(); var i = $('#ex-in'); if (i) i.focus(); }
   function exCur() { var s = S.ex; return s.plan[s.cur] ? xById(s.plan[s.cur].id) : null; }
@@ -2144,15 +2246,19 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     var old = C.ratings[tp], base = old == null ? 5 : old, nv = Math.max(0, Math.min(10, base + r[1]));
     if (C.start[tp] == null) C.start[tp] = base;
     C.ratings[tp] = nv; C.last[tp] = nv - base; C.pulse[tp] = true; renderLeft();
-    var inp = exInput(), rest = xPlan(inp), oldNext = s.plan[s.cur + 1] ? s.plan[s.cur + 1].id : null;
-    var kept = s.plan.slice(0, s.cur + 1);
-    rest.items.forEach(function (it, i, a) { it.why = xWhy(it, i, a, inp); });
-    var newNext = rest.items[0] ? rest.items[0].id : null, note;
-    if (!newNext) note = 'No exercise fits in the time left.';
-    else if (oldNext && newNext !== oldNext) note = 'The plan changed. Next is now ' + exTitle(xById(newNext)) + ' instead of ' + exTitle(xById(oldNext)) + (why(kind, e, xById(newNext)));
-    else note = 'The plan was checked again. The next exercise stays.';
-    s.plan = kept.concat(rest.items); s.res = { kind: kind, text: r[2], rating: [base, nv], note: note, more: !!newNext }; s.fb = '';
+    var inp = exInput(), oldNext = s.plan[s.cur + 1] ? s.plan[s.cur + 1].id : null, kept = s.plan.slice(0, s.cur + 1);
+    s.res = { kind: kind, text: r[2], rating: [base, nv], note: 'Planning the next exercises…', more: false, pending: true }; s.fb = '';
     exRender();
+    exPlanner(inp).then(function (rest) {
+      if (S.ex !== s || !s.res) return;
+      rest.items.forEach(function (it, i, a) { it.why = xWhy(it, i, a, inp); });
+      var newNext = rest.items[0] ? rest.items[0].id : null, note;
+      if (!newNext) note = 'No exercise fits in the time left.';
+      else if (oldNext && newNext !== oldNext) note = 'The plan changed. Next is now ' + exTitle(xById(newNext)) + ' instead of ' + exTitle(xById(oldNext)) + why(kind, e, xById(newNext));
+      else note = 'The plan was checked again. The next exercise stays.';
+      s.plan = kept.concat(rest.items); s.solver = rest.solver; s.solverInfo = rest.info;
+      s.res.note = note; s.res.more = !!newNext; s.res.pending = false; exRender();
+    });
   }
   function why(kind, cur, nx) {
     if ((kind === 'solution' || kind === 'skip') && xSim(cur, nx) > 0.4) return ', because it is related to the one you just missed.';
@@ -2187,7 +2293,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
       '<div class="exsec"><h3>Where can exercises come from?</h3>' + seg('src', [['both', SRC.both], ['up', SRC.up], ['ai', SRC.ai]], s.source) + '<p class="fine">' + nup + ' uploaded from ' + EXQ + ', ' + nai + ' AI-generated for this demo. AI-generated exercises are used when they add something the sheets do not.</p></div>' +
       '<div class="exsec"><h3>How hard should it feel?</h3>' + seg('chal', [[0.75, 'Gentle'], [0.6, 'Balanced'], [0.5, 'Stretch']], s.chal) + '<p class="fine">' + CHAL[s.chal][1] + '</p></div>' +
       (s.note ? '<p class="exwarn" role="alert">' + esc(s.note) + '</p>' : '') +
-      '<div class="row" style="gap:10px;margin-top:6px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="build">Build my plan</button><span class="soft small">The plan picks exercises and their order for ' + s.time + ' minutes.</span></div></div>' +
+      '<div class="row" style="gap:10px;margin-top:6px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="build"' + (s.busy ? ' disabled' : '') + '>' + (s.busy ? 'Planning…' : 'Build my plan') + '</button><span class="soft small">The plan picks exercises and their order for ' + s.time + ' minutes.</span></div></div>' +
       '<aside class="exside"><h3>How it works</h3><ol><li>You choose time, topics and how hard it should feel.</li><li>The planner picks which exercises to do and in what order.</li><li>After every exercise it plans again with what happened.</li></ol><p class="fine">Plans are made for you from your ratings and results, not from a fixed list.</p></aside></div>';
   }
   function itemRow(it, i, state) {
@@ -2200,7 +2306,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     var s = S.ex, tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0);
     return exHead('Your plan for ' + s.time + ' minutes') + '<div class="exbody"><div class="excard"><div class="exsum"><b>' + s.plan.length + ' exercises, about ' + tot + ' of ' + s.time + ' minutes</b><span class="exbudget"><i style="width:' + Math.round(100 * tot / s.time) + '%"></i></span></div>' +
       '<ol class="exlist">' + s.plan.map(function (it, i) { return itemRow(it, i, 'todo'); }).join('') + '</ol>' +
-      '<p class="fine">Minutes are estimates. Only the next exercise is certain: after each one, the plan is made again with your result.</p>' +
+      '<p class="fine">Minutes are estimates. Only the next exercise is certain: after each one, the plan is made again with your result.</p>' + solverNote() +
       '<div class="row" style="gap:10px;margin-top:8px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="start">Start</button><button class="btn" style="height:40px" data-ex="back">Change settings</button></div></div></div>';
   }
   function exRun() {
@@ -2216,11 +2322,11 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
       main += '<div class="row" style="gap:8px;margin-top:12px"><button class="btn small" data-ex="hint"' + (s.hint ? ' disabled' : '') + '>Show a hint</button><button class="btn small" data-ex="sol"' + (s.sol ? ' disabled' : '') + '>Show the solution</button><button class="btn small ghost" data-ex="skip">Skip</button></div>';
     } else {
       main += '<div class="exres ' + r.kind + '"><b>' + esc(r.text) + '</b><span class="small">' + (r.rating[1] > r.rating[0] ? 'Your rating for this topic went from ' + fmt(r.rating[0]) + ' to ' + fmt(r.rating[1]) + ' of 10.' : 'Your rating for this topic stays at ' + fmt(r.rating[1]) + ' of 10.') + '</span>' + (r.kind !== 'clean' && r.kind !== 'retry' ? '<span class="small">Solution: ' + esc(e.sol) + '</span>' : '') + '</div>' +
-        '<div class="explan"><b>Plan updated</b><span>' + esc(r.note) + '</span></div><div class="row" style="gap:8px;margin-top:12px"><button class="btn dark" style="height:40px;padding:0 20px" data-ex="next">' + (r.more ? 'Next exercise' : 'See summary') + '</button></div>';
+        '<div class="explan"><b>Plan updated</b><span>' + esc(r.note) + '</span></div><div class="row" style="gap:8px;margin-top:12px"><button class="btn dark" style="height:40px;padding:0 20px" data-ex="next"' + (r.pending ? ' disabled' : '') + '>' + (r.pending ? 'Planning…' : r.more ? 'Next exercise' : 'See summary') + '</button></div>';
     }
     main += '</div>';
     var left = S.ex.time - s.used;
-    return exHead('Session in progress') + '<div class="exbody run"><aside class="exrail"><div class="exsum"><b>' + s.used + ' of ' + s.time + ' min</b><span class="exbudget"><i style="width:' + Math.min(100, Math.round(100 * s.used / s.time)) + '%"></i></span></div><ol class="exlist small">' + list + '</ol><p class="fine">' + left + ' min left. Exercises below may change after your next answer.</p></aside>' + main + '</div>';
+    return exHead('Session in progress') + '<div class="exbody run"><aside class="exrail"><div class="exsum"><b>' + s.used + ' of ' + s.time + ' min</b><span class="exbudget"><i style="width:' + Math.min(100, Math.round(100 * s.used / s.time)) + '%"></i></span></div><ol class="exlist small">' + list + '</ol><p class="fine">' + left + ' min left. Exercises below may change after your next answer.</p>' + solverNote() + '</aside>' + main + '</div>';
   }
   function exDone() {
     var s = S.ex, solved = s.hist.filter(function (h) { return h.r >= 0.5; }).length, clean = s.hist.filter(function (h) { return h.kind === 'clean' || h.kind === 'retry'; }).length, tp = {};
@@ -2256,7 +2362,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     else if (a === 'skip') exFinish('skip');
     else if (a === 'next') exNext();
     else if (a === 'again') { var keep = { time: s.time, source: s.source, chal: s.chal, topics: s.topics }; S.ex = exNew(); S.ex.time = keep.time; S.ex.source = keep.source; S.ex.chal = keep.chal; S.ex.topics = keep.topics; exRender(); }
-    else if (a === 'material') { S.exOn = false; S.side = 'material'; exRender(); renderLeft(); }
+    else if (a === 'material') { S.exOn = false; S.side = 'all'; exRender(); renderLeft(); }
     else if (a === 'key') {
       var inp = $('#ex-in'); if (!inp) return;
       var st = inp.selectionStart == null ? inp.value.length : inp.selectionStart, en = inp.selectionEnd == null ? st : inp.selectionEnd;
@@ -2269,7 +2375,60 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     if (e.key === 'Escape' && S.exOn && !$('#ov')) exExit();
   });
   document.addEventListener('input', function (e) { if (e.target.id === 'ex-in' && S.ex) S.ex.input = e.target.value; });
-  window.__ex = { bank: EXB, plan: xPlan, ability: xAbility, S: function () { return S.ex; }, open: exOpen };
+  window.__ex = { bank: EXB, plan: xPlan, planner: exPlanner, ability: xAbility, S: function () { return S.ex; }, open: exOpen };
+
+  /* ---------------- graph: files and topics of this context (layout and links as in the group prototype) ----------------
+     Files and topics are drawn on a circle with plain SVG lines, nothing moves. A known lecture links to its own topics.
+     Topic links are fixed: Chain rule and Tangent lines build on Basic derivative rules, Optimization builds on Tangent lines.
+     An uploaded PDF the prototype does not know is a node with no links. The graph replaces the document column only. */
+  var TOPIC_LINKS = [['chain', 'basic'], ['tangent', 'basic'], ['optim', 'tangent']];
+  function graphModel() {
+    var files = C.files.filter(function (f) { return f.status === 'added'; });
+    var nodes = files.map(function (f) { return { id: 'file:' + f.id, kind: 'file', name: f.name, fid: f.id }; })
+      .concat(C.topics.map(function (t) { return { id: 'topic:' + t.id, kind: 'topic', name: t.name, tid: t.id }; }));
+    var ids = {}; nodes.forEach(function (n) { ids[n.id] = n; });
+    var edges = [];
+    files.forEach(function (f) { (f.topics || []).forEach(function (tid) { if (ids['topic:' + tid]) edges.push(['file:' + f.id, 'topic:' + tid]); }); });
+    TOPIC_LINKS.forEach(function (l) { if (ids['topic:' + l[0]] && ids['topic:' + l[1]]) edges.push(['topic:' + l[0], 'topic:' + l[1]]); });
+    nodes.forEach(function (n, i) { var a = -Math.PI / 2 + i * 2 * Math.PI / Math.max(nodes.length, 1); n.x = 280 + Math.cos(a) * 180; n.y = 270 + Math.sin(a) * 180; });
+    return { nodes: nodes, edges: edges, byId: ids };
+  }
+  function graphHtml() {
+    var head = '<div class="vhead"><div class="tabs"><div class="tab on"><span class="tabb">Graph</span></div></div><div class="vtools"><button type="button" class="btn small" data-graph="close">Close graph</button></div></div>';
+    if (!C.files.some(function (f) { return f.status === 'added'; })) return head + '<div class="empty-v"><div>Add course material to see how the topics connect.</div></div>';
+    var g = graphModel(), sel = S.gNode, hot = {};
+    if (sel) { hot[sel] = 1; g.edges.forEach(function (e) { if (e[0] === sel) hot[e[1]] = 1; if (e[1] === sel) hot[e[0]] = 1; }); }
+    var lines = g.edges.map(function (e) { var a = g.byId[e[0]], b = g.byId[e[1]], h = sel && (e[0] === sel || e[1] === sel); return '<line x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '" class="gline' + (h ? ' hot' : '') + '"/>'; }).join('');
+    var circles = g.nodes.map(function (n) {
+      var lit = !sel || hot[n.id], label = n.kind === 'file' ? (n.name.length > 26 ? n.name.slice(0, 24) + '…' : n.name) : n.name;
+      return '<g class="ghit' + (lit ? '' : ' dim') + (n.id === sel ? ' sel' : '') + '" tabindex="0" role="button" data-gnode="' + esc(n.id) + '" aria-label="' + esc(n.name) + (n.kind === 'file' ? ', file' : ', topic') + '"><circle class="gnode ' + n.kind + '" cx="' + n.x + '" cy="' + n.y + '" r="' + (n.kind === 'file' ? 18 : 14) + '"/><text class="glab" x="' + n.x + '" y="' + (n.y + 34) + '" text-anchor="middle">' + esc(label) + '</text></g>';
+    }).join('');
+    var sn = sel ? g.byId[sel] : null, cap = 'Click a node to see what it connects to.';
+    if (sn) {
+      var r = sn.tid ? C.ratings[sn.tid] : null;
+      cap = '<b>' + esc(sn.name) + '</b>' + (sn.kind === 'topic' ? ' · ' + (r == null ? 'not rated' : 'rated ' + fmt(r) + '/10') : ' · file') + (sn.kind === 'file' ? ' <button class="btn small" data-graph="open" data-fid="' + sn.fid + '">Open file</button>' : '');
+    }
+    return head + '<div class="gwrap"><svg class="gsvg" viewBox="0 0 560 560" role="img" aria-label="Graph of files and topics">' + lines + circles + '</svg><div class="gkey"><span><i class="gnode file"></i>File</span><span><i class="gnode topic"></i>Topic</span></div><p class="gcap" role="status">' + cap + '</p></div>';
+  }
+  function graphToggle(on) {
+    S.gOn = on === undefined ? !S.gOn : !!on; S.gNode = null;
+    var b = $('#b-graph'); if (b) { b.setAttribute('aria-pressed', !!S.gOn); b.classList.toggle('on', !!S.gOn); }
+    if (S.gOn && S.exOn) exExit();
+    renderViewer();
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target; if (!t.closest) return; var o;
+    if (t.closest('#b-graph')) { graphToggle(); return; }
+    if ((o = t.closest('[data-gnode]'))) { S.gNode = o.getAttribute('data-gnode'); renderViewer(); return; }
+    if ((o = t.closest('[data-graph]'))) {
+      var a = o.getAttribute('data-graph');
+      if (a === 'close') graphToggle(false);
+      else if (a === 'open') { var fid = o.getAttribute('data-fid'); graphToggle(false); openFile(fid); }
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-gnode')) { e.preventDefault(); S.gNode = e.target.getAttribute('data-gnode'); renderViewer(); }
+  });
   fresh(); acctBoot(); renderAll();
   window.__proto = {
     S: function () { return S; }, parseFn: parseFn, same: same, flush: flush,

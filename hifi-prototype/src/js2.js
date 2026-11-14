@@ -12,7 +12,7 @@
   function fresh() {
     var ctxs = [{ key: 'calc', name: 'Calculus I' }, { key: 'linalg', name: 'Linear Algebra' }], courses = { calc: newCourse(), linalg: newCourse() };
     if (HAS_PDF) { ctxs.unshift({ key: 'hci', name: 'HCI (real PDF test)' }); courses.hci = newCourse(); }
-    S = { side: 'material', lastSide: 'material', dock: 'right', vw: null, vh: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: HAS_PDF ? 'hci' : 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
+    S = { side: 'all', sbc: {}, dock: 'right', vw: null, vh: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: HAS_PDF ? 'hci' : 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
     C = S.courses[S.ctx];
     if (HAS_PDF) {
       var h = S.courses.hci, d = FILE_DEFS.hci[0];
@@ -83,15 +83,11 @@
   }
   function fmt(n) { return String(Math.round(n * 10) / 10); }
   var ICONS = {
-    chats: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
-    material: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',
-    assess: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>'
+    side: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9.5 4.5v15"/></svg>',
+    chev: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>'
   };
-  var SIDES = [['chats', 'Chats'], ['material', 'Material'], ['assess', 'Self-assess']];
   function renderActbar() {
-    $('#actbar').innerHTML = SIDES.map(function (v) {
-      return '<button type="button" class="act' + (S.side === v[0] ? ' on' : '') + '" data-side="' + v[0] + '" aria-pressed="' + (S.side === v[0]) + '" aria-label="' + (v[0] === 'assess' ? 'Self-assessment' : v[1]) + '" title="' + (v[0] === 'assess' ? 'Self-assessment' : v[1]) + ' (click again to hide)">' + ICONS[v[0]] + '</button>';
-    }).join('') + (typeof MAPICON === 'string' && MAPICON ? '<button type="button" class="act' + (S.map ? ' on' : '') + '" data-map="1" aria-pressed="' + (!!S.map) + '" aria-label="Knowledge map" title="Knowledge map">' + MAPICON + '</button>' : '');
+    $('#actbar').innerHTML = '<button type="button" class="act' + (S.side ? ' on' : '') + '" data-side="all" aria-pressed="' + (!!S.side) + '" aria-label="Sidebar" title="Show or hide the sidebar (Ctrl or Cmd + B)">' + ICONS.side + '</button>';
   }
   function filesHtml() {
     var h = C.files.map(function (f) {
@@ -112,8 +108,8 @@
     } else if (!C.topics.length && C.loading === 0) h += '<div class="small soft">Add a file in Material and its topics show up here.</div>';
     h += C.topics.map(function (t) {
       var r = C.ratings[t.id], on = chat().mode && chat().mode.topic === t.id;
-      return '<button type="button" class="topic tmain' + (on ? ' on' : '') + '" data-topic="' + t.id + '"><span class="t1"><span' + (on ? ' style="font-weight:600"' : '') + '>' + esc(t.name) + (C.own[t.id] ? '<span class="own">On my own</span>' : '') + '</span></span>' +
-        '<span class="t2"><span class="bar" role="meter" aria-label="' + esc(t.name) + ', your rating" aria-valuemin="0" aria-valuemax="10" aria-valuenow="' + (r == null ? 0 : r) + '" aria-valuetext="' + (r == null ? 'Not rated' : fmt(r) + ' of 10') + '"><i data-bk="' + S.ctx + ':' + t.id + '" data-bw="' + (r == null ? 0 : r * 10) + '"></i></span><span class="val">' + (r == null ? '–' : fmt(r)) + '</span></span></button>';
+      return '<div class="topic' + (on ? ' on' : '') + '"><button type="button" class="tmain" data-topic="' + t.id + '"><span class="t1"><span' + (on ? ' style="font-weight:600"' : '') + '>' + esc(t.name) + (C.own[t.id] ? '<span class="own">On my own</span>' : '') + '</span></span>' +
+        '<span class="t2"><span class="bar" role="meter" aria-label="' + esc(t.name) + ', your rating" aria-valuemin="0" aria-valuemax="10" aria-valuenow="' + (r == null ? 0 : r) + '" aria-valuetext="' + (r == null ? 'Not rated' : fmt(r) + ' of 10') + '"><i data-bk="' + S.ctx + ':' + t.id + '" data-bw="' + (r == null ? 0 : r * 10) + '"></i></span><span class="val">' + (r == null ? 'Not rated' : fmt(r) + '/10') + '</span></span></button></div>';
     }).join('');
     return h;
   }
@@ -123,16 +119,27 @@
       return '<button type="button" class="chatrow' + (i === C.chat ? ' on' : '') + '" data-chat="' + i + '"' + (i === C.chat ? ' aria-current="true"' : '') + '><span class="ct">' + esc(c.title) + '</span><span class="cs">' + esc(sub) + '</span></button>';
     }).join('');
   }
+  function sbSection(key, title, action, body) {
+    var open = !(S.sbc && S.sbc[key]);
+    return '<section class="sbs"><div class="sbh"><button type="button" class="sbt" data-sbt="' + key + '" aria-expanded="' + open + '"><span class="chv' + (open ? '' : ' shut') + '">' + ICONS.chev + '</span><span class="h">' + title + '</span></button>' + (action || '') + '</div>' + (open ? '<div class="sbb">' + body + '</div>' : '') + '</section>';
+  }
+  function materialHtml() {
+    var added = C.files.some(function (f) { return f.status === 'added'; }), defs = defsFor(S.ctx), more = defs.some(function (d) { return !C.files.some(function (f) { return f.defId === d.id; }); });
+    var h = filesHtml();
+    if (!C.files.length) h += '<div class="sbempty"><strong>Start here</strong><span>Add a PDF of your slides. The topics, the graph and Exercise mode build on it.</span><button class="btn dark small" data-addfiles="1">Choose PDF files</button></div>';
+    if (C.files.length) h += DROP_HTML;
+    if (more) h += '<button class="link sbsample" type="button" data-act="samples">' + (added ? 'Add more sample files' : 'Or add sample files') + '</button>';
+    return h;
+  }
   function renderLeft() {
     renderActbar();
     var ws = $('#ws'); if (ws) ws.classList.toggle('sb-off', !S.side);
     var pad0 = $('#left .p-pad'), scroll = pad0 ? pad0.scrollTop : 0, h = '';
-    if (S.side === 'material') {
-      h = '<div class="p-pad"><div class="h sbh">Material</div>' + filesHtml() + DROP_HTML + '</div>';
-    } else if (S.side === 'assess') {
-      h = '<div class="p-pad"><div class="row between sbh"><span class="h">Self-assessment</span>' + (C.topics.length ? '<button class="btn small icon" data-act="assess" title="Rate my knowledge" aria-label="Rate my knowledge">' + UI.sliders + '</button>' : '') + '</div>' + topicsHtml() + '</div>';
-    } else if (S.side === 'chats') {
-      h = '<div class="p-pad"><div class="row between sbh"><span class="h">Chats</span><button class="btn small icon" data-newchat="1" title="New chat" aria-label="New chat">' + UI.plus + '</button></div>' + chatsHtml() + '</div>';
+    if (S.side) {
+      h = '<div class="p-pad">' +
+        sbSection('chats', 'Chats', '<button class="btn small icon" data-newchat="1" title="New chat" aria-label="New chat">' + UI.plus + '</button>', chatsHtml()) +
+        sbSection('material', 'Material', '<button class="btn small" data-addfiles="1">Add files</button>', materialHtml()) +
+        sbSection('assess', 'Self-assessment', C.topics.length ? '<button class="btn small icon" data-act="assess" title="Rate my knowledge" aria-label="Rate my knowledge">' + UI.sliders + '</button>' : '', topicsHtml()) + '</div>';
     }
     $('#left').innerHTML = h;
     var pad = $('#left .p-pad'); if (pad) pad.scrollTop = scroll;
@@ -141,6 +148,7 @@
 
   /* ---------------- viewer ---------------- */
   function renderViewer() {
+    if (S.gOn) { S.vmin = false; applyLayout(); $('#viewer').innerHTML = graphHtml(); return; }
     var tabs = C.tabs.map(function (id) {
       var f = fileById(id); if (!f) return '';
       return '<div class="tab' + (C.active === id ? ' on' : '') + '"><button type="button" class="tabb" data-tab="' + id + '" title="' + esc(f.name) + '">' + esc(f.short || f.name) + '</button><button type="button" class="x" data-close="' + id + '" aria-label="Close ' + esc(f.short || f.name) + '" title="Close this tab (the file stays in your material)">×</button></div>';
@@ -241,7 +249,7 @@
   }
   function renderChatbar() {
     $('#ctitle').textContent = chat().title;
-    if (S.side === 'chats') renderLeft();
+    if (S.side) renderLeft();
   }
   function renderCompose() {
     var m = chat().mode;
@@ -476,15 +484,7 @@
     setInert(true);
     var x = $('#modal-root .xbtn'); if (x) x.focus();
   }
-  function openPicker() {
-    var defs = defsFor(S.ctx);
-    var rows = defs.map(function (d) {
-      var added = C.files.some(function (f) { return f.defId === d.id; });
-      return '<label class="lrow pick' + (added ? ' dis' : '') + '"><input type="checkbox" data-pick="' + d.id + '"' + (added ? ' disabled checked' : '') + '><span class="ico"></span><span class="pn"><strong>' + esc(d.name) + '</strong><span class="small soft">' + d.mb + ' MB · ' + d.pages + ' pages</span></span><span class="small soft">' + (added ? 'Already added' : '') + '</span></label>';
-    }).join('');
-    modal('<div class="mhead"><div><h2 id="mtitle">Choose files to add</h2><p class="lead">Demo: these example files stand in for your own course material.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div>' +
-      '<div class="list">' + rows + '</div><div class="mfoot"><span class="fine" id="pick-n">Select one or more files.</span><button class="btn ghost" id="p-cancel">Cancel</button><button class="btn dark" id="p-add" disabled>Add selected</button></div>');
-  }
+  function openPicker() { var i = $('#file-input'); if (i) i.click(); }
   function ticksHtml() { var s = ''; for (var i = 0; i <= 10; i++) s += '<span>' + i + '</span>'; return '<div class="ticks">' + s + '</div>'; }
   function openAssess(only) {
     var topics = only ? C.topics.filter(function (t) { return t.id === only; }) : C.topics;
@@ -524,7 +524,9 @@
     if ((o = t.closest('[data-undo]'))) { var uid = o.getAttribute('data-undo'); if (undos[uid]) undos[uid](); dismissToast(uid); return; }
     if (t.closest('[data-vtoggle]')) { S.vmin = !S.vmin; renderViewer(); return; }
     if ((o = t.closest('[data-dock]'))) { S.dock = S.dock === 'bottom' ? 'right' : 'bottom'; applyLayout(); renderViewer(); return; }
-    if ((o = t.closest('[data-side]'))) { var sv = o.getAttribute('data-side'); S.side = S.side === sv ? null : sv; if (S.side) S.lastSide = S.side; renderLeft(); return; }
+    if ((o = t.closest('[data-side]'))) { S.side = S.side ? null : 'all'; renderLeft(); return; }
+    if ((o = t.closest('[data-sbt]'))) { var sk = o.getAttribute('data-sbt'); S.sbc = S.sbc || {}; S.sbc[sk] = !S.sbc[sk]; renderLeft(); return; }
+    if (t.closest('[data-addfiles]')) { openPicker(); return; }
     if ((o = t.closest('[data-close]'))) {
       var id = o.getAttribute('data-close'), prevTabs = C.tabs.slice(), prevActive = C.active, cc = C, f0 = fileById(id);
       C.tabs = C.tabs.filter(function (x) { return x !== id; }); if (C.active === id) C.active = C.tabs[C.tabs.length - 1] || null;
@@ -557,6 +559,7 @@
       else if (a === 'ok4') { var m4 = chat().mode; if (m4) { m4.ok4 = true; help(4); } }
       else if (a === 'focus') $('#inp').focus();
       else if (a === 'upload') openPicker();
+      else if (a === 'samples') { defsFor(S.ctx).forEach(function (d) { addFile(d); }); }
       else if (a === 'ask') { userSay(arg); answer(arg); }
       else if (a === 'retry') { var mr = chat().mode; if (mr && !mr.solved) { mr.heat = []; post({ r: 'ai', kick: 'Problem', strong: PROBLEMS[mr.pid].text, text: 'Your turn. Write your own attempt now. I will note that you saw the solution first.' }); $('#inp').focus(); } }
       else if (a === 'stopcheck') { chat().mode = null; post({ r: 'ai', text: 'Check stopped. Nothing was marked. You can try it again whenever you like.', acts: [{ label: 'Practice the chain rule', act: 'practice', arg: 'p1' }, { label: 'Practice the product rule', act: 'practice', arg: 'p2' }] }); renderLeft(); }
@@ -656,7 +659,7 @@
   var dz = $('#left');
   ['dragenter', 'dragover'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); var d = $('#drop'); if (d) d.classList.add('over'); }); });
   ['dragleave', 'drop'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); var d = $('#drop'); if (d) d.classList.remove('over'); }); });
-  dz.addEventListener('drop', function () { openPicker(); });
+  dz.addEventListener('drop', function (e) { if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) addUploads(e.dataTransfer.files); });
   dz.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'drop') { e.preventDefault(); openPicker(); } });
 
   function renderCtx() {
