@@ -160,7 +160,7 @@
       var sl = SLIDES[C.slide], cit = C.cited && C.cited.slide === C.slide ? C.cited : null;
       var ix = f.slides.indexOf(C.slide);
       body = '<div class="p-pad"><div class="slide"><div class="no">Slide ' + C.slide + '</div><h3>' + esc(sl.t) + '</h3><div class="body' + (cit ? ' dim' : '') + '">' +
-        sl.p.map(function (p, k) { return '<p class="' + ((sl.f && k === 1) ? 'f ' : '') + (cit && cit.p === k ? 'hl k-' + cit.kind : '') + '"' + (cit && cit.p === k ? ' data-tag="' + (cit.kind === 'd' ? 'Used to derive your answer' : 'Source of your answer') + '"' : '') + '>' + esc(p) + '</p>'; }).join('') + '</div></div>' +
+        sl.p.map(function (p, k) { return '<p class="' + ((sl.f && k === 1) ? 'f ' : '') + (hitP(cit, k) ? 'hl k-' + cit.kind : '') + '"' + (hitP(cit, k) ? ' data-tag="' + (cit.kind === 'd' ? 'Used to derive your answer' : 'Source of your answer') + '"' : '') + '>' + esc(p) + '</p>'; }).join('') + '</div></div>' +
         (cit ? '<div class="evstrip" role="status"><span>' + esc(cit.text || '') + '</span><button class="iconlink" data-clearev="1" aria-label="Clear highlight" title="Clear highlight">×</button></div>' : '') +
         '<div class="slidenav"><button class="btn small ghost icon" data-nav="-1"' + (ix <= 0 ? ' disabled' : '') + ' aria-label="Previous slide">' + UI.chev + '</button><span>' + C.slide + ' / ' + f.pages + '</span><button class="btn small ghost icon" data-nav="1"' + (ix >= f.slides.length - 1 ? ' disabled' : '') + ' aria-label="Next slide">' + UI.chevR + '</button></div></div>';
     } else if (f.kind === 'pdf') body = pdfBodyHtml();
@@ -183,28 +183,35 @@
     renderLeft(); renderViewer();
   }
   function openSlide(n) { var f = fileForSlide(n); if (f) openFile(f.id, n, null); }
-  function showEvidence(slide, p, kind, text, keepMin) {
+  function showEvidence(slide, p, kind, text, keepMin, ps) {
     var f = fileForSlide(slide); if (!f) return;
-    openFile(f.id, slide, { slide: slide, p: p, kind: kind, text: text }, keepMin);
+    openFile(f.id, slide, { slide: slide, p: p, kind: kind, text: text, ps: ps }, keepMin);
   }
 
   /* ---------------- chat rendering ---------------- */
+  /* A sentence is plain text. Where the answer comes from is shown once per message (see evidenceHtml). A sentence that is not
+     from the slides keeps a soft tint so it can be told apart. */
+  function hitP(c, k) { return !!c && (c.p === k || (c.ps && c.ps.indexOf(k) >= 0)); }
   function sentHtml(x) {
-    var lab = '<span class="sr">' + KIND_LABEL[x.k] + ': </span>';
-    if (x.k !== 'g' && x.slide && hasSlideFile(x.slide)) {
-      var pg = String(x.slide).replace('P', '');
-      return '<button type="button" class="sent k-' + x.k + '" data-evid="' + x.slide + '|' + x.p + '|' + x.k + '" data-evt="' + esc(x.t) + '"' + (x.q ? ' data-evq="' + esc(x.q) + '"' : '') + ' title="' + (x.k === 'd' ? 'Derived from' : 'From') + ' your slides, p.' + pg + '. Click to see it.">' + lab + esc(x.t) + '<span class="cite" aria-hidden="true">' + pg + '</span></button> ';
-    }
-    return '<span class="sent k-g" title="Not in your slides">' + lab + esc(x.t) + '<span class="cite" aria-hidden="true">!</span></span> ';
+    var lab = '<span class="sr">' + KIND_LABEL[x.k] + ': </span>', grounded = x.k !== 'g' && x.slide && hasSlideFile(x.slide);
+    return '<span class="sent k-' + (grounded ? x.k : 'g') + '"' + (grounded ? '' : ' title="Not in your slides"') + '>' + lab + esc(x.t) + '</span> ';
   }
   /* One plain line says whether the answer comes from the student's slides, and on which pages. The sentences themselves are still clickable
      and show the exact passage in the slides. The match strength, the count and the "why" dialog were taken off the screen (see UI_REVIEW.md, C1 and F1). */
   function evidenceHtml(m, i, pr) {
-    var all = m.sents.concat(m.moreOpen && m.more ? m.more : []), mt = matchOf(all), slides = [];
-    all.forEach(function (x) { if (x.k !== 'g' && x.slide && hasSlideFile(x.slide) && slides.indexOf(x.slide) < 0) slides.push(x.slide); });
-    var pages = slides.map(function (x) { return String(x).replace('P', ''); }).join(', ');
-    var label = mt === 'none' ? 'Not in your slides' : (mt === 'partial' ? 'Partly from your slides' : 'From your slides') + (pages ? ', p. ' + pages : '');
-    return '<div class="srcline src-' + mt + '">' + (mt === 'none' ? UI.warn : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>') + '<span>' + esc(label) + '</span></div>';
+    var all = m.sents.concat(m.moreOpen && m.more ? m.more : []), mt = matchOf(all), groups = [], byKey = {};
+    all.forEach(function (x) {
+      if (x.k === 'g' || !x.slide || !hasSlideFile(x.slide)) return;
+      var g = byKey[x.slide]; if (!g) { g = byKey[x.slide] = { slide: x.slide, first: x, ps: [] }; groups.push(g); }
+      if (g.ps.indexOf(x.p) < 0) g.ps.push(x.p);
+    });
+    var check = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+    if (!groups.length) return '<div class="srcline src-none">' + UI.warn + '<span>Not in your slides</span></div>';
+    /* clicking shows every passage of this message that sits on that slide, in yellow, once */
+    function attrs(g) { var x = g.first; return ' data-evid="' + g.slide + '|' + x.p + '|' + x.k + '" data-evt="' + esc(x.t) + '"' + (x.q ? ' data-evq="' + esc(x.q) + '"' : '') + ' data-evps="' + g.ps.join(',') + '"'; }
+    var lead = mt === 'partial' ? 'Partly from your slides' : 'From your slides', pg = function (g) { return String(g.slide).replace('P', ''); };
+    if (groups.length === 1) return '<button type="button" class="srcline src-ok"' + attrs(groups[0]) + ' title="Show where in your slides">' + check + '<span>' + lead + ', p. ' + pg(groups[0]) + '</span></button>';
+    return '<div class="srcline src-ok">' + check + '<span>' + lead + ', p.</span>' + groups.map(function (g) { return '<button type="button" class="srcpg"' + attrs(g) + ' title="Show where on page ' + pg(g) + '">' + pg(g) + '</button>'; }).join('') + '</div>';
   }
   function renderMsgs(opt) {
     var ch = chat(), el = $('#msgs'), keep = opt && opt.keep, top = el.scrollTop;

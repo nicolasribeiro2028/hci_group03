@@ -239,3 +239,10 @@
 .srcline svg { flex: none; color: var(--green); }
 .srcline.src-none svg { color: var(--amber); }
 .srcline.src-none { color: var(--amber); }
+
+/* one source line per message; the slide shows the passages in yellow */
+button.srcline { font: inherit; font-size: 12px; background: none; border: 0; padding: 2px 8px 2px 0; border-radius: 6px; cursor: pointer; text-align: left; }
+button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--ink); background: var(--fill); }
+.srcpg { font: inherit; font-size: 12px; min-width: 22px; height: 20px; padding: 0 6px; border: 1px solid var(--line); border-radius: 99px; background: #fff; color: var(--ink); cursor: pointer; }
+.srcpg:hover, .srcpg:focus-visible { background: #fff3b8; border-color: #e0a800; }
+.sent.k-s, .sent.k-d { padding: 0; }

@@ -67,7 +67,10 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 - **Road, second version (a test):** stops of the same topic sit under one topic marker (symbol and name once), each stop shows its number, the expression and minutes, and the road wanders instead of zigzagging. To go back to the first version change `ROAD_STYLE` from `'groups'` to `'grid'` in `src/js8.js` and run `./build.sh`.
 
 ## Update: simpler chat answers, grouped header, one run command
-- Chat answers carry one plain line about the source ("From your slides, p. 12", "Partly from your slides", "Not in your slides"). Clicking a sentence still shows the exact passage in the slides ("source of your answer"). The match meter, the count, the "why" dialog and the warning banner are off the screen.
+- Chat answers carry one plain line about the source ("From your slides, p. 12", "Partly from your slides", "Not in your slides"). Clicking that line shows the passages in the slides ("source of your answer"). The match meter, the count, the "why" dialog and the warning banner are off the screen.
 - Header: Graph and Exercise mode are one grouped control, filled only while a view is open. No filled button at rest.
 - Material has one "Add files" control (the dashed drop area).
 - `./run.sh` starts everything. "Real replies" stays as a testing switch only: it exists to help the team decide what is scripted and what should be real AI, and it is removed in the final version.
+
+## Update: one source per message
+- Sentences in a chat answer are plain text: no number after each one and no per-sentence button. The one line under the answer ("From your slides, p. 12") is the button. Clicking it (or hovering it) shows every passage of that message on the slide, in yellow with a "Source" tag. If the answer draws on several slides, each page number is its own small button. Sentences that are not from the slides keep a soft tint.

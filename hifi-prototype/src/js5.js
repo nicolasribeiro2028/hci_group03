@@ -163,7 +163,8 @@
   function evidenceGo(o, keepMin) {
     var v = o.getAttribute('data-evid').split('|'), txt = o.getAttribute('data-evt'), q = o.getAttribute('data-evq');
     if (/^P/.test(v[0])) { markQuote(q, v[2], txt, +v[0].slice(1), keepMin); return; }
-    showEvidence(+v[0], +v[1], v[2], txt, keepMin);
+    var ps = (o.getAttribute('data-evps') || '').split(',').filter(Boolean).map(Number);
+    showEvidence(+v[0], +v[1], v[2], txt, keepMin, ps.length ? ps : null);
   }
   document.addEventListener('submit', function (e) {
     if (e.target.id !== 'markform') return;
