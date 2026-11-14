@@ -43,8 +43,9 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 - **Gurobi:** Exercise mode asks `POST /plan` (see `solver/README.md` for set-up and the licence) and shows on screen whether Gurobi or the in-page search made the plan.
 - **Knowledge map:** not in this repository.
 
-## Update: learning path and fixed screen
-- The plan is drawn as a learning path: a timeline of the session (one block per exercise, sized by minutes, coloured by topic, free time hatched), then numbered stops joined by a line, with what changes between two stops (switch topic, a step harder, a step easier, same level) and the difficulty as pips. The session screen keeps the same path as a rail with done, current and next stops.
-- When the path does not fill the time, the screen says why: either the bank has too few exercises for the chosen topics and source, or the planner left out near-repeats and exercises that teach little.
-- The page no longer scrolls: `#app` is fixed to the window. The exercise view is confined to the editor area (it had been covering the whole window).
-- The bank grew from 21 to 37 exercises, six of them with answers computed by small helpers in `js8.js`. Element tags were made less coarse so fewer exercises count as near-duplicates.
+## Update: clean path, bigger bank, team-only details
+- **Exercise mode, what the student sees:** setup (time, topic pills, source), then the path drawn as a winding road of stops, one stop per exercise, each shown by its topic symbol, name and minutes. Then one exercise at a time with a step line on top. A short summary at the end. Neutral colours with one accent.
+- **What the student does not see:** estimated chance of success, "stretch / about right", why a stop was chosen, planner messages and which solver ran. They are kept as code comments and appear only when the address has `?dev` (for example `http://localhost:8765/?dev`).
+- **Path end:** when the plan does not use all the time, the road ends in "More ahead" instead of a flag. The first plan only sees what suits the current level. After each result the plan is made again, so new stops appear as the student progresses.
+- **Bank:** 96 exercises, 18 to 20 per topic (80 to 117 minutes per topic). Most are generated from parameter lists in `js8.js`, so every answer is computed and was checked numerically. Tags that measure similarity keep what tells exercises apart.
+- **Page scroll:** the app is fixed to the window. The exercise view stays inside the editor area.

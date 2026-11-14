@@ -37,12 +37,12 @@
 
   /* More made-up exercises, built by small helpers so the answers are computed, not typed. */
   function sup(n) { return String(n).replace(/\d/g, function (d) { return '⁰¹²³⁴⁵⁶⁷⁸⁹'.charAt(+d); }); }
-  function ptxt(ts) { return ts.filter(function (t) { return t[0] !== 0; }).map(function (t, i) { var c = t[0], e = t[1], a = Math.abs(c), b = e === 0 ? String(a) : (a === 1 ? '' : String(a)) + 'x' + (e === 1 ? '' : sup(e)); return i === 0 ? (c < 0 ? '−' : '') + b : (c < 0 ? ' − ' : ' + ') + b; }).join(''); }
+  function ptxt(ts) { var z = ts.filter(function (t) { return t[0] !== 0; }); if (!z.length) return '0'; return z.map(function (t, i) { var c = t[0], e = t[1], a = Math.abs(c), b = e === 0 ? String(a) : (a === 1 ? '' : String(a)) + 'x' + (e === 1 ? '' : sup(e)); return i === 0 ? (c < 0 ? '−' : '') + b : (c < 0 ? ' − ' : ' + ') + b; }).join(''); }
   function pder(ts) { return ts.filter(function (t) { return t[1] > 0; }).map(function (t) { return [t[0] * t[1], t[1] - 1]; }); }
   function pev(ts, x) { return ts.reduce(function (sm, t) { return sm + t[0] * Math.pow(x, t[1]); }, 0); }
   function XP(id, d, min, src, el, ts) { var dr = pder(ts); return XE(id, 'basic', d, min, src, el, 'Find f′(x) for f(x) = ' + ptxt(ts) + '.', function (x) { return pev(dr, x); }, 'f′(x) = ' + ptxt(dr) + '.'); }
   function XT(id, d, min, src, el, ts, k) { var dr = pder(ts), v = pev(dr, k); return XE(id, 'tangent', d, min, src, el, 'Find the slope of the tangent line to f(x) = ' + ptxt(ts) + ' at x = ' + k + '.', function () { return v; }, 'f′(x) = ' + ptxt(dr) + ', so at x = ' + k + ' the slope is ' + v + '.'); }
-  function XO(id, d, min, src, el, a, b, c) { var x0 = -b / (2 * a); return XE(id, 'optim', d, min, src, el, 'At which x does f(x) = ' + ptxt([[a, 2], [b, 1], [c, 0]]) + ' have its smallest value?', function () { return x0; }, 'f′(x) = ' + ptxt([[2 * a, 1], [b, 0]]) + ' = 0 gives x = ' + x0 + '.'); }
+  function XO(id, d, min, src, el, a, b, c) { var x0 = -b / (2 * a); el = el || ['critical', 'minimum'].concat(a > 1 ? ['cm'] : [], c !== 0 ? ['constant'] : [], b < 0 ? ['negb'] : ['posb']); return XE(id, 'optim', d, min, src, el, 'At which x does f(x) = ' + ptxt([[a, 2], [b, 1], [c, 0]]) + ' have its smallest value?', function () { return x0; }, 'f′(x) = ' + ptxt([[2 * a, 1], [b, 0]]) + ' = 0 gives x = ' + x0 + '.'); }
   EXB = EXB.concat([
     XP('b5', 4, 4, 'up', ['power', 'sum', 'cm', 'odd-powers'], [[6, 5], [-2, 3], [1, 1]]),
     XP('b6', 3, 3, 'up', ['power', 'sum', 'even-powers'], [[1, 6], [4, 2]]),
@@ -61,7 +61,72 @@
     XO('o4', 3, 3, 'up', ['power', 'sum', 'critical'], 1, -8, 3),
     XO('o5', 5, 5, 'ai', ['power', 'sum', 'critical', 'coef'], 2, -12, 1)
   ]);
-  var TCOL = { basic: '#2150d8', pq: '#b4540a', chain: '#16703f', tangent: '#7b3fb8', optim: '#0e7c86' };
+
+  /* ---- Bigger bank. Everything below is generated from small parameter lists, so the answers are computed, never typed. ----
+     A polynomial is a list of [coefficient, exponent]. These helpers only exist for this demo bank. */
+  function pneg(a) { return a.map(function (t) { return [-t[0], t[1]]; }); }
+  function pmul(a, b) { var m = {}; a.forEach(function (x) { b.forEach(function (y) { var e = x[1] + y[1]; m[e] = (m[e] || 0) + x[0] * y[0]; }); }); return Object.keys(m).map(function (e) { return [m[e], +e]; }).sort(function (p, q) { return q[1] - p[1]; }); }
+  function padd(a, b) { var m = {}; a.concat(b).forEach(function (t) { m[t[1]] = (m[t[1]] || 0) + t[0]; }); return Object.keys(m).map(function (e) { return [m[e], +e]; }).sort(function (p, q) { return q[1] - p[1]; }); }
+  function wrap(ts) { return ts.length > 1 ? '(' + ptxt(ts) + ')' : ptxt(ts); }
+  var DEGNAME = { 2: 'quadratic', 3: 'cubic', 4: 'quartic', 5: 'quintic' };
+  function ptags(ts, extra) { /* tags only measure how alike two exercises are, so they keep what tells exercises apart (shape), not what they all share */
+    var mx = Math.max.apply(null, ts.map(function (u) { return u[1]; })), t = [DEGNAME[mx] || 'linear', 'terms' + ts.length];
+    if (ts.some(function (u) { return Math.abs(u[0]) > 1 && u[1] > 0; })) t.push('cm');
+    if (ts.some(function (u) { return u[1] === 0; })) t.push('constant');
+    return t.concat(extra || []);
+  }
+  function XPa(id, d, min, src, ts) { return XP(id, d, min, src, ptags(ts), ts); }
+  function XQ(id, d, min, src, f, g) { /* product f · g */
+    var df = pder(f), dg = pder(g), D = padd(pmul(df, g), pmul(f, dg));
+    return XE(id, 'pq', d, min, src, ptags(f.concat(g), ['product']), 'Find f′(x) for f(x) = ' + wrap(f) + ' · ' + wrap(g) + '.', function (x) { return pev(D, x); },
+      'Product rule: (' + ptxt(df) + ')(' + ptxt(g) + ') + (' + ptxt(f) + ')(' + ptxt(dg) + ') = ' + ptxt(D) + '.');
+  }
+  function XR(id, d, min, src, f, g) { /* quotient f / g */
+    var df = pder(f), dg = pder(g), N = padd(pmul(df, g), pneg(pmul(f, dg)));
+    return XE(id, 'pq', d, min, src, ptags(f.concat(g), ['quotient']), 'Find f′(x) for f(x) = ' + wrap(f) + ' / ' + wrap(g) + '.', function (x) { return (pev(df, x) * pev(g, x) - pev(f, x) * pev(dg, x)) / Math.pow(pev(g, x), 2); },
+      'Quotient rule: ((' + ptxt(df) + ')(' + ptxt(g) + ') − (' + ptxt(f) + ')(' + ptxt(dg) + ')) / (' + ptxt(g) + ')² = (' + ptxt(N) + ') / (' + ptxt(g) + ')².');
+  }
+  function XC(id, d, min, src, inner, n) { /* (inner)^n */
+    var di = pder(inner);
+    return XE(id, 'chain', d, min, src, ptags(inner, ['chain', 'power' + n]), 'Find f′(x) for f(x) = (' + ptxt(inner) + ')' + sup(n) + '.', function (x) { return n * Math.pow(pev(inner, x), n - 1) * pev(di, x); },
+      'Outside: ' + n + '(' + ptxt(inner) + ')' + (n - 1 > 1 ? sup(n - 1) : '') + '. Inside derivative: ' + ptxt(di) + '. So f′(x) = ' + n + '(' + ptxt(inner) + ')' + (n - 1 > 1 ? sup(n - 1) : '') + '(' + ptxt(di) + ').');
+  }
+  function XM(id, d, min, src, el, a, b) { /* −a x² + b x has its largest value at b / (2a) */
+    var x0 = b / (2 * a);
+    return XE(id, 'optim', d, min, src, el, 'At which x does f(x) = ' + ptxt([[-a, 2], [b, 1]]) + ' have its largest value?', function () { return x0; }, 'f′(x) = ' + ptxt([[-2 * a, 1], [b, 0]]) + ' = 0 gives x = ' + x0 + '.');
+  }
+  function XK(id, d, min, src, a, m) { /* a x³ − 3 a m² x has a local minimum at x = m (x > 0) */
+    var ts = [[a, 3], [-3 * a * m * m, 1]];
+    return XE(id, 'optim', d, min, src, ['critical', 'cubic', 'local', 'k' + m], 'At which x > 0 does f(x) = ' + ptxt(ts) + ' have a local minimum?', function () { return m; }, 'f′(x) = ' + ptxt(pder(ts)) + ' = 0 gives x = ' + m + ' for x > 0. The sign of f′ changes from negative to positive there.');
+  }
+  EXB = EXB.concat([
+    XPa('b8', 2, 3, 'up', [[3, 4]]), XPa('b9', 2, 3, 'up', [[1, 7], [1, 1]]), XPa('b10', 3, 4, 'up', [[5, 3], [-4, 2]]), XPa('b11', 3, 4, 'ai', [[2, 6], [3, 1], [-7, 0]]),
+    XPa('b12', 4, 4, 'up', [[4, 5], [-3, 4], [2, 2]]), XPa('b13', 4, 5, 'up', [[7, 3], [-1, 2], [6, 1]]), XPa('b14', 5, 5, 'ai', [[3, 6], [-2, 5], [5, 3], [-1, 1]]),
+    XPa('b15', 6, 6, 'up', [[5, 8], [-3, 6], [2, 4], [-1, 2]]), XPa('b16', 6, 6, 'ai', [[9, 4], [-7, 3], [2, 2], [11, 1], [-5, 0]]),
+    XPa('b17', 7, 7, 'ai', [[2, 9], [-5, 7], [3, 5], [-4, 3], [1, 1]]), XPa('b18', 3, 4, 'up', [[10, 2], [-6, 1], [1, 0]]),
+    XQ('q9', 3, 4, 'up', [[1, 1], [1, 0]], [[1, 1], [-3, 0]]), XQ('q10', 4, 5, 'up', [[2, 1], [1, 0]], [[1, 2], [1, 0]]), XQ('q11', 4, 5, 'ai', [[1, 2]], [[1, 1], [4, 0]]),
+    XQ('q12', 5, 5, 'up', [[3, 1], [-2, 0]], [[1, 2], [-1, 0]]), XQ('q13', 5, 6, 'ai', [[1, 3]], [[2, 1], [3, 0]]), XQ('q14', 6, 6, 'up', [[1, 2], [1, 0]], [[1, 2], [-3, 0]]),
+    XQ('q15', 6, 7, 'ai', [[2, 1], [-1, 0]], [[1, 3], [1, 1]]), XQ('q16', 7, 7, 'up', [[1, 2], [2, 1]], [[1, 2], [-1, 0]]),
+    XR('q17', 4, 5, 'up', [[1, 1], [3, 0]], [[1, 1], [1, 0]]), XR('q18', 6, 7, 'ai', [[1, 2]], [[1, 1], [3, 0]]), XR('q19', 7, 8, 'ai', [[1, 2], [1, 0]], [[1, 1], [1, 0]]), XR('q20', 5, 6, 'up', [[2, 1], [1, 0]], [[1, 1], [2, 0]]),
+    XC('c10', 2, 3, 'up', [[1, 1], [2, 0]], 2), XC('c11', 3, 4, 'up', [[3, 1], [-2, 0]], 3), XC('c12', 3, 4, 'ai', [[5, 1], [1, 0]], 2), XC('c13', 4, 5, 'up', [[1, 2], [2, 0]], 4),
+    XC('c14', 5, 5, 'ai', [[2, 2], [-1, 0]], 3), XC('c15', 5, 6, 'up', [[1, 3], [1, 0]], 3), XC('c16', 6, 6, 'ai', [[1, 2], [3, 1]], 3), XC('c17', 7, 7, 'up', [[2, 3], [-1, 1]], 2),
+    XC('c18', 6, 6, 'up', [[1, 1], [-4, 0]], 5), XC('c19', 8, 7, 'ai', [[1, 3], [-1, 1]], 3),
+    XT('t7', 2, 3, 'up', ptags([[1, 2], [2, 1]], ['tangent']), [[1, 2], [2, 1]], 1), XT('t8', 2, 3, 'up', ptags([[3, 2], [-1, 0]], ['tangent']), [[3, 2], [-1, 0]], 2),
+    XT('t9', 3, 4, 'up', ptags([[1, 3], [-3, 1]], ['tangent']), [[1, 3], [-3, 1]], 2), XT('t10', 3, 4, 'ai', ptags([[2, 2], [-7, 1], [1, 0]], ['tangent']), [[2, 2], [-7, 1], [1, 0]], 3),
+    XT('t11', 4, 4, 'up', ptags([[1, 3], [2, 2]], ['tangent']), [[1, 3], [2, 2]], 1), XT('t12', 4, 5, 'ai', ptags([[1, 4], [-1, 2]], ['tangent']), [[1, 4], [-1, 2]], 1),
+    XT('t13', 5, 5, 'up', ptags([[3, 3], [-2, 1]], ['tangent']), [[3, 3], [-2, 1]], 2), XT('t14', 5, 5, 'ai', ptags([[1, 5], [-4, 2]], ['tangent']), [[1, 5], [-4, 2]], 1),
+    XT('t15', 6, 6, 'up', ptags([[2, 4], [-3, 3]], ['tangent']), [[2, 4], [-3, 3]], 1), XT('t16', 6, 6, 'ai', ptags([[1, 3], [-6, 2], [9, 1]], ['tangent']), [[1, 3], [-6, 2], [9, 1]], 3),
+    XT('t17', 7, 7, 'up', ptags([[1, 4], [-2, 3], [1, 1]], ['tangent']), [[1, 4], [-2, 3], [1, 1]], 2), XT('t18', 7, 7, 'ai', ptags([[2, 3], [-9, 2], [12, 1]], ['tangent']), [[2, 3], [-9, 2], [12, 1]], 1),
+    XO('o6', 2, 3, 'up', null, 1, -2, 5), XO('o7', 2, 3, 'up', null, 1, -10, 0), XO('o8', 3, 3, 'ai', null, 1, 6, 1),
+    XO('o9', 3, 4, 'up', null, 2, -8, 3), XO('o10', 4, 4, 'up', null, 3, -18, 2),
+    XO('o11', 4, 4, 'ai', null, 1, -14, 7), XO('o12', 5, 5, 'up', null, 2, 8, 1), XO('o13', 5, 5, 'ai', null, 4, -16, 0),
+    XK('o14', 6, 6, 'up', 1, 1), XK('o15', 6, 6, 'ai', 1, 3), XK('o16', 7, 7, 'up', 1, 4), XK('o17', 7, 7, 'ai', 2, 3),
+    XM('o18', 3, 3, 'up', ['critical', 'maximum', 'o18'], 1, 8), XM('o19', 4, 4, 'up', ['critical', 'maximum', 'o19'], 2, 12)
+  ]);
+  /* Everything technical (why the planner chose a stop, the estimated chance of success, which solver ran) is kept out of the
+     student's screen on purpose. Add ?dev to the address to see it while testing. */
+  var DEV = /[?&]dev(=|&|$)/.test(location.search);
+  var GLYPH = { basic: 'xⁿ', pq: 'f·g', chain: 'f∘g', tangent: '↗', optim: '▲' };
   var TNAME = { basic: 'Basic rules', pq: 'Product and quotient', chain: 'Chain rule', tangent: 'Tangent lines', optim: 'Optimization' };
   var SRC = { both: 'Uploaded and AI-generated', up: 'Uploaded only', ai: 'AI-generated only' };
   var PM = { QPEAK: 0.6, S: 1.5, W0: 2, W1: 2, B0: 2, FLOOR: 0.05, BETA: 0.5, TREF: 5, ETA: 0.35, LREM: 0.8, LRED: 0.4, LGEN: 0.15, LHRED: 0.3, SIMR: 0.6, WIDTH: 250 };
@@ -136,6 +201,7 @@
     }
     return parts.join(' ');
   }
+  /* Internal wording for the team only (shown with ?dev). The student never sees these labels. */
   function xFeel(p) { return p >= PM.QPEAK + 0.2 ? 'Easier than usual' : p >= PM.QPEAK - 0.15 ? 'About right' : 'A stretch'; }
 
   /* ---------------- state and flow ---------------- */
@@ -149,8 +215,8 @@
       .catch(function (err) { clearTimeout(to); var r = xPlan(inp); return { items: r.items, solver: 'search', info: String(err && err.message || 'not available') }; });
   }
   function solverNote() {
-    var s = S.ex; if (!s || !s.solver) return '';
-    return s.solver === 'gurobi' ? '<p class="fine exsolver">Planned with Gurobi (' + esc(s.solverInfo) + ').</p>' : '<p class="fine exsolver">Planned with the in-page search, not Gurobi (' + esc(s.solverInfo) + '). Start the Node server with the solver to use Gurobi.</p>';
+    var s = S.ex; if (!DEV || !s || !s.solver) return '';
+    return '<p class="fine exdev">' + (s.solver === 'gurobi' ? 'Gurobi: ' : 'In-page search, not Gurobi: ') + esc(s.solverInfo) + '</p>';
   }
   function exTopicsAvail() { return C.topics.filter(function (t) { return EXB.some(function (e) { return e.topic === t.id; }); }); }
   function exNew() {
@@ -191,7 +257,7 @@
     if (same(f, e.fn)) { exFinish(s.sol ? 'solution' : s.hint ? 'hint' : s.tries ? 'retry' : 'clean'); return; }
     s.tries++; s.fb = s.tries === 1 ? 'Not quite yet. Try again, or ask for a hint.' : 'Still not right. A hint can help, or you can look at the solution.'; exRender(true);
   }
-  var RES = { clean: [0.9, 1, 'Solved with no help.'], retry: [0.8, 1, 'Solved after another try, with no help.'], hint: [0.7, 0.5, 'Solved with a hint.'], solution: [0.4, 0, 'Solution seen.'], skip: [0.1, 0, 'Skipped.'] };
+  var RES = { clean: [0.9, 1, 'Perfect. No help needed.'], retry: [0.8, 1, 'Got it on another try.'], hint: [0.7, 0.5, 'Solved with a hint.'], solution: [0.4, 0, 'Solution seen.'], skip: [0.1, 0, 'Skipped.'] };
   function exFinish(kind) {
     var s = S.ex, e = exCur(), r = RES[kind], tp = e.topic;
     s.hist.push({ id: e.id, r: r[0], kind: kind, min: e.min }); s.used += e.min;
@@ -199,7 +265,7 @@
     if (C.start[tp] == null) C.start[tp] = base;
     C.ratings[tp] = nv; C.last[tp] = nv - base; C.pulse[tp] = true; renderLeft();
     var inp = exInput(), oldNext = s.plan[s.cur + 1] ? s.plan[s.cur + 1].id : null, kept = s.plan.slice(0, s.cur + 1);
-    s.res = { kind: kind, text: r[2], rating: [base, nv], note: 'Planning the next exercises…', more: false, pending: true }; s.fb = '';
+    s.res = { kind: kind, text: r[2], rating: [base, nv], dev: '', adjusted: false, more: false, pending: true }; s.fb = '';
     exRender();
     exPlanner(inp).then(function (rest) {
       if (S.ex !== s || !s.res) return;
@@ -209,7 +275,7 @@
       else if (oldNext && newNext !== oldNext) note = 'The plan changed. Next is now ' + exTitle(xById(newNext)) + ' instead of ' + exTitle(xById(oldNext)) + why(kind, e, xById(newNext));
       else note = 'The plan was checked again. The next exercise stays.';
       s.plan = kept.concat(rest.items); s.solver = rest.solver; s.solverInfo = rest.info;
-      s.res.note = note; s.res.more = !!newNext; s.res.pending = false; exRender();
+      s.res.dev = note; s.res.adjusted = !!(newNext && oldNext && newNext !== oldNext); s.res.more = !!newNext; s.res.pending = false; exRender();
     });
   }
   function why(kind, cur, nx) {
@@ -228,78 +294,83 @@
     return '<div class="seg" role="group">' + items.map(function (it) { return '<button type="button" class="' + (String(it[0]) === String(on) ? 'on' : '') + '" data-ex="' + attr + '" data-v="' + it[0] + '" aria-pressed="' + (String(it[0]) === String(on)) + '">' + esc(it[1]) + '</button>'; }).join('') + '</div>';
   }
   function exHead(sub) {
-    return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2><p class="soft small">' + esc(sub) + '</p></div><span class="spacer"></span><button class="btn small" data-ex="exit">Back to chat</button></div>';
+    return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2>' + (sub ? '<p class="soft small">' + esc(sub) + '</p>' : '') + '</div><span class="spacer"></span><button class="btn small" data-ex="exit">Back to chat</button></div>';
   }
-  function bar(r) { return '<span class="exbar" aria-hidden="true"><i style="width:' + (r == null ? 0 : r * 10) + '%"></i></span>'; }
   function exSetup() {
     var s = S.ex, av = exTopicsAvail(), ctxName = (S.ctxs.filter(function (c) { return c.key === S.ctx; })[0] || {}).name;
-    if (!av.length) return exHead(ctxName) + '<div class="exbody"><div class="excard narrow"><h3>No exercises for this course yet</h3><p class="soft">The exercise bank in this prototype covers Calculus I. Add the Calculus I lectures in Material and rate your topics, then come back.</p><div class="row" style="gap:8px;margin-top:14px"><button class="btn dark" data-ex="material">Open material</button></div></div></div>';
-    var rows = av.map(function (t) {
-      var r = C.ratings[t.id], n = EXB.filter(function (e) { return e.topic === t.id; }).length;
-      return '<label class="extopic"><input type="checkbox" data-ex="topic" data-v="' + t.id + '"' + (s.topics[t.id] ? ' checked' : '') + '><span class="tn">' + esc(t.name) + '</span><span class="tc soft small">' + n + ' exercises</span>' + bar(r) + '<span class="tr small">' + (r == null ? 'Not rated' : fmt(r) + '/10') + '</span></label>';
+    if (!av.length) return exHead(ctxName) + '<div class="exbody"><div class="excard narrow"><h3>No exercises for this course yet</h3><p class="soft">The exercises in this prototype cover Calculus I. Add the Calculus I lectures in Material, then come back.</p><div class="row" style="margin-top:14px"><button class="btn dark" data-ex="material">Open material</button></div></div></div>';
+    var pills = av.map(function (t) {
+      var r = C.ratings[t.id];
+      return '<button type="button" class="expill' + (s.topics[t.id] ? ' on' : '') + '" data-ex="topic" data-v="' + t.id + '" aria-pressed="' + !!s.topics[t.id] + '"><span class="pgl">' + GLYPH[t.id] + '</span>' + esc(TNAME[t.id]) + '<span class="expr">' + (r == null ? '–' : fmt(r)) + '</span></button>';
     }).join('');
-    var nup = EXB.filter(function (e) { return e.src === 'up'; }).length, nai = EXB.length - nup;
-    return exHead(ctxName + ' · set up your session') + '<div class="exbody"><div class="excard">' +
-      '<div class="exsec"><h3>How much time do you have?</h3>' + seg('time', [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']], s.time) + '</div>' +
-      '<div class="exsec"><h3>Which topics?</h3><div class="extopics">' + rows + '</div><p class="fine">Your ratings come from Self-assess. They update as you practice.</p></div>' +
-      '<div class="exsec"><h3>Where can exercises come from?</h3>' + seg('src', [['both', SRC.both], ['up', SRC.up], ['ai', SRC.ai]], s.source) + '<p class="fine">' + nup + ' uploaded from ' + EXQ + ', ' + nai + ' AI-generated for this demo. AI-generated exercises are used when they add something the sheets do not.</p></div>' +
+    return exHead(ctxName) + '<div class="exbody"><div class="excard narrow setup">' +
+      '<h3 class="exbig">Plan your practice</h3>' +
+      '<div class="exsec"><span class="exlab">Time</span>' + seg('time', [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']], s.time) + '</div>' +
+      '<div class="exsec"><span class="exlab">Topics</span><div class="expills">' + pills + '</div></div>' +
+      '<div class="exsec"><span class="exlab">Exercises from</span>' + seg('src', [['both', 'Mine and AI'], ['up', 'Mine only'], ['ai', 'AI only']], s.source) + '</div>' +
       (s.note ? '<p class="exwarn" role="alert">' + esc(s.note) + '</p>' : '') +
-      '<div class="row" style="gap:10px;margin-top:6px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="build"' + (s.busy ? ' disabled' : '') + '>' + (s.busy ? 'Planning…' : 'Build my plan') + '</button><span class="soft small">The plan picks exercises and their order for ' + s.time + ' minutes.</span></div></div>' +
-      '<aside class="exside"><h3>How it works</h3><ol><li>You choose time, topics and how hard it should feel.</li><li>The planner picks which exercises to do and in what order.</li><li>After every exercise it plans again with what happened.</li></ol><p class="fine">Plans are made for you from your ratings and results, not from a fixed list.</p></aside></div>';
+      '<button class="btn dark exbigbtn" data-ex="build"' + (s.busy ? ' disabled' : '') + '>' + (s.busy ? 'Building your path…' : 'Build my path') + '</button></div></div>';
   }
-  function pips(d) { var h = ''; for (var i = 1; i <= 10; i++) h += '<i' + (i <= d ? ' class="on"' : '') + '></i>'; return '<span class="expips" role="img" aria-label="Difficulty ' + d + ' of 10" title="Difficulty ' + d + ' of 10">' + h + '</span>'; }
-  /* The session as a line of time: one block per exercise, sized by its minutes, coloured by topic. */
-  function timelineHtml(plan, budget, done, cur) {
-    var used = plan.reduce(function (a, b) { return a + b.min; }, 0), free = Math.max(0, budget - used);
-    var segs = plan.map(function (it, i) { var e = xById(it.id), st = i < done ? 'done' : i === cur ? 'now' : 'todo'; return '<span class="tseg ' + st + '" style="flex:' + it.min + ';--tc:' + TCOL[e.topic] + '" title="' + esc(exTitle(e)) + '"><b>' + (i + 1) + '</b></span>'; }).join('');
-    if (free) segs += '<span class="tseg free" style="flex:' + free + '" title="Time not used"><em>' + free + ' min</em></span>';
-    var tp = []; plan.forEach(function (it) { var t = xById(it.id).topic; if (tp.indexOf(t) < 0) tp.push(t); });
-    var key = tp.map(function (t) { return '<span class="tk"><i style="background:' + TCOL[t] + '"></i>' + TNAME[t] + '</span>'; }).join('');
-    return '<div class="extl" role="img" aria-label="Session timeline, ' + used + ' of ' + budget + ' minutes planned">' + segs + '</div><div class="extlk small"><span class="soft">0</span><span class="tkeys">' + key + '</span><span class="soft">' + budget + ' min</span></div>';
+  /* The path: a winding road of stops. Each stop is one exercise, drawn as its topic symbol. The student sees the topic and
+     the minutes, nothing else. Order is the order of the road, from top to bottom. */
+  function roadHtml(items, budget) {
+    var n = items.length, DX = [0, -64, 0, 64], W = 360, cx = W / 2, GAP = 104, H = (n + 1) * GAP + 30;
+    var pts = items.map(function (it, i) { return { x: cx + DX[i % 4], y: 52 + i * GAP }; }); pts.push({ x: cx, y: 52 + n * GAP });
+    var d = 'M' + pts[0].x + ' ' + pts[0].y;
+    for (var i = 1; i < pts.length; i++) d += ' C' + pts[i - 1].x + ' ' + (pts[i - 1].y + 52) + ' ' + pts[i].x + ' ' + (pts[i].y - 52) + ' ' + pts[i].x + ' ' + pts[i].y;
+    var tot = items.reduce(function (a, b) { return a + b.min; }, 0);
+    var h = '<div class="exroad" style="height:' + H + 'px"><svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><path d="' + d + '"/></svg>';
+    items.forEach(function (it, k) {
+      var e = xById(it.id), p = pts[k], right = p.x <= cx;
+      h += '<span class="stop' + (k === 0 ? ' next' : '') + '" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-hidden="true">' + GLYPH[e.topic] + '</span>' +
+        '<span class="stoplab ' + (right ? 'r' : 'l') + '" style="left:' + (right ? p.x + 46 : p.x - 46 - 150) + 'px;top:' + (p.y - 20) + 'px" aria-hidden="true"><b>' + TNAME[e.topic] + '</b>' + e.min + ' min</span>';
+    });
+    var f = pts[n], more = budget - tot >= 5;   /* time is left: the path is not over, more stops appear as the student progresses */
+    h += '<span class="stop finish' + (more ? ' more' : '') + '" style="left:' + f.x + 'px;top:' + f.y + 'px" aria-hidden="true">' + (more ? '…' : '⚑') + '</span><span class="stoplab r" style="left:' + (f.x + 46) + 'px;top:' + (f.y - 20) + 'px" aria-hidden="true"><b>' + (more ? 'More ahead' : 'Finish') + '</b>' + (more ? 'new stops appear as you go' : 'about ' + tot + ' min') + '</span></div>';
+    h += '<ol class="sr">' + items.map(function (it, k) { var e = xById(it.id); return '<li>Stop ' + (k + 1) + ': ' + TNAME[e.topic] + ', ' + e.min + ' minutes</li>'; }).join('') + '</ol>';
+    return h;
   }
-  /* The path itself: numbered stops joined by a line, with what changes between two stops. */
-  function pathHtml(items, st) {
-    return '<ol class="expath">' + items.map(function (it, i) {
-      var e = xById(it.id), state = st(i), prev = i ? xById(items[i - 1].id) : null, conn = '', h = S.ex.hist[i];
-      if (prev) { var dd = e.d - prev.d, lab = prev.topic !== e.topic ? 'Switch to ' + TNAME[e.topic] : dd > 0 ? 'A step harder' : dd < 0 ? 'A step easier' : 'Same level'; conn = '<li class="exconn" aria-hidden="true"><span>' + lab + '</span></li>'; }
-      return conn + '<li class="exp ' + state + '" style="--tc:' + TCOL[e.topic] + '"><span class="exnode">' + (state === 'done' ? '✓' : i + 1) + '</span><div class="expc"><div class="exph"><b>' + TNAME[e.topic] + '</b><span class="soft small">' + e.min + ' min</span>' + pips(e.d) + '</div><p class="expq">' + esc(e.q) + '</p>' +
-        '<div class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span>' + (state === 'done' && h ? '<span class="soft">' + esc(RES[h.kind][2]) + '</span>' : '<span class="soft">' + xFeel(it.p) + ' · about ' + Math.round(it.p * 10) + ' in 10 solved on your own (estimate)</span>') + '</div>' +
-        (state !== 'done' && it.why ? '<p class="exwhy small">' + esc(it.why) + '</p>' : '') + '</div></li>';
-    }).join('') + '</ol>';
+  function devPlan(items) { /* for the team only (?dev): what the planner believes about each stop */
+    if (!DEV) return '';
+    return '<details class="exdevbox" open><summary>For the team</summary>' + solverNote() + (S.ex.limitNote ? '<p class="fine">' + esc(S.ex.limitNote) + '</p>' : '') + '<ol>' + items.map(function (it) { var e = xById(it.id); return '<li>' + e.id + ' · difficulty ' + e.d + ' · ' + (e.src === 'up' ? 'uploaded' : 'AI') + ' · estimated solve chance ' + Math.round(it.p * 100) + '% (' + xFeel(it.p) + ') · ' + esc(it.why || '') + '</li>'; }).join('') + '</ol></details>';
   }
   function exPlanView() {
     var s = S.ex, tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0);
-    return exHead('Your learning path for ' + s.time + ' minutes') + '<div class="exbody"><div class="excard wide"><div class="exsum"><b>' + s.plan.length + ' exercises · ' + tot + ' of ' + s.time + ' minutes planned</b></div>' + timelineHtml(s.plan, s.time, 0, -1) +
-      (s.limitNote ? '<p class="exlimit">' + esc(s.limitNote) + '</p>' : '') +
-      '<h3 class="exh3">The path, in order</h3>' + pathHtml(s.plan, function () { return 'todo'; }) +
-      '<p class="fine">Minutes are estimates. Only the next exercise is certain: after each one, the plan is made again with your result.</p>' + solverNote() +
-      '<div class="row" style="gap:10px;margin-top:8px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="start">Start</button><button class="btn" style="height:40px" data-ex="back">Change settings</button></div></div></div>';
+    return exHead('') + '<div class="exbody road"><div class="exroadwrap"><div class="exsumline"><b>Your path</b><span>' + s.plan.length + ' stops · about ' + tot + ' min</span></div>' + roadHtml(s.plan, s.time) + devPlan(s.plan) + '</div></div>' +
+      '<div class="exfoot"><button class="btn" data-ex="back">Change</button><button class="btn dark exbigbtn" data-ex="start">Start</button></div>';
+  }
+  function stepperHtml(s, r) {
+    var n = s.plan.length;
+    return '<div class="exsteps" role="img" aria-label="Stop ' + (s.cur + 1) + ' of ' + n + '">' + s.plan.map(function (it, i) {
+      var st = i < s.cur || (i === s.cur && r) ? 'done' : i === s.cur ? 'now' : 'todo';
+      return (i ? '<i class="exstl' + (st === 'done' || st === 'now' ? ' on' : '') + '"></i>' : '') + '<span class="exst ' + st + '">' + (st === 'done' ? '✓' : '') + '</span>';
+    }).join('') + '</div><p class="exclock soft small">' + s.used + ' of ' + s.time + ' min</p>';
   }
   function exRun() {
     var s = S.ex, e = exCur(), r = s.res;
-    var list = pathHtml(s.plan, function (i) { return i < s.cur || (i === s.cur && r) ? 'done' : i === s.cur ? 'now' : 'todo'; });
     var keys = [['x', 'x'], ['x²', '^2'], ['xⁿ', '^'], ['(', '('], [')', ')'], ['×', '*'], ['÷', '/']].map(function (k) { return '<button type="button" class="mk" data-ex="key" data-v="' + k[1] + '" aria-label="Insert ' + esc(k[0]) + '">' + k[0] + '</button>'; }).join('');
-    var main = '<div class="excur"><div class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span><span class="soft">' + esc(exTitle(e)) + ' · exercise ' + (s.cur + 1) + '</span></div><p class="exq">' + esc(e.q) + '</p>';
+    var main = '<div class="excur"><div class="excurtop"><span class="exchip"><span class="pgl">' + GLYPH[e.topic] + '</span>' + TNAME[e.topic] + '</span><span class="soft small">' + e.min + ' min</span></div><p class="exq">' + esc(e.q) + '</p>';
     if (!r) {
-      main += '<div class="exans"><div class="mkeys" role="group" aria-label="Math keys">' + keys + '</div><div class="row" style="gap:8px"><input class="inp" id="ex-in" autocomplete="off" placeholder="Write your answer…" aria-label="Your answer" value="' + esc(s.input) + '" style="height:40px"><button class="btn dark" style="height:40px;padding:0 20px" data-ex="submit">Check</button></div></div>';
+      main += '<div class="exans"><div class="mkeys" role="group" aria-label="Math keys">' + keys + '</div><div class="row" style="gap:8px"><input class="inp" id="ex-in" autocomplete="off" placeholder="Your answer" aria-label="Your answer" value="' + esc(s.input) + '" style="height:44px"><button class="btn dark" style="height:44px;padding:0 22px" data-ex="submit">Check</button></div></div>';
       if (s.fb) main += '<p class="exfb" role="status">' + esc(s.fb) + '</p>';
       if (s.hint) main += '<div class="exhint"><b>Hint</b> ' + esc(HINTS[e.topic]) + '</div>';
       if (s.sol) main += '<div class="exhint sol"><b>Solution</b> ' + esc(e.sol) + '</div>';
-      main += '<div class="row" style="gap:8px;margin-top:12px"><button class="btn small" data-ex="hint"' + (s.hint ? ' disabled' : '') + '>Show a hint</button><button class="btn small" data-ex="sol"' + (s.sol ? ' disabled' : '') + '>Show the solution</button><button class="btn small ghost" data-ex="skip">Skip</button></div>';
+      main += '<div class="row exsub"><button class="btn small ghost" data-ex="hint"' + (s.hint ? ' disabled' : '') + '>Hint</button><button class="btn small ghost" data-ex="sol"' + (s.sol ? ' disabled' : '') + '>Solution</button><button class="btn small ghost" data-ex="skip">Skip</button></div>';
     } else {
-      main += '<div class="exres ' + r.kind + '"><b>' + esc(r.text) + '</b><span class="small">' + (r.rating[1] > r.rating[0] ? 'Your rating for this topic went from ' + fmt(r.rating[0]) + ' to ' + fmt(r.rating[1]) + ' of 10.' : 'Your rating for this topic stays at ' + fmt(r.rating[1]) + ' of 10.') + '</span>' + (r.kind !== 'clean' && r.kind !== 'retry' ? '<span class="small">Solution: ' + esc(e.sol) + '</span>' : '') + '</div>' +
-        '<div class="explan"><b>Plan updated</b><span>' + esc(r.note) + '</span></div><div class="row" style="gap:8px;margin-top:12px"><button class="btn dark" style="height:40px;padding:0 20px" data-ex="next"' + (r.pending ? ' disabled' : '') + '>' + (r.pending ? 'Planning…' : r.more ? 'Next exercise' : 'See summary') + '</button></div>';
+      var up = r.rating[1] > r.rating[0];
+      main += '<div class="exres ' + r.kind + '"><b>' + esc(r.text) + '</b>' + (up ? '<span class="exgain">' + esc(TNAME[e.topic]) + ' ' + fmt(r.rating[0]) + ' → ' + fmt(r.rating[1]) + '</span>' : '') + (r.kind !== 'clean' && r.kind !== 'retry' ? '<span class="small">' + esc(e.sol) + '</span>' : '') + '</div>' +
+        (r.adjusted ? '<p class="exadj">✦ Your path was adjusted</p>' : '') + (DEV && r.dev ? '<p class="fine exdev">' + esc(r.dev) + '</p>' : '') +
+        '<div class="row" style="margin-top:14px"><button class="btn dark exbigbtn" data-ex="next"' + (r.pending ? ' disabled' : '') + '>' + (r.pending ? 'One moment…' : r.more ? 'Next' : 'Finish') + '</button></div>';
     }
     main += '</div>';
-    var left = S.ex.time - s.used;
-    return exHead('Session in progress') + '<div class="exbody run"><aside class="exrail"><div class="exsum"><b>' + s.used + ' of ' + s.time + ' min</b></div>' + timelineHtml(s.plan, s.time, s.cur + (r ? 1 : 0), r ? -1 : s.cur) + list + '<p class="fine">' + left + ' min left. Exercises below may change after your next answer.</p>' + solverNote() + '</aside>' + main + '</div>';
+    return exHead('') + '<div class="exbody run"><div class="exrunwrap">' + stepperHtml(s, r) + main + (DEV ? '<p class="fine exdev">' + solverNote().replace(/<[^>]+>/g, '') + '</p>' : '') + '</div></div>';
   }
   function exDone() {
     var s = S.ex, solved = s.hist.filter(function (h) { return h.r >= 0.5; }).length, clean = s.hist.filter(function (h) { return h.kind === 'clean' || h.kind === 'retry'; }).length, tp = {};
     s.hist.forEach(function (h) { tp[xById(h.id).topic] = 1; });
-    var rows = Object.keys(tp).map(function (k) { var a = s.rat0[k] == null ? 5 : s.rat0[k], b = C.ratings[k]; return '<li><span>' + esc(TOPIC_DEFS[k].name) + '</span><span class="soft">' + fmt(a) + ' → ' + fmt(b) + ' of 10</span></li>'; }).join('');
-    return exHead('Session finished') + '<div class="exbody"><div class="excard narrow"><h3>' + s.hist.length + ' exercises in ' + s.used + ' of ' + s.time + ' minutes</h3><ul class="exstats"><li><b>' + solved + '</b> solved</li><li><b>' + clean + '</b> with no help</li><li><b>' + s.hist.filter(function (h) { return h.kind === 'skip'; }).length + '</b> skipped</li></ul>' +
-      '<h3 style="margin-top:18px">Your ratings</h3><ul class="exrates">' + rows + '</ul><p class="fine">Rating changes follow a simple prototype rule, not a measurement.</p><div class="row" style="gap:8px;margin-top:12px"><button class="btn dark" data-ex="again">Plan another session</button><button class="btn" data-ex="exit">Back to chat</button></div></div></div>';
+    var rows = Object.keys(tp).map(function (k) { var a = s.rat0[k] == null ? 5 : s.rat0[k], b = C.ratings[k]; return '<li><span class="pgl">' + GLYPH[k] + '</span><span>' + TNAME[k] + '</span><span class="soft">' + fmt(a) + ' → ' + fmt(b) + '</span></li>'; }).join('');
+    return exHead('') + '<div class="exbody"><div class="excard narrow center"><div class="extrophy" aria-hidden="true">⚑</div><h3 class="exbig">Path complete</h3><ul class="exstats"><li><b>' + solved + '</b>solved</li><li><b>' + clean + '</b>on your own</li><li><b>' + s.used + '</b>minutes</li></ul>' +
+      '<ul class="exrates">' + rows + '</ul><div class="row" style="gap:8px;margin-top:18px;justify-content:center"><button class="btn dark exbigbtn" data-ex="again">New path</button><button class="btn" style="height:44px" data-ex="exit">Back to chat</button></div></div></div>';
   }
   function exRender(keepFocus) {
     var v = $('#exview'); if (!v) return;
@@ -317,7 +388,7 @@
     if (a === 'exit') exExit();
     else if (a === 'time') { s.time = +v; exRender(); }
     else if (a === 'src') { s.source = v; exRender(); }
-    else if (a === 'topic') { s.topics[v] = o.checked; s.note = ''; }
+    else if (a === 'topic') { s.topics[v] = !s.topics[v]; s.note = ''; exRender(); }
     else if (a === 'build') exBuild();
     else if (a === 'back') { s.phase = 'setup'; exRender(); }
     else if (a === 'start') exStart();

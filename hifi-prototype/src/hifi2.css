@@ -121,46 +121,76 @@
 #left .sbtog:hover { background: var(--sel); color: var(--ink); border-color: transparent; box-shadow: none; }
 #b-side { color: var(--soft); }
 
-/* ---- learning path ---- */
-.excard.wide { max-width: 780px; }
-.exh3 { margin: 18px 0 10px; font-size: 14px; font-weight: 600; }
-.extl { display: flex; gap: 3px; height: 36px; margin: 6px 0 4px; }
-.tseg { display: flex; align-items: center; justify-content: center; border-radius: 8px; background: var(--tc); color: #fff; font-size: 12px; min-width: 22px; overflow: hidden; transition: opacity .2s; }
-.tseg.done { opacity: .4; }
-.tseg.now { outline: 2px solid var(--ink); outline-offset: 1px; }
-.tseg.free { background: repeating-linear-gradient(45deg, var(--fill), var(--fill) 6px, #fff 6px, #fff 12px); border: 1px dashed var(--line); color: var(--soft); }
-.tseg em { font-style: normal; font-size: 11px; white-space: nowrap; padding: 0 6px; }
-.extlk { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.tkeys { display: flex; flex-wrap: wrap; gap: 4px 14px; justify-content: center; color: var(--soft); }
-.tk { display: inline-flex; align-items: center; gap: 5px; }
-.tk i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
-.exlimit { margin: 10px 0 0; padding: 9px 12px; border-radius: 8px; background: var(--fill); color: var(--soft); font-size: 13px; }
-.expath { list-style: none; margin: 0 0 10px; padding: 0; position: relative; }
-.expath::before { content: ''; position: absolute; left: 14px; top: 16px; bottom: 16px; width: 2px; background: var(--line); }
-.exp { display: grid; grid-template-columns: 30px 1fr; gap: 14px; position: relative; }
-.exnode { position: relative; z-index: 1; width: 30px; height: 30px; margin-top: 8px; border-radius: 50%; background: var(--tc); color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 13px; box-shadow: 0 0 0 4px #fff; }
-.exp.todo .exnode { background: #fff; color: var(--tc); border: 2px solid var(--tc); }
-.exp.now .exnode { box-shadow: 0 0 0 4px #fff, 0 0 0 6px var(--tc); }
-.exconn { position: relative; z-index: 1; padding: 4px 0 4px 44px; display: flex; }
-.exconn span { font-size: 11px; color: var(--soft); background: #fff; padding: 2px 10px; border: 1px solid var(--line2); border-radius: 99px; }
-.expc { border: 1px solid var(--line2); border-left: 4px solid var(--tc); border-radius: 10px; padding: 10px 14px; background: #fff; margin: 2px 0; min-width: 0; }
-.exp.now .expc { box-shadow: 0 0 0 1px var(--tc); }
-.exp.done .expc { background: var(--fill); }
-.exph { display: flex; align-items: center; gap: 10px; }
-.exph b { color: var(--tc); font-size: 14px; }
-.expips { display: inline-flex; gap: 2px; margin-left: auto; }
-.expips i { width: 5px; height: 12px; border-radius: 2px; background: var(--line2); }
-.expips i.on { background: var(--tc); }
-.expq { margin: 4px 0 6px; font-size: 14px; }
-.exwhy { margin: 6px 0 0; color: var(--ink); }
-.exrail { flex: 0 1 360px; }
-.exrail .expq, .exrail .exmeta, .exrail .exwhy { display: none; }
-.exrail .exp.now .expq, .exrail .exp.now .exwhy { display: block; }
-.exrail .expc { padding: 7px 12px; }
-.exrail .expips { display: none; }
-.exrail .exp.now .expips { display: inline-flex; }
-
+/* ---- exercise mode: neutral, one accent ---- */
 .editor { position: relative; }
-.tseg.free { min-width: 48px; }
-
-.extlk > .soft { white-space: nowrap; }
+.excard.setup { padding: 26px 28px; display: grid; gap: 4px; }
+.excard.center { text-align: center; }
+.exbig { margin: 0 0 14px; font-size: 22px; font-weight: 600; }
+.exlab { display: block; margin: 0 0 8px; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
+.exsec { margin-bottom: 20px; }
+.exbigbtn { height: 44px; padding: 0 26px; font-size: 15px; }
+.expills { display: flex; flex-wrap: wrap; gap: 8px; }
+.expill { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 14px 0 6px; border: 1px solid var(--line); border-radius: 99px; background: #fff; font: inherit; font-size: 14px; cursor: pointer; transition: background .15s, color .15s, border-color .15s; }
+.expill:hover { background: var(--fill); }
+.expill.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.expill:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.pgl { display: inline-grid; place-items: center; min-width: 28px; height: 28px; padding: 0 4px; border-radius: 99px; background: var(--sel); color: var(--ink); font-size: 12px; font-weight: 700; }
+.expill.on .pgl { background: rgba(255, 255, 255, .18); color: #fff; }
+.expill .expr { font-size: 12px; opacity: .7; margin-left: 2px; }
+/* the road */
+.exbody.road { align-items: flex-start; padding-bottom: 96px; }
+.exroadwrap { width: 100%; max-width: 440px; margin: 0 auto; }
+.exsumline { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 6px; padding: 0 4px; }
+.exsumline b { font-size: 20px; font-weight: 600; }
+.exsumline span { color: var(--soft); font-size: 14px; }
+.exroad { position: relative; width: 360px; margin: 10px auto 0; }
+.exroad svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.exroad path { fill: none; stroke: var(--line); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 1 11; }
+.stop { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; background: #fff; border: 3px solid var(--ink); display: grid; place-items: center; font-weight: 700; font-size: 16px; box-shadow: 0 4px 0 var(--line); }
+.stop.next { background: var(--ink); color: #fff; box-shadow: 0 4px 0 #000, 0 0 0 7px var(--sel); }
+.stop.finish { background: var(--sel); border-style: dashed; font-size: 22px; }
+.stop.finish.more { font-size: 26px; letter-spacing: 1px; background: #fff; border-color: var(--line); color: var(--soft); box-shadow: none; }
+.stoplab { position: absolute; width: 150px; font-size: 13px; line-height: 1.3; color: var(--soft); }
+.stoplab b { display: block; font-size: 14px; color: var(--ink); }
+.stoplab.l { text-align: right; }
+.exfoot { display: flex; justify-content: center; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--line2); background: #fff; }
+/* session */
+.exbody.run { justify-content: center; }
+.exrunwrap { width: 100%; max-width: 680px; margin: 0 auto; }
+.exsteps { display: flex; align-items: center; justify-content: center; margin: 4px 0 6px; }
+.exst { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--line); background: #fff; display: grid; place-items: center; font-size: 13px; color: #fff; flex: none; }
+.exst.done { background: var(--ink); border-color: var(--ink); }
+.exst.now { border-color: var(--ink); box-shadow: 0 0 0 5px var(--sel); }
+.exstl { flex: 1; max-width: 46px; min-width: 8px; height: 2px; background: var(--line); }
+.exstl.on { background: var(--ink); }
+.exclock { text-align: center; margin: 0 0 14px; }
+.excur { border: 1px solid var(--line2); border-radius: 14px; padding: 24px 28px; background: #fff; }
+.excurtop { display: flex; align-items: center; gap: 12px; }
+.exchip { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; }
+.exq { font-size: 26px; line-height: 1.3; margin: 14px 0 20px; font-weight: 500; }
+.exans { display: grid; gap: 10px; }
+.mkeys { display: flex; gap: 6px; flex-wrap: wrap; }
+.exview .mk { min-width: 36px; height: 32px; border: 1px solid var(--line); border-radius: 8px; background: #fff; font: inherit; cursor: pointer; padding: 0 8px; }
+.exview .mk:hover { background: var(--fill); }
+.exsub { gap: 6px; margin-top: 10px; }
+.exfb { margin: 10px 0 0; color: var(--amber); font-size: 14px; }
+.exhint { margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: var(--fill); font-size: 14px; }
+.exhint.sol { background: var(--amber-bg); }
+.exres { display: grid; gap: 6px; padding: 14px 18px; border-radius: 12px; background: var(--fill); }
+.exres b { font-size: 18px; }
+.exres.solution, .exres.skip { background: var(--amber-bg); }
+.exgain { display: inline-block; justify-self: start; padding: 2px 10px; border-radius: 99px; background: var(--ink); color: #fff; font-size: 12px; font-weight: 600; }
+.exadj { margin: 12px 0 0; font-size: 13px; color: var(--soft); }
+.exwarn { color: var(--amber); background: var(--amber-bg); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin: 0 0 12px; }
+.exwarn:empty { display: none; }
+.extrophy { width: 72px; height: 72px; margin: 0 auto 10px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 30px; }
+.exstats { list-style: none; margin: 8px 0 18px; padding: 0; display: flex; gap: 30px; justify-content: center; font-size: 13px; color: var(--soft); }
+.exstats b { display: block; font-size: 32px; color: var(--ink); }
+.exrates { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; text-align: left; }
+.exrates li { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-bottom: 1px solid var(--line2); font-size: 14px; }
+.exrates li span:nth-child(2) { flex: 1; }
+/* for the team only (?dev) */
+.exdev { color: var(--soft); border-left: 3px solid var(--line); padding-left: 10px; margin: 8px 0 0; }
+.exdevbox { margin: 18px 0 0; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 8px; font-size: 12px; color: var(--soft); }
+.exdevbox ol { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
+@media (prefers-reduced-motion: reduce) { .expill { transition: none; } }
