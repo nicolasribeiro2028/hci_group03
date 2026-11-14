@@ -1,0 +1,4 @@
+{
+  "rewrites": [{ "source": "/plan", "destination": "/api/plan" }],
+  "functions": { "api/plan.py": { "maxDuration": 30, "includeFiles": "solver/**" } }
+}

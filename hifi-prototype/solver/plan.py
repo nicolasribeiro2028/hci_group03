@@ -21,8 +21,7 @@ def jaccard(a, b):
     return len(a & b) / len(a | b) if (a | b) else 0.0
 
 
-def main():
-    req = json.load(sys.stdin)
+def solve(req):
     allowed = [e for e in req['bank'] if req.get('source', 'both') == 'both' or e['src'] == req['source']]
     b = Bank()
     b.X = [dict(id=e['id'], c=e['topic'], d=float(e['d']), t=float(e['min']), gen=(e['src'] == 'ai'), el=e['el']) for e in allowed]
@@ -38,8 +37,12 @@ def main():
     cand, val, pr, rem = model.prepare(st, remaining, topics)
     res = model.plan(st, remaining, topics)
     items = [dict(id=b.X[i]['id'], min=b.X[i]['t'], p=res['pr'][i], rem=rem.get(i, 0.0)) for i in res['order']]
-    print(json.dumps(dict(items=items, solver='gurobi', status=res['status'], gap=res.get('gap'), runtime=round(res['runtime'], 3),
-                          nvars=res['nvars'], ncons=res['ncons'], obj=res['obj'], ncand=res['ncand'])))
+    return dict(items=items, solver='gurobi', status=res['status'], gap=res.get('gap'), runtime=round(res['runtime'], 3),
+                nvars=res['nvars'], ncons=res['ncons'], obj=res['obj'], ncand=res['ncand'])
+
+
+def main():
+    print(json.dumps(solve(json.load(sys.stdin))))
 
 
 if __name__ == '__main__':

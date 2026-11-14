@@ -4,10 +4,6 @@
 
 ## Set up
 
-Easiest: run `./run.sh` in the folder above. It does the three steps below for you the first time.
-
-By hand:
-
 ```
 python3 -m venv solver/.venv
 solver/.venv/bin/pip install -r solver/requirements.txt
@@ -25,3 +21,7 @@ Settings (environment variables of the server): `PLAN_KCAND` (candidates kept, d
 - **Named-User Academic:** valid one year, tied to one person and one computer. Register an academic account, then **connect to the university network** (VPN may work, check with the university) only for activation. In the user portal, go to License Request, "Generate now" in the Named-User Academic block, and run the `grbgetkey` command the portal shows. Afterwards it works offline ([how to get a free academic licence](https://support.gurobi.com/hc/en-us/articles/25770868793105)).
 - **WLS Academic:** lasts 90 days and can be extended. It works on several computers and in containers, which suits a shared demo machine.
 - Nothing to pay. The licence file is personal: do not commit it (`gurobi.lic` is in `.gitignore`).
+
+## Online
+
+`api/plan.py` and `vercel.json` (one folder up) run this same planner as a Vercel function. See `NOTES.md`.

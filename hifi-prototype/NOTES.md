@@ -74,3 +74,7 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 
 ## Update: one source per message
 - Sentences in a chat answer are plain text: no number after each one and no per-sentence button. The one line under the answer ("From your slides, p. 12") is the button. Clicking it (or hovering it) shows every passage of that message on the slide, in yellow with a "Source" tag. If the answer draws on several slides, each page number is its own small button. Sentences that are not from the slides keep a soft tint.
+
+## Online copy (Vercel) with Gurobi
+- The same page can be hosted as a static site plus one Python function: `api/plan.py` runs `solver/plan.py` (Gurobi) and `vercel.json` rewrites `/plan` to it. The page already asks `/plan`, so Exercise mode uses Gurobi on the link too. If the function fails the page falls back to its own search.
+- The pip Gurobi licence is size limited, for non-production use, and expires 2026-11-23 for the version used here. After that date the link uses the in-page search until a licence (for example the free academic WLS one) is set up.
