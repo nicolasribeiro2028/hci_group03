@@ -703,6 +703,15 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 .stoplab .tz { display: block; color: var(--ink); opacity: .72; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12.5px; }
 .exroad { width: 560px; }
 .exroadwrap { max-width: 600px; overflow-x: auto; }
+
+/* road, second version */
+.exroadwrap { max-width: 700px; }
+.stop.sm { width: 46px; height: 46px; margin: -23px 0 0 -23px; font-size: 14px; border-width: 2px; box-shadow: 0 3px 0 var(--line); }
+.stop.sm.next { box-shadow: 0 3px 0 var(--line), 0 0 0 6px var(--sel); }
+.stop.topic { width: 60px; height: 60px; margin: -30px 0 0 -30px; background: var(--sel); border-color: var(--line); box-shadow: none; }
+.exhelp { margin: 8px 0 0; font-size: 13px; color: var(--soft); }
+.exhelp.ok { color: var(--ink); }
+.exbigbtn:disabled { opacity: .45; cursor: not-allowed; }
 </style>
 
 <div id="login" hidden>
@@ -2360,7 +2369,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   }
   function exTopicsAvail() { return C.topics.filter(function (t) { return EXB.some(function (e) { return e.topic === t.id; }); }); }
   function exNew() {
-    var av = exTopicsAvail(), tp = {}; av.forEach(function (t) { tp[t.id] = true; });
+    var av = exTopicsAvail(), tp = {}; av.forEach(function (t) { tp[t.id] = false; });   /* nothing is selected until the student chooses */
     return { phase: 'setup', time: 30, topics: tp, source: 'both', plan: [], hist: [], cur: 0, used: 0, rat0: null, tries: 0, hint: false, sol: false, input: '', fb: '', res: null, note: '', ctx: S.ctx };
   }
   function exInput() { var s = S.ex, tp = Object.keys(s.topics).filter(function (k) { return s.topics[k]; }); return { remaining: s.time - s.used, topics: tp, source: s.source, rat: s.rat0 || C.ratings, hist: s.hist.map(function (h) { return { id: h.id, r: h.r }; }) }; }
@@ -2458,6 +2467,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
       return exHead(ctxName) + '<div class="exbody"><div class="excard narrow center"><div class="extrophy" aria-hidden="true">xⁿ</div><h3 class="exbig">' + (reading ? 'Reading the sample lectures…' : 'Let\u2019s get your material in') + '</h3><p class="soft">The exercises in this prototype are about derivatives. Use the sample lectures to try Exercise mode, or add your own PDF.</p><div class="row" style="gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap">' +
         (reading ? '' : '<button class="btn dark exbigbtn" data-ex="samples">Use sample lectures</button><button class="btn" style="height:44px" data-ex="material">Add my own PDF</button>') + '</div></div></div>';
     }
+    var picked = av.filter(function (t) { return s.topics[t.id]; }).length;
     var pills = av.map(function (t) {
       var r = C.ratings[t.id];
       return '<button type="button" class="expill' + (s.topics[t.id] ? ' on' : '') + '" data-ex="topic" data-v="' + t.id + '" aria-pressed="' + !!s.topics[t.id] + '">' + esc(TNAME[t.id]) + '<span class="expr">' + (r == null ? '–' : fmt(r)) + '</span></button>';
@@ -2465,14 +2475,14 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     return exHead(ctxName) + '<div class="exbody"><div class="excard narrow setup">' +
       '<h3 class="exbig">Plan your practice</h3>' +
       '<div class="exsec"><span class="exlab">Time</span>' + seg('time', [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']], s.time) + '</div>' +
-      '<div class="exsec"><span class="exlab">Topics</span><div class="expills">' + pills + '</div></div>' +
+      '<div class="exsec"><span class="exlab">Choose your topics</span><div class="expills">' + pills + '</div><p class="exhelp' + (picked ? ' ok' : '') + '">' + (picked ? picked + (picked === 1 ? ' topic' : ' topics') + ' chosen' : 'Tap one or more topics to practice') + '</p></div>' +
       '<div class="exsec"><span class="exlab">Exercises from</span>' + seg('src', [['both', 'Mine and AI'], ['up', 'Mine only'], ['ai', 'AI only']], s.source) + '</div>' +
       (s.note ? '<p class="exwarn" role="alert">' + esc(s.note) + '</p>' : '') +
-      '<button class="btn dark exbigbtn" data-ex="build"' + (s.busy ? ' disabled' : '') + '>' + (s.busy ? 'Building your path…' : 'Build my path') + '</button></div></div>';
+      '<button class="btn dark exbigbtn" data-ex="build"' + (s.busy || !picked ? ' disabled' : '') + '>' + (s.busy ? 'Building your path…' : 'Build my path') + '</button></div></div>';
   }
   /* The path: a winding road of stops. Each stop is one exercise, drawn as its topic symbol. The student sees the topic and
      the minutes, nothing else. Order is the order of the road, from top to bottom. */
-  function roadHtml(items, budget) {
+  function roadHtmlGrid(items, budget) {   /* first version: every stop alike, in a regular zigzag */
     /* The road is read from the bottom up: Start at the bottom, then the stops in order, the end of the path at the top. */
     var n = items.length, DX = [0, -56, 0, 56], W = 560, cx = W / 2, GAP = 108, H = (n + 2) * GAP + 24;
     function Y(k) { return H - 56 - k * GAP; }   /* k = 0 is Start, 1..n the stops, n + 1 the end */
@@ -2480,7 +2490,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     var d = 'M' + pts[0].x + ' ' + pts[0].y;
     for (var i = 1; i < pts.length; i++) d += ' C' + pts[i - 1].x + ' ' + (pts[i - 1].y - 52) + ' ' + pts[i].x + ' ' + (pts[i].y + 52) + ' ' + pts[i].x + ' ' + pts[i].y;
     var tot = items.reduce(function (a, b) { return a + b.min; }, 0);
-    var h = '<div class="exroad" style="height:' + H + 'px"><svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><path d="' + d + '"/></svg>';
+    var h = '<div class="exroad" style="height:' + H + 'px;width:' + W + 'px"><svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><path d="' + d + '"/></svg>';
     h += '<span class="stop start" style="left:' + pts[0].x + 'px;top:' + pts[0].y + 'px" aria-hidden="true">Start</span>';
     items.forEach(function (it, k) {
       var e = xById(it.id), p = pts[k + 1], right = p.x <= cx;
@@ -2490,6 +2500,39 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     var f = pts[n + 1], more = budget - tot >= 5;   /* time is left: the path is not over, more stops appear as the student progresses */
     h += '<span class="stop finish' + (more ? ' more' : '') + '" style="left:' + f.x + 'px;top:' + f.y + 'px" aria-hidden="true">' + (more ? '…' : '⚑') + '</span><span class="stoplab r" style="left:' + (f.x + 46) + 'px;top:' + (f.y - 20) + 'px" aria-hidden="true"><b>' + (more ? 'More ahead' : 'Finish') + '</b>' + (more ? 'new stops appear as you go' : 'about ' + tot + ' min') + '</span></div>';
     h += '<ol class="sr">' + items.map(function (it, k) { var e = xById(it.id); return '<li>Stop ' + (k + 1) + ': ' + TNAME[e.topic] + ', ' + e.min + ' minutes</li>'; }).join('') + '</ol>';
+    return h;
+  }
+  /* Second version (testing): stops of the same topic are grouped under one topic marker, so the topic name and symbol are not repeated,
+     and the road wanders instead of zigzagging. Set ROAD_STYLE to 'grid' to go back to the first version. */
+  var ROAD_STYLE = 'groups';
+  function roadHtml(items, budget) { return ROAD_STYLE === 'groups' ? roadHtmlGroups(items, budget) : roadHtmlGrid(items, budget); }
+  function roadHtmlGroups(items, budget) {
+    var W = 640, cx = W / 2, seq = [{ kind: 'start' }], seg = null, prev = null;
+    items.forEach(function (it, k) {
+      var e = xById(it.id);
+      if (prev !== e.topic) { seg = { kind: 'topic', topic: e.topic, count: 0, min: 0 }; seq.push(seg); }
+      seg.count++; seg.min += it.min; seq.push({ kind: 'ex', it: it, e: e, k: k }); prev = e.topic;
+    });
+    seq.push({ kind: 'end' });
+    var gaps = seq.map(function (q, i) { return i === 0 ? 0 : q.kind === 'topic' ? 104 : q.kind === 'end' ? 100 : 84; }), cum = 0, ys = [];
+    gaps.forEach(function (g) { cum += g; ys.push(cum); });
+    var H = cum + 120, pts = seq.map(function (q, i) {
+      var x = i === 0 || q.kind === 'end' ? cx : cx + Math.max(-112, Math.min(112, 80 * Math.sin(i * 1.25 + 0.4) + 28 * Math.cos(i * 2.3)));
+      return { x: Math.round(x), y: Math.round(H - 56 - ys[i]) };
+    });
+    var d = 'M' + pts[0].x + ' ' + pts[0].y;
+    for (var i = 1; i < pts.length; i++) { var half = gaps[i] / 2; d += ' C' + pts[i - 1].x + ' ' + (pts[i - 1].y - half) + ' ' + pts[i].x + ' ' + (pts[i].y + half) + ' ' + pts[i].x + ' ' + pts[i].y; }
+    var tot = items.reduce(function (a, b) { return a + b.min; }, 0), more = budget - tot >= 5;
+    var h = '<div class="exroad" style="height:' + H + 'px;width:' + W + 'px"><svg viewBox="0 0 ' + W + ' ' + H + '" aria-hidden="true"><path d="' + d + '"/></svg>';
+    function lab(p, r, html, top) { var right = p.x <= cx; return '<span class="stoplab ' + (right ? 'r' : 'l') + '" style="left:' + (right ? p.x + r + 14 : p.x - r - 14 - 170) + 'px;top:' + (p.y - top) + 'px" aria-hidden="true">' + html + '</span>'; }
+    seq.forEach(function (q, i) {
+      var p = pts[i];
+      if (q.kind === 'start') h += '<span class="stop start" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-hidden="true">Start</span>';
+      else if (q.kind === 'topic') h += '<span class="stop topic" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-hidden="true">' + GLYPH[q.topic] + '</span>' + lab(p, 30, '<b>' + TNAME[q.topic] + '</b>' + q.count + (q.count === 1 ? ' stop' : ' stops') + ' · ' + q.min + ' min', 22);
+      else if (q.kind === 'ex') h += '<span class="stop sm' + (q.k === 0 ? ' next' : '') + '" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-hidden="true">' + (q.k + 1) + '</span>' + lab(p, 23, '<span class="tz">' + esc(teaser(q.e)) + '</span>' + q.it.min + ' min', 20);
+      else h += '<span class="stop finish' + (more ? ' more' : '') + '" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-hidden="true">' + (more ? '…' : '⚑') + '</span>' + lab(p, 32, '<b>' + (more ? 'More ahead' : 'Finish') + '</b>' + (more ? 'new stops appear as you go' : 'about ' + tot + ' min'), 20);
+    });
+    h += '</div><ol class="sr">' + items.map(function (it, k) { var e = xById(it.id); return '<li>Stop ' + (k + 1) + ': ' + TNAME[e.topic] + ', ' + e.min + ' minutes</li>'; }).join('') + '</ol>';
     return h;
   }
   function devPlan(items) { /* for the team only (?dev): what the planner believes about each stop */

@@ -60,3 +60,7 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 - In courses other than Calculus I, Exercise mode says it is Calculus-only for now and offers "Go to Calculus I to test".
 - In Calculus I with no material, opening Exercise mode loads the sample lectures at once (demo), instead of opening a file chooser.
 - Topic pills have no icon. The path is read from the bottom up: a Start stop, then the exercises, then the end of the path ("More ahead" or a flag) at the top. The view opens scrolled to the bottom so Start is visible.
+
+## Update: topics start empty, road test version
+- Exercise setup starts with no topic chosen ("Choose your topics", a hint under the pills, and "Build my path" stays off until one is chosen).
+- **Road, second version (a test):** stops of the same topic sit under one topic marker (symbol and name once), each stop shows its number, the expression and minutes, and the road wanders instead of zigzagging. To go back to the first version change `ROAD_STYLE` from `'groups'` to `'grid'` in `src/js8.js` and run `./build.sh`.
