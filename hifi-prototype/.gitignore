@@ -1,0 +1,4 @@
+# local state, do not commit
+agent/log.md
+*.local.json
+.DS_Store

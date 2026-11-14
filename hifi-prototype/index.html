@@ -1,0 +1,2296 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Idea B · Study workspace (hi-fi direction)</title>
+<style>
+/* Hi-fi direction. Neutral base from the lo-fi prototype, plus a hi-fi layer at the end of this block. */
+:root {
+  --ink: #222; --soft: #6b6b6b; --faint: #8a8a8a; --line: #bdbdbd; --line2: #e0e0e0;
+  --fill: #f0f0f0; --sel: #d9d9d9; --card: #fafafa; --white: #fff;
+  --font: Inter, "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { font-family: var(--font); color: var(--ink); background: var(--white); font-size: 14px; line-height: 1.4; }
+button, select, textarea, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+#app { height: 100%; display: flex; flex-direction: column; min-width: 1200px; }
+
+/* top bar */
+.top { display: flex; align-items: center; gap: 10px; padding: 20px 24px 16px; }
+.top label { color: var(--soft); }
+.sel { height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); padding: 0 12px; min-width: 200px; }
+.btn { height: 36px; padding: 0 16px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); font-weight: 500; }
+.btn:hover { border-color: var(--ink); }
+.btn.dark { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.btn.small { height: 30px; padding: 0 12px; font-size: 13px; }
+.btn.ghost { border-color: transparent; color: var(--soft); }
+.btn.ghost:hover { color: var(--ink); background: var(--fill); }
+.btn:disabled { opacity: .45; cursor: not-allowed; }
+.spacer { flex: 1; }
+
+/* 3 columns */
+.cols { flex: 1; min-height: 0; display: grid; grid-template-columns: 260px 480px minmax(440px, 1fr); gap: 16px; padding: 0 24px 24px; }
+.panel { border: 1px solid var(--line); border-radius: 12px; background: var(--white); min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.p-pad { padding: 16px; overflow-y: auto; flex: 1; min-height: 0; }
+.h { font-weight: 600; font-size: 14px; }
+.soft { color: var(--soft); }
+.small { font-size: 12px; }
+.link { background: none; border: 0; padding: 0; color: var(--ink); text-decoration: underline; text-underline-offset: 2px; font-size: 12px; }
+.link:hover { color: var(--soft); }
+.row { display: flex; align-items: center; gap: 8px; }
+.row.between { justify-content: space-between; }
+
+/* left */
+.file { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; margin-bottom: 4px; }
+.file:hover { background: var(--fill); }
+.file.on { background: var(--sel); }
+.file .ico, .pick .ico { width: 14px; height: 18px; border: 1px solid var(--line); border-radius: 2px; background: var(--fill); flex: none; }
+.file .nm { flex: 1; min-width: 0; font-size: 13px; line-height: 1.3; overflow-wrap: anywhere; }
+.file .st { font-size: 11px; color: var(--soft); white-space: nowrap; }
+.bar { height: 4px; border-radius: 2px; background: #d0d0d0; overflow: hidden; }
+.bar > i { display: block; height: 100%; background: var(--ink); border-radius: 2px; }
+.drop { margin: 12px 0 4px; border: 1.5px dashed #999; border-radius: 12px; padding: 16px 12px 14px; text-align: center; background: var(--card); cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.drop:hover, .drop.over { background: var(--fill); border-color: var(--ink); }
+.drop .dico { width: 40px; height: 40px; border-radius: 50%; background: var(--fill); display: grid; place-items: center; margin-bottom: 4px; }
+.drop .dt { font-weight: 600; font-size: 13px; }
+.drop .ds { font-size: 12px; color: var(--soft); margin-bottom: 8px; }
+.pick { align-items: center; cursor: pointer; }
+.pick.dis { opacity: .55; cursor: default; }
+.pick .pn { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pick input { width: 18px; height: 18px; accent-color: #222; }
+hr { border: 0; border-top: 1px solid var(--line2); margin: 14px 0; }
+.topic { padding: 7px 8px; margin: 0 -8px 2px; border-radius: 8px; cursor: pointer; }
+.topic:hover { background: var(--fill); }
+.topic.on { background: var(--fill); }
+.topic .t1 { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.topic .t2 { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.topic .t2 .bar { flex: 1; }
+.topic .val { font-size: 12px; color: var(--soft); min-width: 44px; text-align: right; }
+.spin { width: 16px; height: 16px; border: 2px solid var(--line2); border-top-color: var(--ink); border-radius: 50%; animation: sp .9s linear infinite; display: inline-block; }
+@keyframes sp { to { transform: rotate(360deg); } }
+.note { color: var(--soft); font-size: 12px; margin-top: 10px; }
+.inp { width: 100%; height: 34px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; background: var(--white); }
+
+/* viewer */
+.tabs { display: flex; gap: 4px; padding: 8px 12px 0; border-bottom: 1px solid var(--line2); min-height: 44px; overflow-x: auto; }
+.tab { display: flex; align-items: center; gap: 10px; height: 32px; padding: 0 12px; border-radius: 6px 6px 0 0; font-size: 13px; color: var(--soft); white-space: nowrap; cursor: pointer; border: 0; background: none; }
+.tab.on { background: var(--fill); color: var(--ink); font-weight: 500; }
+.tab .x { color: var(--soft); background: none; border: 0; padding: 0 2px; font-size: 15px; line-height: 1; }
+.slide { border: 1px solid var(--line); border-radius: 8px; background: var(--card); padding: 20px; }
+.slide .no { font-size: 12px; color: var(--soft); }
+.slide h3 { margin: 6px 0 14px; font-size: 22px; font-weight: 600; }
+.slide .body { border-radius: 6px; padding: 14px 16px; }
+.slide .body.hl { background: #e4e4e4; }
+.slide .body p { margin: 0 0 12px; font-size: 15px; }
+.slide .body p.f { font-size: 20px; font-weight: 500; }
+.slide .body p:last-child { margin-bottom: 0; }
+.tag { display: inline-block; margin-top: 14px; background: var(--ink); color: var(--white); border-radius: 13px; padding: 4px 14px; font-size: 12px; font-weight: 500; }
+.sk i { display: block; height: 8px; border-radius: 4px; background: #e6e6e6; margin-bottom: 14px; }
+.empty-v { height: 100%; display: grid; place-items: center; text-align: center; color: var(--soft); padding: 30px; }
+.ex { border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; margin-bottom: 12px; display: flex; gap: 12px; align-items: center; justify-content: space-between; }
+.ex .q { font-size: 15px; }
+.ex .n { font-size: 12px; color: var(--soft); }
+
+/* chat */
+.chead { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--line2); }
+.chead .sel { min-width: 220px; height: 34px; }
+.msgs { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; gap: 10px; align-items: flex-start; }
+.msg.user { justify-content: flex-end; }
+.av { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: var(--white); font-size: 10px; font-weight: 600; display: grid; place-items: center; flex: none; margin-top: 2px; }
+.bubble { background: var(--fill); border-radius: 12px; padding: 12px 16px; max-width: 390px; }
+.msg.user .bubble { background: var(--sel); max-width: 300px; }
+.kick { font-size: 12px; color: var(--soft); }
+.btitle { font-weight: 600; font-size: 13px; }
+.bsub { font-size: 12px; color: var(--soft); margin-bottom: 6px; }
+.btext { font-size: 14px; white-space: pre-wrap; }
+.btext.strong { font-size: 15px; font-weight: 600; margin: 2px 0 6px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.chip { border: 1px solid #999; background: var(--white); border-radius: 13px; padding: 4px 12px; font-size: 11px; font-weight: 500; }
+button.chip:hover { background: var(--sel); }
+.acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.fine { font-size: 11px; color: var(--soft); margin-top: 6px; }
+.cols { transition: grid-template-columns .2s ease; }
+.cols.vmin { grid-template-columns: 260px 48px minmax(440px, 1fr); }
+.vhead { display: flex; align-items: flex-end; border-bottom: 1px solid var(--line2); }
+.vhead .tabs { flex: 1; min-width: 0; border-bottom: 0; }
+.vbtn { flex: none; margin: 0 10px 6px 4px; height: 28px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); font-size: 12px; color: var(--soft); white-space: nowrap; }
+.vbtn:hover { border-color: var(--ink); color: var(--ink); }
+.vstrip { width: 100%; height: 100%; border: 0; background: var(--card); display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 16px; color: var(--soft); cursor: pointer; }
+.vstrip:hover { background: var(--fill); color: var(--ink); }
+.vstrip .vl { writing-mode: vertical-rl; font-size: 13px; letter-spacing: .04em; }
+.vstrip .va { font-size: 18px; line-height: 1; }
+.heat { padding: 0 16px 12px; }
+.heat .hrow { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; font-size: 12px; color: var(--soft); }
+.heat .hword { font-weight: 600; color: var(--ink); font-size: 13px; }
+.heat .htrack { position: relative; height: 10px; border-radius: 6px; background: linear-gradient(to right, #7fb0ee 0%, #cfd6e0 35%, #f2c14e 65%, #e8590c 100%); }
+.heat.none .htrack { background: #e2e2de; }
+.heat .hmark { position: absolute; top: -4px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--white); border: 3px solid var(--ink); transition: left .35s ease; }
+.heat .hends { display: flex; justify-content: space-between; margin-top: 4px; font-size: 11px; color: var(--soft); }
+.ladder { padding: 0 16px 10px; }
+.ladder .lbl { font-size: 12px; color: var(--soft); margin-bottom: 6px; }
+.ladder .btns { display: flex; gap: 8px; }
+.lv { flex: 1; height: 36px; border: 1px solid var(--line); background: var(--white); border-radius: 8px; font-size: 13px; }
+.lv:hover { border-color: var(--ink); }
+.lv.on { background: var(--sel); border: 2px solid var(--ink); font-weight: 600; }
+.compose { padding: 0 16px 16px; }
+.box { border: 1px solid var(--line); border-radius: 10px; padding: 10px 10px 10px 14px; display: flex; flex-direction: column; gap: 6px; background: var(--white); }
+.box:focus-within { border-color: var(--ink); }
+.box textarea { border: 0; outline: 0; resize: none; height: 44px; width: 100%; background: transparent; }
+.box .r { display: flex; justify-content: space-between; align-items: center; }
+.hintline { font-size: 11px; color: var(--soft); }
+
+/* modal */
+.overlay { z-index: 20; position: fixed; inset: 0; background: rgba(34,34,34,.35); display: grid; place-items: center; padding: 24px; z-index: 20; }
+.modal { background: var(--white); border: 1px solid var(--line); border-radius: 14px; width: min(760px, 100%); max-height: 92vh; overflow-y: auto; padding: 24px 28px; }
+.modal h2 { margin: 0 0 6px; font-size: 24px; font-weight: 600; }
+.modal .lead { color: var(--soft); margin: 0 0 16px; }
+.mhead { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.xbtn { border: 1px solid var(--line); background: var(--white); border-radius: 8px; width: 32px; height: 32px; font-size: 18px; line-height: 1; }
+.legend { display: flex; justify-content: space-between; font-size: 12px; color: var(--soft); margin: 14px 0 6px; }
+.list { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.lrow { display: flex; align-items: flex-start; gap: 14px; padding: 12px 16px; border-top: 1px solid var(--line); }
+.lrow:first-child { border-top: 0; }
+.lrow .nm { width: 180px; flex: none; font-size: 15px; padding-top: 1px; }
+.lrow .sl { flex: 1; min-width: 0; }
+.lrow .rd { width: 30px; text-align: right; font-weight: 600; padding-top: 1px; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 24px; margin: 0; background: transparent; }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--ink) var(--p, 0%), #d0d0d0 var(--p, 0%)); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--white); border: 2px solid var(--ink); margin-top: -8px; cursor: grab; }
+input[type=range]::-moz-range-track { height: 4px; border-radius: 2px; background: #d0d0d0; }
+input[type=range]::-moz-range-progress { height: 4px; background: var(--ink); border-radius: 2px; }
+input[type=range]::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--white); border: 2px solid var(--ink); cursor: grab; }
+input[type=range].untouched::-webkit-slider-thumb { border-style: dashed; border-color: var(--faint); }
+input[type=range].untouched::-moz-range-thumb { border-style: dashed; border-color: var(--faint); }
+.ticks { display: flex; justify-content: space-between; margin-top: 2px; }
+.ticks span { width: 20px; text-align: center; font-size: 10px; color: var(--soft); position: relative; padding-top: 6px; }
+.ticks span::before { content: ""; position: absolute; top: 0; left: 50%; width: 1px; height: 5px; background: var(--soft); }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; margin-top: 6px; }
+.tags .chip { display: inline-flex; gap: 6px; align-items: center; padding: 3px 10px; }
+.tags .chip button { border: 0; background: none; padding: 0; color: var(--soft); font-size: 14px; line-height: 1; }
+.tags input { flex: 1; min-width: 160px; border: 0; outline: 0; background: transparent; }
+.mfoot { display: flex; justify-content: flex-end; align-items: center; gap: 10px; margin-top: 18px; }
+.mfoot .fine { margin: 0 auto 0 0; }
+.seg { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 16px; }
+.seg button { border: 1px solid var(--line); background: var(--white); border-radius: 18px; padding: 6px 14px; font-size: 13px; font-weight: 500; }
+.seg button.on { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.two { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; }
+.card { border: 1px solid var(--line); border-radius: 10px; padding: 16px; }
+.big { font-size: 38px; font-weight: 700; line-height: 1; }
+.meter { height: 8px; border-radius: 4px; background: #d8d8d8; overflow: hidden; flex: 1; }
+.meter > i { display: block; height: 100%; background: var(--ink); }
+ul.why { margin: 8px 0 0; padding-left: 18px; }
+.advice { background: var(--fill); border-radius: 8px; padding: 12px 14px; margin-top: 12px; font-weight: 500; }
+.srcbox { border: 1px solid var(--line2); background: var(--card); border-radius: 8px; padding: 12px; margin-top: 8px; font-size: 13px; }
+.stats { display: flex; gap: 12px; margin: 16px 0; }
+.stat { flex: 1; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.stat .v { font-size: 26px; font-weight: 700; }
+.prow { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-top: 1px solid var(--line); }
+.prow:first-child { border-top: 0; }
+.prow .nm { flex: 1; }
+.prow .ch { font-weight: 600; min-width: 90px; text-align: right; }
+
+/* footer */
+.foot { text-align: center; font-size: 11px; color: var(--soft); padding: 0 0 10px; margin-top: -12px; }
+#intro { position: fixed; inset: 0; background: var(--white); z-index: 5; display: flex; align-items: center; justify-content: center; }
+#intro .ibox { width: min(560px, 90vw); }
+#intro .ititle { font-size: 34px; font-weight: 600; margin-bottom: 8px; }
+#intro .isub { color: var(--soft); margin: 0 0 24px; font-size: 16px; }
+#intro .ibox { text-align: left; }
+#intro .ititle, #intro .isub { text-align: center; }
+#intro .flab { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block; }
+#intro .area { width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; background: var(--white); resize: none; line-height: 1.4; }
+#intro .pcs { display: flex; flex-wrap: wrap; gap: 8px; }
+#intro .pc { border: 1px solid var(--line); background: var(--white); border-radius: 999px; padding: 7px 14px; cursor: pointer; }
+#intro .pc:hover { background: var(--fill); }
+#intro .pc.on { background: var(--ink); color: var(--white); border-color: var(--ink); }
+[hidden] { display: none; }
+#intro { position: fixed; inset: 0; background: var(--white); z-index: 5; display: flex; align-items: center; justify-content: center; }
+#intro .ibox { width: min(560px, 90vw); }
+#intro .ititle { font-size: 34px; font-weight: 600; margin-bottom: 8px; }
+#intro .isub { color: var(--soft); margin: 0 0 24px; font-size: 16px; }
+#intro .drop { padding: 36px 20px 30px; margin: 0; }
+[hidden] { display: none !important; }
+
+/* ===== Hi-fi layer: tokens, motion, evidence, ladder, learning cues ===== */
+:root {
+  --ink: #1b1d21; --soft: #5a6068; --faint: #7d838b; --line: #cdd2d8; --line2: #e5e8ec; --fill: #f3f5f7; --sel: #e4e8ec; --card: #fafbfc;
+  --blue: #2150d8; --blue-bg: #e9efff; --blue-line: #b9c9f5;
+  --amber: #8a5200; --amber-bg: #fff5dc; --amber-line: #d99a1c;
+  --green: #16703f; --green-bg: #e6f5ec;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+  --shadow: 0 10px 32px rgba(20, 24, 32, .16);
+}
+body { background: #f6f7f9; -webkit-font-smoothing: antialiased; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.panel { border-color: var(--line2); box-shadow: 0 1px 2px rgba(20, 24, 32, .04); }
+.btn, .link, .chip, .cpill, .vbtn, .xbtn, .lv { transition: background .15s, border-color .15s, color .15s, transform .1s, box-shadow .15s; }
+.btn:active { transform: translateY(1px); }
+.btn.dark:hover { background: #000; border-color: #000; }
+.btn:hover { box-shadow: 0 1px 3px rgba(20, 24, 32, .1); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.sel, .inp, .area { transition: border-color .15s, box-shadow .15s; }
+.sel:focus-visible, .inp:focus-visible { outline: 0; border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-bg); }
+.box:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-bg); }
+.top { padding-bottom: 14px; }
+
+/* left rail */
+.bar { display: block; background: #dfe2e6; }
+.bar > i { transition: width .7s var(--ease); }
+.file { width: 100%; border: 0; background: none; text-align: left; transition: background .15s; }
+.file:hover { background: var(--fill); }
+.topic { padding: 0; margin: 0 -8px 4px; border-radius: 8px; transition: background .15s; }
+.topic .tmain { display: block; width: 100%; border: 0; background: none; text-align: left; padding: 7px 8px 4px; border-radius: 8px; }
+.topic .tmain:hover { background: var(--fill); }
+.topic .t1 { display: flex; justify-content: space-between; align-items: center; }
+.topic .t2 { margin-top: 6px; }
+.topic .trend { font-size: 11px; color: var(--green); padding: 0 8px; }
+.topic .thist { margin: 2px 8px 6px; color: var(--soft); }
+.own { display: inline-block; font-size: 10px; font-weight: 600; color: var(--green); background: var(--green-bg); border-radius: 9px; padding: 1px 7px; margin-left: 6px; animation: pop .4s var(--ease); }
+.dchip { font-size: 11px; font-weight: 600; color: var(--green); background: var(--green-bg); border-radius: 9px; padding: 1px 7px; }
+.dchip.pop { animation: pop .6s var(--ease); }
+.hlist { margin: 0 8px 8px; border-left: 2px solid var(--line2); padding-left: 8px; }
+.hrow2 { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 5px 6px; border-radius: 6px; font-size: 12px; }
+.hrow2:hover { background: var(--fill); }
+.hrow2 .s { display: block; color: var(--soft); font-size: 11px; }
+.indep { margin-top: 16px; border: 1px solid var(--line2); border-radius: 10px; padding: 12px; background: var(--card); animation: rise .35s var(--ease); }
+.indep .spark { display: flex; align-items: flex-end; gap: 4px; height: 34px; margin: 8px 0 6px; }
+.indep .spark i { flex: 1; max-width: 18px; min-height: 3px; border-radius: 3px 3px 0 0; background: var(--ink); transform-origin: bottom; animation: grow .5s var(--ease); }
+.indep .spark i.z { background: var(--green); }
+
+/* viewer */
+.tab { padding: 0; gap: 0; align-items: stretch; background: none; }
+.tab .tabb { border: 0; background: none; padding: 0 4px 0 12px; font-size: 13px; color: inherit; font-weight: inherit; max-width: 230px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tab .x { padding: 0 9px 0 4px; font-size: 16px; }
+.tab .x:hover { color: var(--ink); }
+.tab { transition: background .15s, color .15s; }
+.tab:not(.on):hover { background: #f8f9fa; }
+.slide { background: var(--white); }
+.slide .body p { padding: 8px 10px; border-radius: 6px; border-left: 3px solid transparent; margin: 0 0 6px; transition: background .25s, border-color .25s; }
+.slide .body p.f { font-size: 20px; }
+.slide .body p.hl { background: var(--blue-bg); border-left-color: var(--blue); animation: flash 1.2s var(--ease); }
+.slide .body p.hl.k-d { background: #f3f6ff; border-left-style: dashed; }
+.evstrip { margin-top: 12px; border: 1px solid var(--blue-line); background: var(--blue-bg); border-radius: 8px; padding: 10px 12px; font-size: 13px; animation: rise .3s var(--ease); }
+.evstrip .lab { font-size: 11px; font-weight: 600; color: var(--blue); text-transform: uppercase; letter-spacing: .04em; }
+.slidenav { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 14px; font-size: 12px; color: var(--soft); }
+.vstrip, .cols { transition: grid-template-columns .28s var(--ease), background .15s; }
+#viewer > * { animation: fade .25s ease; }
+
+/* chat */
+.chead { padding: 12px 16px 6px; border-bottom: 0; }
+.chatbar { display: flex; gap: 6px; padding: 4px 16px 10px; overflow-x: auto; border-bottom: 1px solid var(--line2); scrollbar-width: thin; }
+.cpill { flex: none; max-width: 190px; height: 28px; padding: 0 12px; border: 1px solid var(--line2); border-radius: 14px; background: var(--white); font-size: 12px; color: var(--soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cpill:hover { border-color: var(--line); color: var(--ink); }
+.cpill.on { background: var(--ink); color: var(--white); border-color: var(--ink); }
+.cpill .ck { margin-left: 6px; font-size: 11px; opacity: .85; }
+.bubble { max-width: 430px; border-radius: 14px; }
+.msg.ai .bubble { background: var(--fill); }
+.msg.user .bubble { background: var(--white); border: 1.5px solid var(--ink); max-width: 320px; }
+.who, .kick { font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--soft); margin-bottom: 3px; }
+.msg.user .who { color: var(--ink); }
+.bnote { font-size: 12px; color: var(--soft); margin-top: 6px; }
+.msg.enter { animation: rise .35s var(--ease); }
+.btext.sents { line-height: 1.65; }
+.typing { display: inline-flex; gap: 4px; padding: 14px 16px; }
+.typing i { width: 6px; height: 6px; border-radius: 50%; background: var(--faint); animation: blink 1.1s infinite ease-in-out; }
+.typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+.acts .btn { transition: background .15s, border-color .15s, transform .1s, opacity .2s; }
+
+/* sentence kinds */
+.ss { font: inherit; color: inherit; background: none; border: 0; padding: 1px 2px; margin: 0; text-align: left; border-radius: 4px; display: inline; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
+button.ss { cursor: pointer; }
+.ss-s { background: var(--blue-bg); text-decoration: underline solid var(--blue); text-decoration-thickness: 2px; text-underline-offset: 3px; }
+.ss-d { text-decoration: underline dashed var(--blue); text-decoration-thickness: 2px; text-underline-offset: 3px; background: #f6f8ff; }
+.ss-g { background: var(--amber-bg); box-shadow: 0 0 0 1px var(--amber-line); padding: 1px 5px; color: #4d3000; }
+.ss-g::before { content: "!"; display: inline-grid; place-items: center; width: 14px; height: 14px; margin-right: 5px; border-radius: 50%; background: var(--amber-line); color: #fff; font-size: 10px; font-weight: 700; vertical-align: 1px; }
+button.ss-s:hover, button.ss-s:focus-visible { background: #d6e2ff; }
+button.ss-d:hover, button.ss-d:focus-visible { background: #e9efff; }
+.evsum { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; margin-top: 10px; font-size: 12px; color: var(--soft); }
+.match { position: relative; display: inline-flex; align-items: center; gap: 7px; cursor: default; padding: 2px 0; }
+.match b { color: var(--ink); }
+.m3 { display: inline-flex; gap: 2px; }
+.m3 i { width: 14px; height: 6px; border-radius: 3px; background: #d5d9de; }
+.m-strong .m3 i { background: var(--blue); }
+.m-partial .m3 i:nth-child(-n+2) { background: var(--amber-line); }
+.tip { position: absolute; left: 0; top: calc(100% + 6px); z-index: 10; width: 250px; background: var(--ink); color: #fff; border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.4; opacity: 0; visibility: hidden; transform: translateY(-3px); transition: opacity .15s, transform .15s, visibility .15s; pointer-events: none; }
+.match:hover .tip, .match:focus .tip { opacity: 1; visibility: visible; transform: none; }
+.lg { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 11px; color: var(--soft); }
+.lg span { display: inline-flex; align-items: center; gap: 5px; }
+.sw { display: inline-block; width: 16px; height: 8px; border-radius: 2px; }
+.sw.s { background: var(--blue-bg); border-bottom: 2px solid var(--blue); }
+.sw.d { background: #f6f8ff; border-bottom: 2px dashed var(--blue); }
+.sw.g { background: var(--amber-bg); box-shadow: 0 0 0 1px var(--amber-line); }
+.banner { display: flex; gap: 10px; align-items: center; justify-content: space-between; background: var(--amber-bg); border: 1px solid var(--amber-line); color: #4d3000; border-radius: 8px; padding: 8px 10px; margin-top: 10px; font-size: 13px; }
+.banner strong { display: block; }
+
+/* ladder card */
+.ladcard { border: 1px solid var(--line2); background: var(--white); border-radius: 10px; padding: 10px 12px 8px; margin: 4px 0 10px; }
+.lad { list-style: none; display: flex; margin: 0 0 6px; padding: 0; }
+.lad .st { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: var(--faint); position: relative; text-align: center; }
+.lad .st::before { content: ""; position: absolute; top: 10px; right: 50%; width: 100%; height: 2px; background: var(--line2); }
+.lad .st:first-child::before { display: none; }
+.lad .dot { position: relative; z-index: 1; width: 22px; height: 22px; border-radius: 50%; background: var(--white); border: 2px solid var(--line); display: grid; place-items: center; font-size: 11px; font-weight: 600; color: var(--faint); }
+.lad .done { color: var(--soft); }
+.lad .done .dot { background: var(--ink); border-color: var(--ink); color: #fff; }
+.lad .done::before, .lad .cur::before { background: var(--ink); }
+.lad .cur { color: var(--ink); font-weight: 600; }
+.lad .cur .dot { border-color: var(--ink); color: var(--ink); box-shadow: 0 0 0 4px rgba(27, 29, 33, .1); animation: pop .45s var(--ease); }
+.lad .off { opacity: .55; }
+.lad .off .dot { border-style: dashed; }
+.ltime { font-size: 11px; color: var(--soft); }
+.result { margin-top: 10px; border-radius: 10px; background: var(--green-bg); border: 1px solid #b9e0c9; padding: 10px 12px; color: #0f4f2b; animation: rise .4s var(--ease); }
+.result b { display: block; font-size: 13px; }
+.result .rd2 { font-size: 12px; margin-top: 2px; color: #2f6a49; }
+.heat .hmark { transition: left .5s var(--ease); }
+
+/* modal and toasts */
+.overlay { animation: fade .18s ease; }
+.overlay.out { opacity: 0; transition: opacity .14s; }
+.modal { animation: pop2 .24s var(--ease); box-shadow: var(--shadow); }
+.overlay.out .modal { transform: scale(.98); transition: transform .14s; }
+.xbtn:hover { border-color: var(--ink); }
+.tlabel { display: inline-block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .03em; border-radius: 8px; padding: 1px 7px; margin-right: 6px; vertical-align: 1px; }
+.tlabel.s { background: var(--blue-bg); color: var(--blue); }
+.tlabel.d { background: #f6f8ff; color: var(--blue); border: 1px dashed var(--blue); }
+.tlabel.g { background: var(--amber-bg); color: var(--amber); border: 1px solid var(--amber-line); }
+ul.sl { list-style: none; margin: 10px 0 0; padding: 0; }
+ul.sl li { padding: 8px 0; border-top: 1px solid var(--line2); font-size: 13px; }
+ul.sl li:first-child { border-top: 0; }
+#toasts { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); display: flex; flex-direction: column; gap: 8px; align-items: center; z-index: 40; pointer-events: none; }
+.toast { pointer-events: auto; display: flex; align-items: center; gap: 14px; background: var(--ink); color: #fff; border-radius: 10px; padding: 10px 16px; font-size: 13px; box-shadow: var(--shadow); animation: rise .3s var(--ease); }
+.toast .link { color: #fff; font-size: 13px; }
+.toast.out { opacity: 0; transform: translateY(6px); transition: opacity .2s, transform .2s; }
+
+/* intro */
+#intro { animation: fade .3s ease; overflow-y: auto; }
+#intro .how { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 10px; }
+#intro .how li { display: flex; gap: 12px; align-items: flex-start; font-size: 14px; }
+#intro .how b { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff; display: grid; place-items: center; font-size: 12px; }
+#intro .pc { transition: background .15s, color .15s, border-color .15s; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes pop { 0% { transform: scale(.8); } 60% { transform: scale(1.12); } 100% { transform: scale(1); } }
+@keyframes pop2 { from { opacity: 0; transform: translateY(8px) scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes grow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes blink { 0%, 80%, 100% { opacity: .25; transform: none; } 40% { opacity: 1; transform: translateY(-2px); } }
+@keyframes flash { 0% { box-shadow: 0 0 0 0 rgba(33, 80, 216, .45); } 100% { box-shadow: 0 0 0 10px rgba(33, 80, 216, 0); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+}
+
+/* ===== Workspace layout (VSCode-like) ===== */
+#b-practice { height: 36px; padding: 0 20px; }
+#b-practice.pulse { animation: ring 2s ease-out infinite; }
+@keyframes ring { 0% { box-shadow: 0 0 0 0 rgba(27, 29, 33, .35); } 70%, 100% { box-shadow: 0 0 0 12px rgba(27, 29, 33, 0); } }
+.ws { flex: 1; min-height: 0; display: flex; padding: 0 24px 24px 16px; }
+.actbar { width: 62px; flex: none; display: flex; flex-direction: column; gap: 6px; padding: 2px 0; align-items: center; }
+.act { width: 54px; padding: 8px 0 6px; border: 0; border-radius: 12px; background: none; color: var(--soft); display: flex; flex-direction: column; align-items: center; gap: 3px; font-size: 10px; font-weight: 500; transition: background .15s, color .15s; }
+.act:hover { background: var(--sel); color: var(--ink); }
+.act.on { background: var(--ink); color: #fff; }
+.sidebar { width: 290px; flex: none; margin-right: 12px; transition: width .25s var(--ease), margin .25s var(--ease), opacity .2s; }
+.sidebar .p-pad { min-width: 262px; }
+.sbh { margin-bottom: 12px; min-height: 30px; }
+.sb-off .sidebar { width: 0; margin-right: 0; border-width: 0; opacity: 0; pointer-events: none; }
+.chatrow { display: block; width: 100%; text-align: left; border: 0; background: none; padding: 9px 10px; border-radius: 8px; margin-bottom: 2px; transition: background .15s; }
+.chatrow:hover { background: var(--fill); } .chatrow.on { background: var(--sel); }
+.chatrow .ct { display: block; font-size: 13px; font-weight: 500; }
+.chatrow .cs { display: block; font-size: 11px; color: var(--soft); margin-top: 1px; }
+.editor { flex: 1; min-width: 0; display: flex; --vw: 46%; --vh: 42%; }
+.editor > #chat { flex: 1 1 0; min-width: 340px; min-height: 0; }
+.editor > #viewer { flex: 0 0 var(--vw); min-width: 0; }
+.noview #viewer { display: none; }
+.split { flex: none; width: 12px; cursor: col-resize; position: relative; touch-action: none; }
+.split::after { content: ""; position: absolute; top: 0; bottom: 0; left: 5px; width: 2px; border-radius: 1px; background: transparent; transition: background .15s; }
+.split:hover::after, .split.drag::after, .split:focus-visible::after { background: var(--blue); }
+.split:focus-visible { outline: 0; }
+body.dragging { cursor: col-resize; user-select: none; } body.dragging.dragging iframe { pointer-events: none; }
+.dock-bottom .editor { flex-direction: column; }
+.dock-bottom .editor > #chat { min-height: 220px; min-width: 0; }
+.dock-bottom .editor > #viewer { flex: 0 0 var(--vh); }
+.dock-bottom .split { width: auto; height: 12px; cursor: row-resize; }
+.dock-bottom .split::after { top: 5px; bottom: auto; left: 0; right: 0; width: auto; height: 2px; }
+.dock-bottom.ws body.dragging, body.dragging .dock-bottom .split { cursor: row-resize; }
+.vhead { align-items: center; }
+.vtools { display: flex; gap: 6px; padding: 0 10px; flex: none; }
+.vtools .vbtn { margin: 0; }
+.focus.noview #chat .msgs, .focus.noview #chat .compose, .focus.noview #chat .chead { width: 100%; max-width: 820px; margin-left: auto; margin-right: auto; }
+.focus.noview .bubble { max-width: 680px; }
+.focus.noview .msg.user .bubble { max-width: 460px; }
+.focus.noview .btext { font-size: 15px; }
+.focus #chat { box-shadow: 0 8px 30px rgba(20, 24, 32, .08); }
+/* trust: the cited passage on the slide, and the sentence that points to it */
+.ss.cited { box-shadow: 0 0 0 2px var(--blue); }
+.slide { padding: 26px 28px; }
+.slide h3 { font-size: 26px; }
+.slide .body p { position: relative; transition: opacity .25s, background .25s, border-color .25s; }
+.slide .body.dim p:not(.hl) { opacity: .38; }
+.slide .body p.hl { background: linear-gradient(transparent 0, rgba(255, 224, 102, .55) 0); background: #fff3b8; border-left-color: #e0a800; }
+.slide .body p.hl.k-d { background: #fff9dc; border-left-style: dashed; }
+.slide .body p.hl::after { content: attr(data-tag); position: absolute; right: 8px; top: -10px; font-size: 10px; font-weight: 600; letter-spacing: .03em; background: var(--ink); color: #fff; border-radius: 9px; padding: 2px 9px; animation: pop .4s var(--ease); }
+.evstrip { background: #fffbe6; border-color: #ecd77a; } .evstrip .lab { color: #7a5a00; }
+.mkeys { display: flex; gap: 6px; padding: 0 0 8px; }
+.mk { min-width: 40px; height: 34px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--white); font-family: Cambria, "Times New Roman", serif; font-size: 16px; transition: background .12s, transform .08s, border-color .12s; }
+.mk:hover { border-color: var(--ink); } .mk:active { transform: scale(.94); background: var(--sel); }
+.mk sup { font-size: .6em; }
+
+/* ===== Real PDF viewer ===== */
+.pdftools { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; }
+.pdftools .pgno { font-size: 12px; color: var(--soft); min-width: 92px; text-align: center; }
+.markform { display: flex; gap: 6px; margin-left: auto; flex: 1; min-width: 200px; max-width: 360px; }
+.markform .inp { height: 30px; font-size: 13px; }
+.pdfpage { position: relative; border: 1px solid var(--line2); border-radius: 8px; overflow: hidden; background: #fff; box-shadow: 0 1px 4px rgba(20, 24, 32, .08); min-height: 120px; }
+.pdfpage canvas { display: block; }
+.pdfload { padding: 40px 16px; text-align: center; color: var(--soft); font-size: 13px; }
+.pdfhls { position: absolute; inset: 0; pointer-events: none; }
+.pdfhl { position: absolute; background: rgba(255, 214, 0, .45); mix-blend-mode: multiply; border-radius: 4px; box-shadow: 0 0 0 2px rgba(224, 168, 0, .6); animation: flash 1.2s var(--ease); }
+.pdfhl.k-d { background: rgba(255, 224, 102, .3); box-shadow: 0 0 0 2px rgba(224, 168, 0, .5); outline: 2px dashed #e0a800; outline-offset: 1px; }
+.pdftag { position: absolute; font-size: 10px; font-weight: 600; letter-spacing: .03em; background: var(--ink); color: #fff; border-radius: 9px; padding: 2px 9px; white-space: nowrap; animation: pop .4s var(--ease); }
+
+/* ===== Cleaner chrome: icons instead of text ===== */
+.btn svg, .vbtn svg, .act svg, .mkbtn svg, .iconlink svg, .srcchip svg { pointer-events: none; }
+.btn.icon, .vbtn.icon { padding: 0; width: 34px; height: 34px; display: inline-grid; place-items: center; }
+.btn.small.icon { width: 30px; height: 30px; }
+.top { padding: 14px 20px 10px; gap: 8px; }
+.actbar { width: 48px; } .act { width: 40px; height: 40px; padding: 0; justify-content: center; border-radius: 10px; }
+.act span { display: none; }
+.sidebar { width: 250px; } .sidebar .p-pad { min-width: 222px; }
+.drop { margin: 10px 0 0; padding: 12px; flex-direction: row; justify-content: center; gap: 8px; font-size: 13px; font-weight: 500; border-radius: 10px; }
+.sbh .h { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--soft); }
+.chatrow .cs { display: none; } .chatrow { padding: 8px 10px; }
+.evsum { gap: 8px; margin-top: 8px; }
+.evsum .cnt { color: var(--soft); font-size: 12px; margin-left: 2px; }
+.iconlink { border: 0; background: none; color: var(--soft); padding: 2px; display: inline-grid; place-items: center; border-radius: 6px; font-size: 16px; line-height: 1; }
+.iconlink:hover { color: var(--ink); background: var(--sel); }
+.banner { justify-content: flex-start; gap: 8px; padding: 6px 10px; } .banner span { flex: 1; font-weight: 500; }
+.foot { font-size: 10px; padding-bottom: 6px; }
+.editor { --vw: 52%; }
+.evstrip { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; font-size: 13px; }
+.slidenav .btn { width: 30px; }
+/* the real PDF fills the panel, edge to edge, scrolling vertically */
+#viewer { border: 0; background: #e9ebee; }
+#viewer .vhead { background: #fff; border-bottom: 1px solid var(--line2); }
+.pdfwrap { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.pdfscroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; scroll-behavior: auto; }
+.pdfscroll .pg { position: relative; background: #fff; margin: 0 0 6px; overflow: hidden; }
+.pdfscroll .pg:last-child { margin-bottom: 0; }
+.pdfscroll .pg canvas { display: block; width: 100%; height: 100%; }
+.pdfhl { box-shadow: 0 0 0 2px rgba(224, 168, 0, .65); }
+.markform { position: absolute; top: 10px; right: 14px; display: flex; align-items: center; margin: 0; background: rgba(255, 255, 255, .94); backdrop-filter: blur(6px); border: 1px solid var(--line2); border-radius: 18px; box-shadow: 0 2px 10px rgba(20, 24, 32, .12); padding: 0 4px 0 2px; max-width: none; flex: none; min-width: 0; }
+.mkbtn { width: 30px; height: 30px; border: 0; background: none; color: var(--soft); border-radius: 50%; display: grid; place-items: center; }
+.mkbtn:hover { color: var(--ink); }
+.markform input { width: 96px; height: 30px; border: 0; outline: 0; background: transparent; font-size: 13px; transition: width .2s var(--ease); }
+.markform input:focus { width: 190px; }
+.markform:focus-within { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-bg); }
+.pgpill { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); background: rgba(27, 29, 33, .82); color: #fff; font-size: 12px; padding: 3px 12px; border-radius: 12px; pointer-events: none; font-variant-numeric: tabular-nums; }
+.srcchip { position: absolute; bottom: 12px; right: 14px; display: inline-flex; align-items: center; gap: 6px; background: #fff3b8; border: 1px solid #e0a800; color: #4d3000; font-size: 12px; font-weight: 600; border-radius: 14px; padding: 4px 10px; box-shadow: 0 2px 10px rgba(20, 24, 32, .15); animation: pop .4s var(--ease); }
+
+/* ===== Source markers: readable text, small numbered tags ===== */
+.sent { font: inherit; color: var(--ink); background: none; border: 0; padding: 1px 2px; margin: 0; text-align: left; border-radius: 5px; display: inline; -webkit-box-decoration-break: clone; box-decoration-break: clone; text-decoration: none; transition: background .15s; }
+button.sent { cursor: pointer; }
+button.sent:hover, button.sent:focus-visible { background: #e9ecf0; }
+button.sent.cited { background: #fff3b8; }
+.sent .cite { display: inline-block; min-width: 17px; height: 16px; line-height: 16px; padding: 0 5px; margin-left: 4px; border-radius: 8px; font-size: 10px; font-weight: 600; text-align: center; vertical-align: 2px; background: var(--ink); color: #fff; font-variant-numeric: tabular-nums; }
+.sent.k-d .cite { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); border-radius: 8px; background-image: none; }
+.sent.k-g { background: var(--amber-bg); box-shadow: none; padding: 1px 4px; cursor: default; }
+.sent.k-g .cite { background: var(--amber-line); color: #fff; min-width: 16px; padding: 0; }
+button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #fff; box-shadow: none; }
+.btext.sents { line-height: 1.6; }
+.m-strong .m3 i { background: var(--ink); }
+.m-partial .m3 i:nth-child(-n+2) { background: var(--amber-line); }
+.evsum .match b { font-weight: 600; }
+
+
+/* ---- sign-in, real replies toggle, exercise mode ---- */
+#login { position: fixed; inset: 0; background: var(--white, #fff); z-index: 40; display: flex; align-items: center; justify-content: center; animation: fade .3s ease; overflow-y: auto; }
+#login[hidden] { display: none; }
+#login .ibox { width: min(460px, 90vw); }
+#login .ititle { font-size: 34px; font-weight: 600; margin-bottom: 8px; text-align: center; }
+#login .isub { color: var(--soft); margin: 0 0 24px; font-size: 15px; text-align: center; }
+#login .flab { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block; }
+#login .inp { border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; }
+#intro .row .small { font-size: 12px; }
+#b-signout { margin-left: 2px; }
+
+.rtog { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: var(--soft); user-select: none; }
+.rtog input { position: absolute; opacity: 0; width: 0; height: 0; }
+.rtog .trk { width: 30px; height: 18px; border-radius: 999px; background: var(--line); position: relative; transition: background .15s; flex: none; }
+.rtog .trk::after { content: ''; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform .15s var(--ease); box-shadow: 0 1px 2px rgba(0, 0, 0, .25); }
+.rtog input:checked + .trk { background: var(--ink); }
+.rtog input:checked + .trk::after { transform: translateX(12px); }
+.rtog input:focus-visible + .trk { box-shadow: 0 0 0 3px var(--blue-bg); outline: 1px solid var(--blue); }
+.rtog input:checked ~ .rl { color: var(--ink); font-weight: 600; }
+
+#b-practice.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.exview { position: absolute; inset: 0; z-index: 21; display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line2); border-radius: 12px; overflow: hidden; animation: rise .25s var(--ease); }
+.exview[hidden] { display: none; }
+.exh { display: flex; align-items: center; gap: 10px; padding: 16px 22px 12px; border-bottom: 1px solid var(--line2); }
+.exh h2 { margin: 0; font-size: 20px; font-weight: 600; outline: 0; }
+.exh p { margin: 2px 0 0; }
+.exbody { flex: 1; min-height: 0; overflow-y: auto; padding: 22px; display: flex; gap: 22px; align-items: flex-start; justify-content: center; }
+.excard { flex: 1 1 560px; max-width: 700px; border: 1px solid var(--line2); border-radius: 12px; padding: 22px 24px; background: #fff; }
+.excard.narrow { max-width: 520px; flex: 0 1 520px; }
+.excard h3, .exside h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+.exsec { margin-bottom: 20px; }
+.exside { flex: 0 1 260px; border-radius: 12px; background: var(--fill); padding: 18px 20px; font-size: 13px; color: var(--soft); }
+.exside ol { margin: 0 0 10px; padding-left: 18px; display: grid; gap: 6px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: #fff; flex-wrap: wrap; }
+.seg button { height: 34px; padding: 0 16px; border: 0; border-right: 1px solid var(--line2); background: #fff; font: inherit; font-size: 13px; cursor: pointer; transition: background .15s, color .15s; }
+.seg button:last-child { border-right: 0; }
+.seg button:hover { background: var(--fill); }
+.seg button.on { background: var(--ink); color: #fff; }
+.seg button:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+.extopics { display: grid; gap: 4px; }
+.extopic { display: grid; grid-template-columns: 20px 1fr auto 90px 64px; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.extopic:hover { background: var(--fill); }
+.extopic .tr { text-align: right; color: var(--soft); }
+.exbar { height: 6px; border-radius: 99px; background: var(--line2); overflow: hidden; display: block; }
+.exbar i { display: block; height: 100%; background: var(--ink); border-radius: 99px; }
+.exwarn { color: var(--amber); background: var(--amber-bg); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin: 0 0 12px; }
+.exwarn:empty { display: none; }
+.exsum { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 14px; }
+.exbudget { flex: 1; height: 8px; border-radius: 99px; background: var(--line2); overflow: hidden; min-width: 80px; }
+.exbudget i { display: block; height: 100%; background: var(--blue); border-radius: 99px; transition: width .4s var(--ease); }
+.exlist { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+.exit { display: flex; gap: 12px; padding: 12px 14px; border: 1px solid var(--line2); border-radius: 10px; background: #fff; }
+.exit.now { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.exit.done { background: var(--fill); }
+.exn { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--sel); display: grid; place-items: center; font-size: 12px; font-weight: 600; }
+.exit.now .exn { background: var(--ink); color: #fff; }
+.exit.done .exn { background: var(--green-bg); color: var(--green); }
+.exm { display: grid; gap: 3px; min-width: 0; }
+.exm b { font-weight: 600; font-size: 14px; }
+.exmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.exwhy { color: var(--ink); }
+.exsrc { display: inline-block; margin: 0; color: var(--ink); padding: 1px 8px; border-radius: 99px; font-size: 11px; border: 1px solid var(--line); background: #fff; }
+.exsrc.ai { border-color: var(--blue-line); background: var(--blue-bg); color: var(--blue); }
+.exbody.run { align-items: flex-start; }
+.exrail { flex: 0 1 340px; position: sticky; top: 0; }
+.exrail .exit { padding: 9px 11px; }
+.exrail .exm .soft, .exrail .exwhy, .exrail .exsrc { display: none; }
+.exrail .exit.now .exwhy { display: block; }
+.excur { flex: 1 1 520px; max-width: 700px; border: 1px solid var(--line2); border-radius: 12px; padding: 22px 24px; }
+.exq { font-size: 22px; line-height: 1.35; margin: 12px 0 16px; font-weight: 500; }
+.exans { display: grid; gap: 8px; }
+.mkeys { display: flex; gap: 6px; flex-wrap: wrap; }
+.exview .mk { min-width: 34px; height: 30px; border: 1px solid var(--line); border-radius: 7px; background: #fff; font: inherit; cursor: pointer; padding: 0 8px; }
+.exview .mk:hover { background: var(--fill); }
+.exfb { margin: 10px 0 0; color: var(--amber); font-size: 14px; }
+.exhint { margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: var(--blue-bg); border: 1px solid var(--blue-line); font-size: 14px; }
+.exhint.sol { background: var(--amber-bg); border-color: var(--amber-line); }
+.exres { display: grid; gap: 4px; padding: 14px 16px; border-radius: 10px; background: var(--green-bg); border: 1px solid #b6dfc7; }
+.exres.solution, .exres.skip { background: var(--amber-bg); border-color: var(--amber-line); }
+.explan { margin-top: 12px; padding: 12px 16px; border-radius: 10px; background: var(--fill); display: grid; gap: 3px; font-size: 14px; animation: rise .3s var(--ease); }
+.exstats { list-style: none; margin: 0; padding: 0; display: flex; gap: 22px; font-size: 14px; }
+.exstats b { font-size: 26px; display: block; }
+.exrates { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.exrates li { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; border-bottom: 1px solid var(--line2); }
+@media (max-width: 900px) { .exbody { flex-direction: column; align-items: stretch; } .exrail { position: static; flex-basis: auto; } .extopic { grid-template-columns: 20px 1fr 64px; } .extopic .exbar, .extopic .tc { display: none; } }
+@media (prefers-reduced-motion: reduce) { .exview, #login, .explan { animation: none; } .exbudget i, .rtog .trk::after { transition: none; } }
+</style>
+
+<div id="login" hidden>
+  <div class="ibox">
+    <div class="ititle">Sign in</div>
+    <p class="isub">Enter your email to open your saved workspace. There is no password. A new email starts with a short profile.</p>
+    <label class="flab" for="login-email">Email</label>
+    <input class="inp" id="login-email" type="email" autocomplete="username" placeholder="you@example.com" style="height:42px;width:100%">
+    <p class="exwarn" id="login-note" role="alert" style="margin:8px 0 0"></p>
+    <div class="row" style="gap:10px;margin-top:20px"><button class="btn dark" id="login-go" style="height:42px;padding:0 28px;font-size:15px">Continue</button><button class="btn" id="login-demo" style="height:42px">Open the demo workspace</button></div>
+    <p class="fine" style="margin-top:14px">Your work is saved in this browser only.</p>
+  </div>
+</div>
+
+<div id="intro">
+  <div class="ibox">
+    <div class="ititle" id="ititle">Hey, ready to study?</div>
+    <p class="isub" id="isub">Practice with help that comes only from your own course slides.</p>
+    <ul class="how" id="how">
+      <li><b>1</b><span>Add your slides. The AI answers from them and shows where each sentence comes from.</span></li>
+      <li><b>2</b><span>Try a problem yourself first. Help comes in small steps, only as much as you need.</span></li>
+      <li><b>3</b><span>Watch your topics improve as you need fewer hints.</span></li>
+    </ul>
+    <label class="flab" for="prof-desc">About you</label>
+    <textarea class="area" id="prof-desc" rows="3" maxlength="300" placeholder="e.g. First-year CS student. I like examples and I get stuck on word problems."></textarea>
+    <div class="flab" style="margin-top:20px">Math courses you finished in earlier semesters</div>
+    <div class="pcs" id="pcs" role="group" aria-label="Math courses you finished in earlier semesters"></div>
+    <div class="row" style="gap:8px;margin-top:12px"><input class="inp" id="pc-new" placeholder="Add another course" maxlength="40" aria-label="Add another course" style="height:36px"><button class="btn" id="pc-add" style="height:36px" disabled>Add</button></div>
+    <div class="row" style="gap:10px;margin-top:28px"><button class="btn dark" id="b-start" style="height:42px;padding:0 28px;font-size:15px">Continue</button><button class="btn ghost" id="b-pcancel" style="height:42px" hidden>Cancel</button><span class="spacer"></span><span class="soft small" id="whoami"></span><button class="btn ghost small" id="b-signout">Sign out</button></div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="top">
+    <select class="sel" id="ctx" aria-label="Course context"></select>
+    <button class="btn small icon" id="b-addctx" aria-label="Add context" title="Add context"></button>
+    <span class="spacer"></span>
+    <button class="btn icon" id="b-slides" data-vtoggle="1" aria-pressed="true" aria-label="Slides"></button>
+    <button class="btn dark" id="b-practice">Start an exercise</button>
+    <button class="btn icon" id="b-profile" aria-label="Profile" title="Profile"></button>
+  </header>
+
+  <main class="ws" id="ws">
+    <nav class="actbar" id="actbar" aria-label="Sidebar views"></nav>
+    <aside class="panel sidebar" id="left" aria-label="Sidebar"></aside>
+    <div class="editor" id="editor">
+      <section class="exview" id="exview" aria-label="Exercise mode" hidden></section>
+      <section class="panel" id="chat" aria-label="Chat">
+        <div class="chead">
+          <span class="h" id="ctitle">Chat</span>
+          <span class="spacer"></span>
+          <label class="rtog" title="Off: scripted answers. On: a terminal reply agent answers general questions from your notes."><input type="checkbox" id="real-toggle" role="switch" aria-checked="false"><span class="trk"></span><span class="rl">Real replies</span></label>
+          <button class="btn small" id="b-exit" hidden title="Back to the full workspace">Exit</button>
+        </div>
+        <div class="msgs" id="msgs"></div>
+        <div class="compose">
+          <div class="mkeys" id="mkeys" hidden role="group" aria-label="Math keys"></div>
+          <div class="box">
+            <textarea id="inp" placeholder="Ask a question…" aria-label="Message"></textarea>
+            <div class="r"><span class="hintline" id="hintline"></span><button class="btn dark small icon" id="send" aria-label="Send" title="Send"></button></div>
+          </div>
+        </div>
+      </section>
+      <div class="split" id="split" role="separator" tabindex="0" aria-label="Resize slides panel. Use arrow keys, or double-click to reset." hidden></div>
+      <section class="panel" id="viewer" aria-label="Slides"></section>
+    </div>
+  </main>
+  <div class="foot">Prototype · scripted answers</div>
+</div>
+
+<div id="modal-root"></div>
+<div id="toasts"></div>
+<div id="sr" class="sr" aria-live="polite"></div>
+
+<script>
+(function () {
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
+  var REDUCED = !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var QS = location.search;
+  var INSTANT = REDUCED || /[?&]fast(=|&|$)/.test(QS);
+  var DELAY = INSTANT ? 0 : 450;
+
+  /* ---------------- content (scripted) ----------------
+     Every sentence of an AI answer has a kind:
+       s = from your slides (the sentence is in, or paraphrases, a slide passage)
+       d = derived from your slides (applies a slide rule to this problem)
+       g = general knowledge that is not in your slides
+     slide + p point to the slide number and the paragraph index that supports it. */
+  function T(k, slide, p, t, q) { return { k: k, slide: slide, p: p, t: t, q: q }; }
+  var L3 = 'Calculus I – Lecture 3: Derivatives.pdf', L4 = 'Calculus I – Lecture 4: Applications of derivatives.pdf';
+  var FILE_DEFS = {
+    calc: [
+      { id: 'l3', name: L3, short: 'Lecture 3', mb: '2.4', pages: 34, kind: 'lecture', preview: 12, slides: [10, 11, 12, 13], topics: ['basic', 'pq', 'chain'] },
+      { id: 'l4', name: L4, short: 'Lecture 4', mb: '1.9', pages: 28, kind: 'lecture', preview: 20, slides: [20, 21], topics: ['tangent', 'optim'] }
+    ],
+    hci: [
+      { id: 'realpdf', name: 'HCI Week 8 – Computational Design.pdf', short: 'Week 8', mb: '4.9', pages: 60, kind: 'pdf', url: 'material/computational-design.pdf', slides: [], topics: [] }
+    ],
+    linalg: [
+      { id: 'scan', name: 'Linear Algebra – Scanned lecture notes.pdf', short: 'Scanned notes', mb: '5.2', pages: 41, kind: 'scan', slides: [], topics: [] }
+    ]
+  };
+  var TOPIC_DEFS = {
+    basic: { id: 'basic', name: 'Basic derivative rules', slide: 10 },
+    pq: { id: 'pq', name: 'Product and quotient rule', slide: 11 },
+    chain: { id: 'chain', name: 'Chain rule', slide: 12 },
+    tangent: { id: 'tangent', name: 'Tangent lines', slide: 20 },
+    optim: { id: 'optim', name: 'Optimization', slide: 21 }
+  };
+  var SLIDES = {
+    10: { t: 'Basic derivative rules', p: ['Power rule: d/dx xⁿ = n · xⁿ⁻¹', 'Constant multiple: (c · f)′ = c · f′', 'Sum rule: (f + g)′ = f′ + g′'] },
+    11: { t: 'Product and quotient rule', p: ['Product: (f · g)′ = f′ · g + f · g′', 'Quotient: (f / g)′ = (f′ · g − f · g′) / g²'] },
+    12: { t: 'The chain rule', p: ['If y = f(g(x)), then', 'y′ = f′(g(x)) · g′(x)', 'Differentiate the outside, then multiply by the derivative of the inside.'], f: 1 },
+    13: { t: 'Worked example', p: ['g(x) = (2x + 5)³', 'Outside: 3(2x + 5)². Inside: 2x + 5, with derivative 2.', 'g′(x) = 3(2x + 5)² · 2 = 6(2x + 5)²'] },
+    20: { t: 'Tangent lines', p: ['The tangent line to f at x = a is', 'y = f(a) + f′(a)(x − a)', 'Its slope is the derivative f′(a).'], f: 1 },
+    21: { t: 'Optimization', p: ['Maxima and minima occur where f′(x) = 0 or where f′ is undefined.', 'Check the sign of f′ on both sides, or use the second derivative.'] }
+  };
+  var SLIDE_FILE = { 10: 'l3', 11: 'l3', 12: 'l3', 13: 'l3', 20: 'l4', 21: 'l4' };
+  var LV = ['Hint', 'Concept', 'Example', 'Solution'];
+  var LTIME = { 1: 'about 1 min', 2: 'about 2 min', 3: 'about 3 min', 4: 'about 2 min' };
+  var PROBLEMS = {
+    p1: {
+      topic: 'chain', slide: 12, name: 'Chain rule', difficulty: 'hard', similar: 'p3', next: 'p2', text: 'Find f′(x) for f(x) = (3x² + 1)⁴',
+      fn: function (x) { return 24 * x * Math.pow(3 * x * x + 1, 3); },
+      close: [{ fn: function (x) { return 4 * Math.pow(3 * x * x + 1, 3); }, msg: 'You applied the power rule to the outside, which is right.' }],
+      hints: [
+        { s: [T('d', 12, 2, 'Look at what is inside the brackets. After the power comes down, is there anything else to multiply by?'), T('s', 12, 2, 'The chain rule says to multiply by the derivative of the inside.')],
+          more: [T('d', 12, 0, 'Here f(g(x)) has g(x) = 3x² + 1 inside the power.')] },
+        { s: [T('s', 12, 0, 'The chain rule is for a function inside another function: y = f(g(x)).'), T('s', 12, 1, 'Then y′ = f′(g(x)) · g′(x).'), T('s', 12, 2, 'Differentiate the outside, then multiply by the derivative of the inside.')],
+          more: [T('d', 12, 2, 'Keep the inside, 3x² + 1, unchanged while you differentiate the outside power.')] },
+        { s: [T('s', 13, 0, 'Take g(x) = (2x + 5)³.'), T('s', 13, 1, 'The outside gives 3(2x + 5)², and the inside 2x + 5 has derivative 2.'), T('s', 13, 2, 'So g′(x) = 3(2x + 5)² · 2 = 6(2x + 5)².')],
+          more: [T('d', 12, 2, 'Your problem has the same shape, with a fourth power and the inside 3x² + 1.')] },
+        { s: [T('d', 12, 1, 'Let u = 3x² + 1, so f = u⁴.'), T('d', 12, 1, 'Then f′ = 4u³ · u′. Since u′ = 6x, f′(x) = 4(3x² + 1)³ · 6x = 24x(3x² + 1)³.')],
+          more: [T('g', null, null, 'You could also expand the bracket first and differentiate term by term, but that takes much longer.')] }
+      ],
+      done: 'The outer power comes down first, then you multiply by the derivative of what is inside the brackets: 4(3x² + 1)³ · 6x = 24x(3x² + 1)³.', doneP: 1
+    },
+    p2: {
+      topic: 'pq', slide: 11, name: 'Product rule', difficulty: 'easy', similar: 'p4', next: 'p1', text: 'Find h′(x) for h(x) = (x² + 1)(x³ − 2x)',
+      fn: function (x) { return 5 * Math.pow(x, 4) - 3 * x * x - 2; },
+      close: [{ fn: function (x) { return (2 * x) * (3 * x * x - 2); }, msg: 'The derivative of a product is not the product of the derivatives.' }],
+      hints: [
+        { s: [T('d', 11, 0, 'You have two factors multiplied together.'), T('s', 11, 0, 'The product rule combines the derivative of each factor with the other factor left as it is.')],
+          more: [T('d', 11, 0, 'Here the factors are x² + 1 and x³ − 2x.')] },
+        { s: [T('s', 11, 0, 'Product rule: (f · g)′ = f′ · g + f · g′.'), T('d', 11, 0, 'Here f = x² + 1 and g = x³ − 2x. Find f′ and g′ first.')],
+          more: [T('s', 10, 0, 'The power rule gives you each derivative: d/dx xⁿ = n · xⁿ⁻¹.')] },
+        { s: [T('d', 11, 0, 'Try (x)(x + 1). Then f′ = 1 and g′ = 1.'), T('d', 11, 0, 'The product rule gives 1 · (x + 1) + x · 1 = 2x + 1.')],
+          more: [T('d', 11, 0, 'Your problem works the same way, with longer factors.')] },
+        { s: [T('d', 11, 0, 'f′ = 2x and g′ = 3x² − 2.'), T('d', 11, 0, 'So h′ = 2x(x³ − 2x) + (x² + 1)(3x² − 2) = 5x⁴ − 3x² − 2.')],
+          more: [T('d', 10, 0, 'Expanding h first and using the power rule gives the same result.')] }
+      ],
+      done: 'The product rule gives 2x(x³ − 2x) + (x² + 1)(3x² − 2). Expanding and collecting terms: 5x⁴ − 3x² − 2.', doneP: 0
+    },
+    p3: {
+      topic: 'chain', slide: 12, name: 'Chain rule', difficulty: 'hard', check: true, next: 'p2', text: 'Find g′(x) for g(x) = (5x − 2)³',
+      fn: function (x) { return 15 * Math.pow(5 * x - 2, 2); },
+      close: [{ fn: function (x) { return 3 * Math.pow(5 * x - 2, 2); }, msg: 'You applied the power rule to the outside, which is right.' }],
+      hints: [],
+      done: 'The outside gives 3(5x − 2)², and the inside 5x − 2 has derivative 5. So g′(x) = 15(5x − 2)².', doneP: 1
+    },
+    p4: {
+      topic: 'pq', slide: 11, name: 'Product rule', difficulty: 'easy', check: true, next: 'p1', text: 'Find k′(x) for k(x) = (x + 3)(x² − 1)',
+      fn: function (x) { return 3 * x * x + 6 * x - 1; },
+      close: [{ fn: function (x) { return 2 * x; }, msg: 'The derivative of a product is not the product of the derivatives.' }],
+      hints: [],
+      done: 'The product rule gives 1 · (x² − 1) + (x + 3) · 2x = 3x² + 6x − 1.', doneP: 0
+    }
+  };
+
+  /* ---------------- help policy (one configuration object) ----------------
+     HELP_POLICY[band][difficulty] = { levels, startLevel, attemptsBeforeSolution, offerNextAfter }
+       band: low (rating 0 to 3), mid (4 to 6, or not rated), high (7 to 10)
+       levels: help levels offered, from 1 Hint, 2 Concept, 3 Example, 4 Solution
+       startLevel: level shown right after the first wrong attempt (0 = wait until the student asks)
+       attemptsBeforeSolution: wrong attempts before the solution opens without a confirmation question
+         (the student is never blocked from the solution)
+       offerNextAfter: wrong attempts after which the next level is offered as the main action
+     To run a different policy (for example the one from Milestone 3), add an entry here, or call
+     window.__proto.registerPolicy(id, label, cells) and window.__proto.setPolicy(id), or open ?policy=id. */
+  var ALL = [1, 2, 3, 4];
+  function cell(levels, start, att, offer) { return { levels: levels, startLevel: start, attemptsBeforeSolution: att, offerNextAfter: offer }; }
+  var HELP_POLICIES = {
+    adaptive: {
+      label: 'Adaptive (hand-made default)',
+      cells: {
+        low: { easy: cell(ALL, 1, 3, 1), hard: cell(ALL, 2, 2, 1) },
+        mid: { easy: cell([1, 2, 4], 1, 3, 2), hard: cell(ALL, 1, 3, 2) },
+        high: { easy: cell([1, 4], 0, 4, 3), hard: cell([1, 2, 4], 1, 3, 2) }
+      }
+    },
+    baseline: {
+      label: 'Baseline (all levels everywhere)',
+      cells: {
+        low: { easy: cell(ALL, 1, 2, 1), hard: cell(ALL, 1, 2, 1) },
+        mid: { easy: cell(ALL, 1, 2, 1), hard: cell(ALL, 1, 2, 1) },
+        high: { easy: cell(ALL, 1, 2, 1), hard: cell(ALL, 1, 2, 1) }
+      }
+    }
+  };
+  var POLICY_ID = (/[?&]policy=([a-z0-9_-]+)/i.exec(QS) || [])[1];
+  if (!POLICY_ID || !HELP_POLICIES[POLICY_ID]) POLICY_ID = 'adaptive';
+  function bandOf(r) { return r == null ? 'mid' : r <= 3 ? 'low' : r <= 6 ? 'mid' : 'high'; }
+  function policyCell(r, diff) { return JSON.parse(JSON.stringify(HELP_POLICIES[POLICY_ID].cells[bandOf(r)][diff])); }
+  function nextLevelOf(m) { return m.cell.levels.filter(function (l) { return l > m.level; })[0] || null; }
+
+  /* ---------------- trust helpers ---------------- */
+  var MATCH_NAME = { strong: 'Strong', partial: 'Partial', none: 'None' };
+  var KIND_LABEL = { s: 'From your slides', d: 'Derived from your slides', g: 'Not in your slides' };
+  function counts(sents) { var c = { s: 0, d: 0, g: 0 }; sents.forEach(function (x) { c[x.k]++; }); return c; }
+  function matchOf(sents) { var c = counts(sents); if (!c.s && !c.d) return 'none'; return c.g ? 'partial' : 'strong'; }
+  function countLine(sents) {
+    var c = counts(sents), n = sents.length;
+    var s = c.s + ' of ' + n + (n === 1 ? ' step comes' : ' steps come') + ' from your slides';
+    if (c.d) s += ', ' + c.d + ' derived from them';
+    if (c.g) s += ', ' + c.g + ' general knowledge';
+    return s;
+  }
+  function matchReason(sents) {
+    var c = counts(sents), n = sents.length, mt = matchOf(sents);
+    if (mt === 'none') return 'Nothing in your slides supports this answer.';
+    var base = c.s + ' of ' + n + (n === 1 ? ' step is' : ' steps are') + ' in your slides' + (c.d ? ', ' + c.d + ' derived from them' : '') + '.';
+    return mt === 'strong' ? base + ' No general knowledge was added.' : base + ' ' + c.g + (c.g === 1 ? ' is' : ' are') + ' general knowledge that is not in your material.';
+  }
+  var MATCH_ADVICE = { strong: 'Safe to build on. Click a sentence to see the passage it relies on.', partial: 'Check the outlined sentences yourself before relying on them.', none: 'Treat this as a guess. Check it in the lecture or ask your instructor.' };
+
+  /* ---------------- tiny safe math parser (so any correct form is accepted) ---------------- */
+  function parseFn(str) {
+    try {
+      var s = String(str).toLowerCase().replace(/\s+/g, '')
+        .replace(/[′’`]/g, "'").replace(/[·×⋅∙]/g, '*').replace(/[−–]/g, '-').replace(/÷/g, '/')
+        .replace(/²/g, '^2').replace(/³/g, '^3').replace(/⁴/g, '^4').replace(/⁵/g, '^5');
+      if (s.indexOf('=') > -1) s = s.split('=').pop();
+      if (!s) return null;
+      var toks = [], i = 0;
+      while (i < s.length) {
+        var c = s[i];
+        if (/[0-9.]/.test(c)) { var j = i; while (j < s.length && /[0-9.]/.test(s[j])) j++; var v = parseFloat(s.slice(i, j)); if (isNaN(v)) return null; toks.push({ t: 'n', v: v }); i = j; }
+        else if (c === 'x') { toks.push({ t: 'x' }); i++; }
+        else if ('+-*/^()'.indexOf(c) > -1) { toks.push({ t: c }); i++; }
+        else return null;
+      }
+      var out = [];
+      for (var k = 0; k < toks.length; k++) {
+        var a = toks[k - 1], b = toks[k];
+        if (a && (a.t === 'n' || a.t === 'x' || a.t === ')') && (b.t === 'n' || b.t === 'x' || b.t === '(')) out.push({ t: '*' });
+        out.push(b);
+      }
+      var p = 0;
+      var peek = function () { return out[p]; };
+      function expr() { var l = term(); while (peek() && (peek().t === '+' || peek().t === '-')) { var o = out[p++].t, r = term(), a = l; l = (o === '+') ? (function (a, r) { return function (x) { return a(x) + r(x); }; })(a, r) : (function (a, r) { return function (x) { return a(x) - r(x); }; })(a, r); } return l; }
+      function term() { var l = unary(); while (peek() && (peek().t === '*' || peek().t === '/')) { var o = out[p++].t, r = unary(), a = l; l = (o === '*') ? (function (a, r) { return function (x) { return a(x) * r(x); }; })(a, r) : (function (a, r) { return function (x) { return a(x) / r(x); }; })(a, r); } return l; }
+      function unary() { if (peek() && peek().t === '-') { p++; var u = unary(); return function (x) { return -u(x); }; } if (peek() && peek().t === '+') { p++; return unary(); } return power(); }
+      function power() { var b = atom(); if (peek() && peek().t === '^') { p++; var e = unary(); return function (x) { return Math.pow(b(x), e(x)); }; } return b; }
+      function atom() {
+        var t = out[p++]; if (!t) throw new Error('end');
+        if (t.t === 'n') return function () { return t.v; };
+        if (t.t === 'x') return function (x) { return x; };
+        if (t.t === '(') { var e = expr(); if (!(peek() && peek().t === ')')) throw new Error('paren'); p++; return e; }
+        throw new Error('tok');
+      }
+      var f = expr(); if (p !== out.length) return null; return f;
+    } catch (e) { return null; }
+  }
+  var PTS = [0.7, 1.3, -0.9, 2.1, 0.35];
+  function same(f, g) {
+    for (var i = 0; i < PTS.length; i++) {
+      var a = f(PTS[i]), b = g(PTS[i]);
+      if (!isFinite(a) || !isFinite(b)) return false;
+      if (Math.abs(a - b) > 1e-6 * (1 + Math.abs(b))) return false;
+    }
+    return true;
+  }
+
+  /* ---------------- state ---------------- */
+  var S, C;
+  var Q = [], qbusy = false;
+  function newChat(title) { return { title: title, msgs: [], mode: null, topics: [], shown: 0, last: '' }; }
+  function newCourse() {
+    return { files: [], nid: 1, loading: 0, empty: false, topics: [], ratings: {}, start: {}, last: {}, pulse: {}, own: {}, streak: 0, log: [], openHist: {}, tags: [], tabs: [], active: null, slide: 12, cited: null,
+      chats: [newChat('Getting started')], chat: 0, stats: { attempts: 0, level: 0, solved: 0 }, timers: [] };
+  }
+  /* The HCI context needs a course PDF that is not kept in the shared repository. Without the file it is left out. */
+  var HAS_PDF = (function () { try { var x = new XMLHttpRequest(); x.open('HEAD', 'material/computational-design.pdf', false); x.send(); return x.status === 200; } catch (e) { return false; } })();
+  function fresh() {
+    var ctxs = [{ key: 'calc', name: 'Calculus I' }, { key: 'linalg', name: 'Linear Algebra' }], courses = { calc: newCourse(), linalg: newCourse() };
+    if (HAS_PDF) { ctxs.unshift({ key: 'hci', name: 'HCI (real PDF test)' }); courses.hci = newCourse(); }
+    S = { side: 'material', lastSide: 'material', dock: 'right', vw: null, vh: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: HAS_PDF ? 'hci' : 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
+    C = S.courses[S.ctx];
+    if (HAS_PDF) {
+      var h = S.courses.hci, d = FILE_DEFS.hci[0];
+      h.pdfDemo = true; h.nid = 2; h.pdfPage = 1;
+      h.files.push({ id: 'f1', defId: d.id, name: d.name, short: d.short, mb: d.mb, pages: d.pages, kind: 'pdf', url: d.url, slides: [], topics: [], status: 'added', pct: 100 });
+      h.tabs = ['f1']; h.active = 'f1';
+      h.chats[0].msgs.push({ r: 'ai', text: 'Ask about the slides. I mark the passage I used.', acts: [{ label: 'What is Moore’s law?', act: 'ask', arg: 'What is Moore’s law?', dark: true }, { label: 'What are the goals of the course?', act: 'ask', arg: 'What are the goals of the course?' }, { label: 'Who proposed Moore’s law?', act: 'ask', arg: 'Who proposed Moore’s law?' }] });
+    }
+    greet(S.courses.calc); greet(S.courses.linalg);
+  }
+  var PAST = ['Calculus I', 'Calculus II', 'Linear Algebra', 'Statistics', 'Probability', 'Discrete Mathematics', 'Differential Equations', 'Numerical Methods'];
+  var NONE = 'None of these';
+  function greetText() {
+        return 'Hi! Add your course material to get started. I can answer without it, but I cannot point to your slides.';
+  }
+  function greet(c) { c.chats[0].msgs.push({ r: 'ai', text: greetText() }); }
+  function chat() { return C.chats[C.chat]; }
+  function hasMaterial() { return C.files.some(function (f) { return f.status === 'added'; }); }
+  function fileById(id) { return C.files.filter(function (f) { return f.id === id; })[0]; }
+  function fileForSlide(n) { if (typeof n === 'string' && n.charAt(0) === 'P') return C.files.filter(function (f) { return f.status === 'added' && f.kind === 'pdf'; })[0]; return C.files.filter(function (f) { return f.status === 'added' && f.defId === SLIDE_FILE[n]; })[0]; }
+  function hasSlideFile(n) { return !!fileForSlide(n); }
+  function slideSrcName(n) { var id = SLIDE_FILE[n], d = FILE_DEFS.calc.filter(function (x) { return x.id === id; })[0]; return d ? d.name : null; }
+  function defsFor(key) { return FILE_DEFS[key] || S.extraDefs[key] || []; }
+  function defById(id) { var all = FILE_DEFS.calc.concat(FILE_DEFS.linalg, FILE_DEFS.hci); Object.keys(S.extraDefs).forEach(function (k) { all = all.concat(S.extraDefs[k]); }); return all.filter(function (d) { return d.id === id; })[0]; }
+
+  /* ---------------- feedback: toasts and announcer ---------------- */
+  var tn = 0, undos = {};
+  function toast(msg, undo) {
+    var id = 'toast' + (++tn), el = document.createElement('div');
+    el.className = 'toast'; el.id = id;
+    el.innerHTML = '<span>' + esc(msg) + '</span>' + (undo ? '<button class="link" data-undo="' + id + '">Undo</button>' : '');
+    if (undo) undos[id] = undo;
+    $('#toasts').appendChild(el);
+    setTimeout(function () { dismissToast(id); }, undo ? 7000 : 3500);
+  }
+  function dismissToast(id) {
+    var el = document.getElementById(id); delete undos[id];
+    if (!el) return;
+    el.classList.add('out'); setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, INSTANT ? 0 : 220);
+  }
+  function announce(t) { var el = $('#sr'); el.textContent = ''; setTimeout(function () { el.textContent = t; }, 30); }
+
+  /* ---------------- left panel ---------------- */
+  var UI = {
+    plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+    user: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg>',
+    slides: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M14.5 4.5v15"/></svg>',
+    dockR: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M13.5 4.5v15"/></svg>',
+    dockB: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 13.5h17"/></svg>',
+    hide: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+    send: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
+    sliders: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h9M18 7h1M5 17h1M10 17h9"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>',
+    info: '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5M12 8v.01"/></svg>',
+    upload: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V5M12 5l-4 4M12 5l4 4M5 17v2h14v-2"/></svg>',
+    chev: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>',
+    chevR: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
+    warn: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17v.01"/></svg>'
+  };
+  var DROP_HTML = '<div class="drop" id="drop" role="button" tabindex="0" aria-label="Add course material" title="Add course material">' + UI.upload + '<span>Add files</span></div>';
+  var shownW = {};
+  function animateBars() {
+    $$('#left i[data-bk]').forEach(function (el) {
+      var k = el.getAttribute('data-bk'), to = +el.getAttribute('data-bw'), from = shownW[k];
+      if (from == null || REDUCED || from === to) { el.style.width = to + '%'; }
+      else { el.style.width = from + '%'; void el.offsetWidth; requestAnimationFrame(function () { el.style.width = to + '%'; }); }
+      shownW[k] = to;
+    });
+  }
+  function fmt(n) { return String(Math.round(n * 10) / 10); }
+  var ICONS = {
+    chats: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/></svg>',
+    material: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg>',
+    assess: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>'
+  };
+  var SIDES = [['chats', 'Chats'], ['material', 'Material'], ['assess', 'Self-assess']];
+  function renderActbar() {
+    $('#actbar').innerHTML = SIDES.map(function (v) {
+      return '<button type="button" class="act' + (S.side === v[0] ? ' on' : '') + '" data-side="' + v[0] + '" aria-pressed="' + (S.side === v[0]) + '" aria-label="' + (v[0] === 'assess' ? 'Self-assessment' : v[1]) + '" title="' + (v[0] === 'assess' ? 'Self-assessment' : v[1]) + ' (click again to hide)">' + ICONS[v[0]] + '</button>';
+    }).join('') + (typeof MAPICON === 'string' && MAPICON ? '<button type="button" class="act' + (S.map ? ' on' : '') + '" data-map="1" aria-pressed="' + (!!S.map) + '" aria-label="Knowledge map" title="Knowledge map">' + MAPICON + '</button>' : '');
+  }
+  function filesHtml() {
+    var h = C.files.map(function (f) {
+      var st = f.status === 'added' ? '' : f.status === 'uploading' ? f.pct + '%' : 'Problem';
+      var row = '<button type="button" class="file' + (C.active === f.id ? ' on' : '') + '" data-open="' + f.id + '"><span class="ico"></span><span class="nm" title="' + esc(f.name) + '">' + esc(f.name) + '</span><span class="st">' + st + '</span></button>';
+      if (f.status === 'uploading') row += '<div class="bar" style="margin:-2px 10px 8px"><i style="width:' + f.pct + '%"></i></div>';
+      if (f.status === 'problem') row += '<div class="small soft" style="margin:-2px 10px 8px">' + esc(f.note) + ' <button class="link" data-retry="' + f.id + '">Try again</button></div>';
+      return row;
+    }).join('');
+    if (C.loading > 0) h += '<div class="row soft small" style="margin:6px 0"><span class="spin"></span> Reading your material…</div>';
+    return h;
+  }
+  function topicsHtml() {
+    var h = '';
+    if (!C.topics.length && C.empty) {
+      h += '<div class="small" style="margin-bottom:8px"><strong>We could not find any topics.</strong> The file may be a scan or have very little text. Add another file, or list the topics you want to work on.</div>' +
+        '<input class="inp" id="manual" placeholder="Type a topic and press Enter" aria-label="Add a topic">';
+    } else if (!C.topics.length && C.loading === 0) h += '<div class="small soft">Add a file in Material and its topics show up here.</div>';
+    h += C.topics.map(function (t) {
+      var r = C.ratings[t.id], on = chat().mode && chat().mode.topic === t.id;
+      return '<button type="button" class="topic tmain' + (on ? ' on' : '') + '" data-topic="' + t.id + '"><span class="t1"><span' + (on ? ' style="font-weight:600"' : '') + '>' + esc(t.name) + (C.own[t.id] ? '<span class="own">On my own</span>' : '') + '</span></span>' +
+        '<span class="t2"><span class="bar" role="meter" aria-label="' + esc(t.name) + ', your rating" aria-valuemin="0" aria-valuemax="10" aria-valuenow="' + (r == null ? 0 : r) + '" aria-valuetext="' + (r == null ? 'Not rated' : fmt(r) + ' of 10') + '"><i data-bk="' + S.ctx + ':' + t.id + '" data-bw="' + (r == null ? 0 : r * 10) + '"></i></span><span class="val">' + (r == null ? '–' : fmt(r)) + '</span></span></button>';
+    }).join('');
+    return h;
+  }
+  function chatsHtml() {
+    return C.chats.map(function (c, i) {
+      var sub = c.mode && c.mode.solved ? (c.last || 'Solved') : c.mode ? 'In progress' : (c.msgs.length > 1 ? 'Conversation' : 'New');
+      return '<button type="button" class="chatrow' + (i === C.chat ? ' on' : '') + '" data-chat="' + i + '"' + (i === C.chat ? ' aria-current="true"' : '') + '><span class="ct">' + esc(c.title) + '</span><span class="cs">' + esc(sub) + '</span></button>';
+    }).join('');
+  }
+  function renderLeft() {
+    renderActbar();
+    var ws = $('#ws'); if (ws) ws.classList.toggle('sb-off', !S.side);
+    var pad0 = $('#left .p-pad'), scroll = pad0 ? pad0.scrollTop : 0, h = '';
+    if (S.side === 'material') {
+      h = '<div class="p-pad"><div class="h sbh">Material</div>' + filesHtml() + DROP_HTML + '</div>';
+    } else if (S.side === 'assess') {
+      h = '<div class="p-pad"><div class="row between sbh"><span class="h">Self-assessment</span>' + (C.topics.length ? '<button class="btn small icon" data-act="assess" title="Rate my knowledge" aria-label="Rate my knowledge">' + UI.sliders + '</button>' : '') + '</div>' + topicsHtml() + '</div>';
+    } else if (S.side === 'chats') {
+      h = '<div class="p-pad"><div class="row between sbh"><span class="h">Chats</span><button class="btn small icon" data-newchat="1" title="New chat" aria-label="New chat">' + UI.plus + '</button></div>' + chatsHtml() + '</div>';
+    }
+    $('#left').innerHTML = h;
+    var pad = $('#left .p-pad'); if (pad) pad.scrollTop = scroll;
+    animateBars(); renderTop();
+  }
+
+  /* ---------------- viewer ---------------- */
+  function renderViewer() {
+    var tabs = C.tabs.map(function (id) {
+      var f = fileById(id); if (!f) return '';
+      return '<div class="tab' + (C.active === id ? ' on' : '') + '"><button type="button" class="tabb" data-tab="' + id + '" title="' + esc(f.name) + '">' + esc(f.short || f.name) + '</button><button type="button" class="x" data-close="' + id + '" aria-label="Close ' + esc(f.short || f.name) + '" title="Close this tab (the file stays in your material)">×</button></div>';
+    }).join('');
+    var body = '', f = C.active ? fileById(C.active) : null;
+    if (!f) body = '<div class="empty-v"><div><div class="h" style="margin-bottom:6px">No document open</div>Add your course material on the left, then click a file to read it here.</div></div>';
+    else if (f.status !== 'added') body = '<div class="empty-v"><div>This file is not ready yet.</div></div>';
+    else if (f.kind === 'lecture') {
+      if (f.slides.indexOf(C.slide) < 0) C.slide = f.preview;
+      var sl = SLIDES[C.slide], cit = C.cited && C.cited.slide === C.slide ? C.cited : null;
+      var ix = f.slides.indexOf(C.slide);
+      body = '<div class="p-pad"><div class="slide"><div class="no">Slide ' + C.slide + '</div><h3>' + esc(sl.t) + '</h3><div class="body' + (cit ? ' dim' : '') + '">' +
+        sl.p.map(function (p, k) { return '<p class="' + ((sl.f && k === 1) ? 'f ' : '') + (cit && cit.p === k ? 'hl k-' + cit.kind : '') + '"' + (cit && cit.p === k ? ' data-tag="' + (cit.kind === 'd' ? 'Used to derive your answer' : 'Source of your answer') + '"' : '') + '>' + esc(p) + '</p>'; }).join('') + '</div></div>' +
+        (cit ? '<div class="evstrip" role="status"><span>' + esc(cit.text || '') + '</span><button class="iconlink" data-clearev="1" aria-label="Clear highlight" title="Clear highlight">×</button></div>' : '') +
+        '<div class="slidenav"><button class="btn small ghost icon" data-nav="-1"' + (ix <= 0 ? ' disabled' : '') + ' aria-label="Previous slide">' + UI.chev + '</button><span>' + C.slide + ' / ' + f.pages + '</span><button class="btn small ghost icon" data-nav="1"' + (ix >= f.slides.length - 1 ? ' disabled' : '') + ' aria-label="Next slide">' + UI.chevR + '</button></div></div>';
+    } else if (f.kind === 'pdf') body = pdfBodyHtml();
+    else body = '<div class="p-pad"><div class="soft small" style="margin-bottom:14px">Scanned pages. Short preview only.</div><div class="sk"><i style="width:90%"></i><i style="width:100%"></i><i style="width:78%"></i><i style="width:100%"></i><i style="width:86%"></i></div></div>';
+    applyLayout();
+    if (S.vmin) { $('#viewer').innerHTML = ''; return; }
+    $('#viewer').innerHTML = '<div class="vhead"><div class="tabs">' + tabs + '</div><div class="vtools"><button type="button" class="vbtn icon" data-dock="1" title="' + (S.dock === 'bottom' ? 'Dock right' : 'Dock bottom') + '" aria-label="' + (S.dock === 'bottom' ? 'Dock right' : 'Dock bottom') + '">' + (S.dock === 'bottom' ? UI.dockR : UI.dockB) + '</button><button type="button" class="vbtn icon" data-vtoggle="1" aria-label="Hide slides" title="Hide slides">' + UI.hide + '</button></div></div>' + body;
+    markCited();
+    if (f && f.kind === 'pdf' && f.status === 'added') pdfRender(f);
+    var hl = $('#viewer p.hl');
+    if (hl && hl.scrollIntoView) setTimeout(function () { hl.scrollIntoView({ block: 'nearest', behavior: REDUCED ? 'auto' : 'smooth' }); }, 30);
+  }
+  function openFile(id, slide, cited, keepMin) {
+    if (!keepMin) S.vmin = false;
+    if (C.tabs.indexOf(id) < 0) C.tabs.push(id);
+    C.active = id;
+    var ff = fileById(id);
+    if (slide) { C.slide = slide; C.cited = cited || null; }
+    else if (ff && ff.preview) { C.slide = ff.preview; C.cited = null; }
+    renderLeft(); renderViewer();
+  }
+  function openSlide(n) { var f = fileForSlide(n); if (f) openFile(f.id, n, null); }
+  function showEvidence(slide, p, kind, text, keepMin) {
+    var f = fileForSlide(slide); if (!f) return;
+    openFile(f.id, slide, { slide: slide, p: p, kind: kind, text: text }, keepMin);
+  }
+
+  /* ---------------- chat rendering ---------------- */
+  function sentHtml(x) {
+    var lab = '<span class="sr">' + KIND_LABEL[x.k] + ': </span>';
+    if (x.k !== 'g' && x.slide && hasSlideFile(x.slide)) {
+      var pg = String(x.slide).replace('P', '');
+      return '<button type="button" class="sent k-' + x.k + '" data-evid="' + x.slide + '|' + x.p + '|' + x.k + '" data-evt="' + esc(x.t) + '"' + (x.q ? ' data-evq="' + esc(x.q) + '"' : '') + ' title="' + (x.k === 'd' ? 'Derived from' : 'From') + ' your slides, p.' + pg + '. Click to see it.">' + lab + esc(x.t) + '<span class="cite" aria-hidden="true">' + pg + '</span></button> ';
+    }
+    return '<span class="sent k-g" title="Not in your slides">' + lab + esc(x.t) + '<span class="cite" aria-hidden="true">!</span></span> ';
+  }
+  function evidenceHtml(m, i, pr) {
+    var all = m.sents.concat(m.moreOpen && m.more ? m.more : []), mt = matchOf(all), c = counts(all);
+    var slides = []; all.forEach(function (x) { if (x.k !== 'g' && x.slide && hasSlideFile(x.slide) && slides.indexOf(x.slide) < 0) slides.push(x.slide); });
+    var grounded = c.s + c.d, n = all.length;
+    var h = '<div class="evsum"><span class="match m-' + mt + '" tabindex="0" aria-describedby="tip-' + i + '"><span class="m3" aria-hidden="true"><i></i><i></i><i></i></span><b>' + MATCH_NAME[mt] + '</b><span class="cnt" title="' + esc(countLine(all)) + '">' + c.s + '/' + n + '</span><span class="tip" role="tooltip" id="tip-' + i + '">' + esc(matchReason(all)) + '</span></span>';
+    if (!pr) h += '<button class="iconlink" data-why="' + i + '" title="Why this match" aria-label="Why this match">' + UI.info + '</button>';
+    h += '</div>';
+    if (mt === 'none' && !pr) h += '<div class="banner">' + UI.warn + '<span>Not in your slides</span><button class="btn small" data-act="lecture">Check lecture</button></div>';
+    return h;
+  }
+  function ladderHtml(m) {
+    var hp = m.help;
+    var steps = [1, 2, 3, 4].map(function (n) {
+      var st = hp.levels.indexOf(n) < 0 ? 'off' : n < hp.lv ? 'done' : n === hp.lv ? 'cur' : 'todo';
+      return '<li class="st ' + st + '"' + (st === 'cur' ? ' aria-current="step"' : '') + (st === 'off' ? ' title="Skipped at your level"' : '') + '><span class="dot">' + (st === 'done' ? '✓' : n) + '</span><span>' + LV[n - 1] + '</span></li>';
+    }).join('');
+    return '<div class="ladcard"><ol class="lad" aria-label="Help steps">' + steps + '</ol></div>';
+  }
+  function renderMsgs(opt) {
+    var ch = chat(), el = $('#msgs'), keep = opt && opt.keep, top = el.scrollTop;
+    var pending = Q.some(function (q) { return q.ch === ch; });
+    var h = ch.msgs.map(function (m, i) {
+      var enter = i >= (ch.shown || 0) ? ' enter' : '';
+      if (m.r === 'user') return '<div class="msg user' + enter + '"><div class="bubble">' + (m.attempt ? '<div class="who">Your step</div>' : '') + '<div class="btext">' + esc(m.text) + '</div></div></div>';
+      var o = '<div class="msg ai' + enter + '"><span class="av" aria-hidden="true">AI</span><div class="bubble">';
+      var kick = m.kick && m.kick !== 'AI note' ? m.kick : '';
+      if (kick) o += '<div class="kick">' + esc(kick) + '</div>';
+      if (m.title) o += '<div class="btitle">' + esc(m.title) + '</div>';
+      if (m.sub) o += '<div class="bsub">' + esc(m.sub) + '</div>';
+      if (m.help) o += ladderHtml(m);
+      if (m.strong) o += '<div class="btext strong">' + esc(m.strong) + '</div>';
+      if (m.text) o += '<div class="btext">' + esc(m.text) + '</div>';
+      if (m.sents) o += '<div class="btext sents">' + m.sents.map(sentHtml).join('') + '</div>';
+      if (m.more) {
+        o += '<button type="button" class="link" data-more="' + i + '" aria-expanded="' + !!m.moreOpen + '" style="margin-top:6px">' + (m.moreOpen ? 'Hide detail' : 'Show more detail') + '</button>';
+        if (m.moreOpen) o += '<div class="btext sents" style="margin-top:6px">' + m.more.map(sentHtml).join('') + '</div>';
+      }
+      if (m.note) o += '<div class="bnote">' + esc(m.note) + '</div>';
+      if (m.sents) o += evidenceHtml(m, i);
+      if (m.result) o += '<div class="result"><b>' + esc(m.result.line) + '</b><div class="rd2">' + esc(m.result.sub) + '</div></div>';
+      if (m.acts && i === ch.msgs.length - 1 && !pending) o += '<div class="acts">' + m.acts.map(function (a) { return '<button class="btn small' + (a.dark ? ' dark' : '') + '" data-act="' + a.act + '"' + (a.arg != null ? ' data-arg="' + esc(a.arg) + '"' : '') + '>' + esc(a.label) + '</button>'; }).join('') + '</div>';
+      return o + '</div></div>';
+    }).join('');
+    if (pending) h += '<div class="msg ai enter" aria-hidden="true"><span class="av">AI</span><div class="bubble typing"><i></i><i></i><i></i></div></div>';
+    el.innerHTML = h;
+    ch.shown = ch.msgs.length;
+    el.scrollTop = keep ? top : el.scrollHeight;
+    renderChatbar(); renderCompose(); markCited();
+  }
+  function renderChatbar() {
+    $('#ctitle').textContent = chat().title;
+    if (S.side === 'chats') renderLeft();
+  }
+  function renderCompose() {
+    var m = chat().mode;
+    renderHeat(m);
+    var t;
+    if (!m) t = 'Ask a question about your material.';
+    else if (m.solved) t = 'Solved. Ask a question or start another problem.';
+    else if (m.check) t = 'Check: no help in this one. Type your answer.';
+    else t = 'Type your attempt for: ' + PROBLEMS[m.pid].name;
+    $('#hintline').textContent = '';
+    var mk = $('#mkeys'); if (mk) mk.hidden = !(m && !m.solved);
+    $('#inp').placeholder = m && !m.solved ? 'Your answer, e.g. 4(3x^2+1)^3' : 'Ask a question…';
+  }
+  function closeness(f, p) {
+    if (same(f, p.fn)) return 100;
+    if (p.close.some(function (c) { return same(f, c.fn); })) return 62;
+    var es = [];
+    for (var i = 0; i < PTS.length; i++) {
+      var a = f(PTS[i]), b = p.fn(PTS[i]);
+      if (!isFinite(a) || !isFinite(b)) return 8;
+      es.push(Math.abs(a - b) / (Math.abs(b) + 1e-9));
+    }
+    es.sort(function (x, y) { return x - y; });
+    return Math.max(5, Math.round(85 * Math.exp(-3 * es[2])));
+  }
+  function heatWord(sc) { return sc >= 100 ? 'Solved' : sc >= 75 ? 'Hot' : sc >= 50 ? 'Warm' : sc >= 25 ? 'Cool' : 'Cold'; }
+  function renderHeat(m) {
+    var el = $('#heat');
+    if (!el) return;
+    if (!m || m.check) { el.hidden = true; return; }
+    el.hidden = false;
+    var p = heatParts(m); el.className = p.cls; el.innerHTML = p.html;
+  }
+  function heatParts(m) {
+    var hs = m.heat || [], sc = m.solved ? 100 : hs.length ? hs[hs.length - 1] : null, note;
+    if (sc === null) note = 'Make an attempt to see how close you are.';
+    else if (m.solved) note = 'You got there.';
+    else if (hs.length > 1) { var d = hs[hs.length - 1] - hs[hs.length - 2]; note = d > 5 ? 'Warmer than your last try.' : d < -5 ? 'Colder than your last try.' : 'About the same as your last try.'; }
+    else note = 'First try. Keep going.';
+    return { cls: 'heat' + (sc === null ? ' none' : ''), html: '<div class="hrow"><span>How close is your answer?</span><span class="hword">' + (sc === null ? 'No attempt yet' : heatWord(sc)) + '</span></div>' +
+      '<div class="htrack" role="meter" aria-label="How close your answer is" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + (sc === null ? 0 : sc) + '" aria-valuetext="' + (sc === null ? 'No attempt yet' : heatWord(sc)) + '">' +
+      (sc === null ? '' : '<span class="hmark" style="left:' + sc + '%"></span>') + '</div>' +
+      '<div class="hends"><span>Cold</span><span>' + esc(note) + '</span><span>Hot</span></div>' };
+  }
+
+  /* ---------------- posting (with a short typing indicator) ---------------- */
+  function plain(m) {
+    return (m.title ? m.title + '. ' : '') + (m.strong ? m.strong + '. ' : '') + (m.text || '') + ' ' + (m.sents ? m.sents.map(function (x) { return x.t; }).join(' ') : '') + ' ' + (m.result ? m.result.line : '');
+  }
+  function deliver(ch, m) { ch.msgs.push(m); if (m.r === 'ai') announce(plain(m)); }
+  function pump() {
+    if (qbusy || !Q.length) return;
+    qbusy = true;
+    setTimeout(function () {
+      var it = Q.shift(); qbusy = false;
+      if (!it) return;
+      deliver(it.ch, it.m);
+      if (it.ch === chat()) renderMsgs(); else renderChatbar();
+      pump();
+    }, DELAY);
+  }
+  function post(m) {
+    var ch = chat();
+    if (m.r !== 'ai' || !DELAY) { deliver(ch, m); renderMsgs(); return; }
+    Q.push({ ch: ch, m: m }); renderMsgs(); pump();
+  }
+  function flush() { while (Q.length) { var it = Q.shift(); deliver(it.ch, it.m); } qbusy = false; renderMsgs(); }
+  function userSay(t, attempt) { chat().msgs.push({ r: 'user', text: t, attempt: !!attempt }); }
+
+  /* ---------------- practice ---------------- */
+  function startProblem(pid) {
+    if (!hasMaterial()) { post({ r: 'ai', text: 'Add your course material first, so I can start from your slides.', acts: [{ label: 'Add course material', act: 'upload', dark: true }] }); return; }
+    var p = PROBLEMS[pid], ch = chat(), rating = C.ratings[p.topic], cl = policyCell(rating, p.difficulty);
+    ch.mode = { pid: pid, topic: p.topic, level: 0, used: [], fails: 0, solved: false, ok4: false, sawSol: false, check: !!p.check, cell: cl, band: bandOf(rating), heat: [], helps: [], fb: null, input: '', result: null, confirm4: false };
+    if (ch.topics.indexOf(p.topic) < 0) ch.topics.push(p.topic);
+    if (/^(Getting started|New chat)$/.test(ch.title)) ch.title = p.name + (p.check ? ' check' : '');
+    var intro;
+    if (p.check) intro = 'This is a short check with no hints. If you solve it, this topic gets a mark for solved on your own. Write your answer below.';
+    else {
+      intro = 'Try it yourself first. Write your attempt below. ' + (rating == null ? 'You have not rated this topic yet, so ' : 'You rated this topic ' + fmt(rating) + ' of 10, so ') +
+        (cl.startLevel ? 'after a wrong try I will start with ' + (cl.startLevel === 1 ? 'a hint' : 'the ' + LV[cl.startLevel - 1].toLowerCase()) + '.' : 'I will wait until you ask for help.');
+    }
+    post({ r: 'ai', kick: p.check ? 'Check' : 'Problem', strong: p.text, text: intro });
+    renderLeft(); setFocus(true);
+  }
+  function help(lv) {
+    var ch = chat(), m = ch.mode; if (!m || m.solved || m.check) return;
+    var p = PROBLEMS[m.pid], cl = m.cell;
+    if (lv === 4 && !m.ok4 && m.fails < cl.attemptsBeforeSolution) {
+      var left = cl.attemptsBeforeSolution - m.fails;
+      m.confirm4 = true;       post({ r: 'ai', text: 'Want the full solution now? You usually learn more if you try ' + (left === 1 ? 'one more time' : 'a couple more times') + ' first. You can still see it whenever you choose.', acts: [{ label: 'Show the solution anyway', act: 'ok4' }, { label: 'I’ll try again', act: 'focus', dark: true }] });
+      return;
+    }
+    m.confirm4 = false; m.level = Math.max(m.level, lv); C.stats.level = Math.max(C.stats.level, lv);
+    if (m.used.indexOf(lv) < 0) m.used.push(lv);
+    if (lv === 4) m.sawSol = true;
+    var h = p.hints[lv - 1], nx = nextLevelOf(m), acts = null;
+    if (lv === 4) acts = [{ label: 'Try it myself again', act: 'retry', dark: true }, { label: 'Try another problem', act: 'practice', arg: p.next }];
+    else if (nx) acts = [{ label: 'Next: ' + LV[nx - 1], act: 'next', arg: nx }];
+    m.helps.push({ lv: lv, sents: h.s, more: h.more, moreOpen: false });     post({ r: 'ai', kick: 'AI note', title: LV[lv - 1], sents: h.s, more: h.more, help: { lv: lv, levels: m.cell.levels.slice() }, acts: acts });
+  }
+  function resultLine(m) {
+    if (m.check) return 'Solved on your own, with no help.';
+    var u = m.used;
+    if (!u.length) return 'Solved with no help. You did every step yourself.';
+    if (m.sawSol) return 'Solved after seeing the solution. Try the check below to see if it stuck.';
+    if (u.indexOf(3) > -1) return 'Solved after an example. You applied it to this problem yourself.';
+    return 'Solved with ' + u.length + (u.length === 1 ? ' hint' : ' hints') + ', you did the main step yourself.';
+  }
+  function applyMastery(m) {
+    var old = C.ratings[m.topic], base = old == null ? 0 : old;
+    var d = m.check ? 1 : m.sawSol ? 0 : !m.used.length ? 2 : 1;
+    var nv = Math.max(0, Math.min(10, base + d));
+    if (C.start[m.topic] == null) C.start[m.topic] = base;
+    C.ratings[m.topic] = nv; C.last[m.topic] = nv - base; C.pulse[m.topic] = true;
+    if (m.check) C.own[m.topic] = true;
+    if (!m.check) C.streak = m.used.length ? 0 : C.streak + 1;
+    C.log.push({ pid: m.pid, topic: m.topic, hints: m.used.length, sawSol: m.sawSol, check: !!m.check });
+    return { from: base, to: nv, d: nv - base };
+  }
+  function solve(m, p) {
+    m.solved = true; C.stats.solved++;
+    var line = resultLine(m), r = applyMastery(m), name = TOPIC_DEFS[m.topic].name;
+    chat().last = line;
+    var sub = r.d > 0 ? 'Your rating for ' + name + ' moved from ' + fmt(r.from) + ' to ' + fmt(r.to) + ' of 10.' : 'Your rating for ' + name + ' stays at ' + fmt(r.to) + ' of 10.';
+    if (m.check) sub += ' This topic now has the mark solved on your own.';
+    var acts = [];
+    if (!m.check && p.similar) acts.push({ label: 'Check: a similar problem, no help', act: 'check', arg: p.similar, dark: true });
+    acts.push({ label: 'Try another problem', act: 'practice', arg: p.next });
+    acts.push({ label: 'Rate my knowledge', act: 'rate1', arg: m.topic });
+    renderLeft(); renderTop();
+    post({ r: 'ai', title: 'Correct', sents: [T('d', p.slide, p.doneP, p.done)], result: { line: line, sub: sub }, acts: acts });
+  }
+  function attempt(text, f) {
+    var ch = chat(), m = ch.mode, p = PROBLEMS[m.pid], cl = m.cell;
+    C.stats.attempts++;
+    userSay(text, true);
+    m.heat.push(closeness(f, p));
+    if (same(f, p.fn)) { solve(m, p); return; }
+    m.fails++;
+    var close = p.close.filter(function (c) { return same(f, c.fn); })[0];
+    var head = 'Not quite yet' + (close ? ', but you are close.' : '.') + (close ? ' ' + close.msg : '');
+    m.input = '';
+    if (m.check) { m.fb = { kind: close ? 'close' : 'wrong', text: head + ' This is a check, so there are no hints.' }; post({ r: 'ai', text: head + ' This is a check, so there are no hints. Try again when you are ready.', acts: [{ label: 'Stop the check', act: 'stopcheck' }] }); return; }
+    m.fb = { kind: close ? 'close' : 'wrong', text: head };
+    if (m.level === 0 && cl.startLevel > 0) { post({ r: 'ai', text: head }); help(cl.startLevel); return; }
+    var nx = nextLevelOf(m), ready = !!nx && m.fails >= cl.offerNextAfter;
+        post({ r: 'ai', text: head + (nx ? (ready ? ' You have tried a few times, so the next step is ready if you want it.' : ' You can try again, or ask for the next level.') : ' You can try again.'),
+      acts: nx ? [{ label: nx === 1 ? 'Give me a hint' : 'Next: ' + LV[nx - 1], act: 'next', arg: nx, dark: ready }] : null });
+  }
+  function answer(q) {
+    var t = q.toLowerCase(), mat = hasMaterial(), r, up = false;
+    if (mat && /practice|exercise|problem/.test(t)) { post({ r: 'ai', text: 'Which problem would you like to try?', acts: [{ label: 'Chain rule problem', act: 'practice', arg: 'p1', dark: true }, { label: 'Product rule problem', act: 'practice', arg: 'p2' }] }); return; }
+    if (mat && C.pdfDemo && (r = pdfAnswer(t))) { }
+    else if (!mat) { r = { s: [T('g', null, null, 'I do not have your course material yet, so this is general knowledge.')], note: 'Add your slides and I can point to them.' }; up = true; }
+    else if (/root|sqrt/.test(t)) r = { s: [T('g', null, null, 'Yes. Write the root as a power, such as (3x² + 1)^(1/2).'), T('d', 12, 1, 'Then apply y′ = f′(g(x)) · g′(x) in the same way.')], note: 'Your slides cover whole-number powers only, so step 1 is not in them.' };
+    else if (/quiz|exam|test|midterm/.test(t)) r = { s: [T('g', null, null, 'I can only see your slides, and they do not say what the quiz covers.'), T('g', null, null, 'Chain rule questions are common, but that is a guess.')], note: 'Ask your instructor what the quiz covers.' };
+    else if (/chain/.test(t)) r = { s: [T('s', 12, 0, 'The chain rule is for a function inside another function.'), T('s', 12, 2, 'Differentiate the outside, keep the inside as it is, then multiply by the derivative of the inside.')] };
+    else if (/product|quotient/.test(t)) r = { s: [T('s', 11, 0, 'Product rule: (f · g)′ = f′ · g + f · g′.'), T('s', 11, 1, 'Quotient rule: (f / g)′ = (f′ · g − f · g′) / g².')] };
+    else if (/power|basic|sum/.test(t)) r = { s: [T('s', 10, 0, 'Power rule: d/dx xⁿ = n · xⁿ⁻¹.'), T('s', 10, 1, 'A constant multiple stays in front.'), T('s', 10, 2, 'The derivative of a sum is the sum of the derivatives.')] };
+    else if (/tangent/.test(t)) r = { s: [T('s', 20, 1, 'The tangent line to f at x = a is y = f(a) + f′(a)(x − a).'), T('s', 20, 2, 'Its slope is the derivative f′(a).')] };
+    else if (/maxim|minim|optimi/.test(t)) r = { s: [T('s', 21, 0, 'Maxima and minima occur where f′(x) = 0 or where f′ is undefined.'), T('s', 21, 1, 'Check the sign of f′ on both sides, or use the second derivative.')] };
+    else r = { s: [T('g', null, null, 'I could not find this in your material, so I can only give a general answer.')], note: 'Try asking about one of the topics on the left.' };
+    var note = r.note, dg = false;
+    r.s = r.s.map(function (x) { if (x.slide && !hasSlideFile(x.slide)) { dg = true; return T('g', null, null, x.t); } return x; });
+    if (dg) { note = 'This topic is not in your current material. Add the lecture to get an answer I can point to.'; up = true; }
+    post({ r: 'ai', sents: r.s, note: note, q: q, acts: up ? [{ label: 'Add course material', act: 'upload', dark: true }] : null });
+  }
+  function send() {
+    var inp = $('#inp'), text = inp.value.trim();
+    if (!text) { $('#hintline').textContent = 'Write something first.'; return; }
+    if (Q.length || realWait) { $('#hintline').textContent = 'One moment, the AI is still writing.'; return; }
+    inp.value = '';
+    var m = chat().mode;
+    if (m && !m.solved) {
+      var f = parseFn(text);
+      if (f) { attempt(text, f); return; }
+    }
+    userSay(text);
+    if (REAL) realAsk(text); else answer(text);
+  }
+
+  /* ---------------- files (demo: the upload area only offers example files) ---------------- */
+  function addFile(def) {
+    if (C.files.some(function (f) { return f.defId === def.id; })) return;
+    var f = { id: 'f' + C.nid++, defId: def.id, name: def.name, short: def.short, mb: def.mb, pages: def.pages, kind: def.kind, preview: def.preview, slides: def.slides, topics: def.topics, status: 'uploading', pct: 0 };
+    C.files.push(f); renderLeft();
+    var c = C;
+    (function tick() {
+      if (c.files.indexOf(f) < 0) return;
+      f.pct += 14 + Math.round(Math.random() * 16);
+      if (f.pct >= 100) {
+        f.pct = 100; f.status = 'added';
+        if (c === C) { renderLeft(); if (!C.active || f.kind === 'lecture' || f.kind === 'scan') openFile(f.id, null, null, true); else renderViewer(); toast(def.short + ' added.'); }
+        afterAdd(c, f); return;
+      }
+      if (c === C) renderLeft();
+      c.timers.push(setTimeout(tick, 150));
+    })();
+  }
+  function afterAdd(c, f) {
+    c.loading++; if (c === C) renderLeft();
+    c.timers.push(setTimeout(function () {
+      c.loading--;
+      var had = c.topics.length;
+      var fr = (f.topics || []).filter(function (id) { return !c.topics.some(function (t) { return t.id === id; }); }).map(function (id) { return TOPIC_DEFS[id]; });
+      c.topics = c.topics.concat(fr);
+      var d = defById(f.defId), msgs = c.chats[0].msgs;
+      if (f.kind === 'lecture') {
+        if (!had) msgs.push({ r: 'ai', text: 'I found ' + fr.length + ' topics.', acts: [{ label: 'Rate my knowledge', act: 'assess', dark: true }, { label: 'Practice the chain rule', act: 'practice', arg: 'p1' }, { label: 'Practice the product rule', act: 'practice', arg: 'p2' }] });
+        else msgs.push({ r: 'ai', text: 'I found ' + fr.length + ' new topics in ' + d.short + ': ' + fr.map(function (t) { return t.name; }).join(', ') + '.', acts: [{ label: 'Rate my knowledge', act: 'assess', dark: true }] });
+      } else if (f.kind === 'scan') {
+        c.empty = !c.topics.length;
+        msgs.push({ r: 'ai', text: 'I could not find topics in that file.', acts: [{ label: 'Add another file', act: 'upload' }] });
+      }
+      if (c === C) { renderLeft(); renderMsgs({ keep: false }); }
+    }, 1300));
+  }
+
+  /* ---------------- modals ---------------- */
+  var lastFocus = null;
+  function setInert(on) { ['#app', '#intro'].forEach(function (s) { var e = $(s); if (e) { if (on) e.setAttribute('inert', ''); else e.removeAttribute('inert'); } }); }
+  function closeModal() {
+    var ov = $('#ov'); if (!ov) return;
+    var done = function () { var o = $('#ov'); if (o && o.classList.contains('out')) $('#modal-root').innerHTML = ''; setInert(false); if (lastFocus && document.body.contains(lastFocus)) lastFocus.focus(); };
+    ov.classList.add('out');
+    if (INSTANT) done(); else setTimeout(done, 150);
+  }
+  function modal(html) {
+    lastFocus = document.activeElement;
+    $('#modal-root').innerHTML = '<div class="overlay" id="ov"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle">' + html + '</div></div>';
+    setInert(true);
+    var x = $('#modal-root .xbtn'); if (x) x.focus();
+  }
+  function openPicker() {
+    var defs = defsFor(S.ctx);
+    var rows = defs.map(function (d) {
+      var added = C.files.some(function (f) { return f.defId === d.id; });
+      return '<label class="lrow pick' + (added ? ' dis' : '') + '"><input type="checkbox" data-pick="' + d.id + '"' + (added ? ' disabled checked' : '') + '><span class="ico"></span><span class="pn"><strong>' + esc(d.name) + '</strong><span class="small soft">' + d.mb + ' MB · ' + d.pages + ' pages</span></span><span class="small soft">' + (added ? 'Already added' : '') + '</span></label>';
+    }).join('');
+    modal('<div class="mhead"><div><h2 id="mtitle">Choose files to add</h2><p class="lead">Demo: these example files stand in for your own course material.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div>' +
+      '<div class="list">' + rows + '</div><div class="mfoot"><span class="fine" id="pick-n">Select one or more files.</span><button class="btn ghost" id="p-cancel">Cancel</button><button class="btn dark" id="p-add" disabled>Add selected</button></div>');
+  }
+  function ticksHtml() { var s = ''; for (var i = 0; i <= 10; i++) s += '<span>' + i + '</span>'; return '<div class="ticks">' + s + '</div>'; }
+  function openAssess(only) {
+    var topics = only ? C.topics.filter(function (t) { return t.id === only; }) : C.topics;
+    if (!topics.length) { post({ r: 'ai', text: 'Add your course material first. Then I can show the topics I found and you can rate them.', acts: [{ label: 'Add course material', act: 'upload', dark: true }] }); return; }
+    var h = '<div class="mhead"><div><h2 id="mtitle">' + (only ? 'How confident do you feel now?' : 'What do you already know?') + '</h2><p class="lead">Drag the slider for each topic, from 0 to 10, so the help starts at the right level. You can change it later.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div>';
+    h += '<div class="legend"><span>0 = never seen it</span><span>10 = could explain it to someone</span></div><div class="list">';
+    h += topics.map(function (t) {
+      var r = C.ratings[t.id];
+      return '<div class="lrow"><div class="nm">' + esc(t.name) + '</div><div class="sl"><input type="range" min="0" max="10" step="1" value="' + (r == null ? 0 : Math.round(r)) + '" data-rt="' + t.id + '" class="' + (r == null ? 'untouched' : '') + '" aria-label="' + esc(t.name) + '">' + ticksHtml() + '</div><div class="rd" id="rd-' + t.id + '">' + (r == null ? '–' : Math.round(r)) + '</div></div>';
+    }).join('') + '</div>';
+    if (!only) h += '<div style="margin-top:16px"><span class="h">Anything else you already know? (optional)</span><div class="tags" id="tags"></div></div>';
+    h += '<div class="mfoot"><span class="fine">' + (only ? 'Your answer updates the topic bar.' : 'Your answers only set the starting point. They are never graded.') + '</span><button class="btn ghost" id="m-skip">Skip for now</button><button class="btn dark" id="m-save">' + (only ? 'Save' : 'Save and continue') + '</button></div>';
+    modal(h);
+    $$('#modal-root input[type=range]').forEach(function (r) { r.style.setProperty('--p', (r.value * 10) + '%'); });
+    if (!only) renderTags();
+  }
+  function renderTags() {
+    var box = $('#tags'); if (!box) return;
+    box.innerHTML = C.tags.map(function (t, i) { return '<span class="chip">' + esc(t) + '<button data-tagx="' + i + '" aria-label="Remove ' + esc(t) + '">×</button></span>'; }).join('') + '<input id="taginp" placeholder="Type and press Enter to add…" aria-label="Add something you know">';
+  }
+  function openWhy(m) {
+    var all = m.sents.concat(m.moreOpen && m.more ? m.more : []), mt = matchOf(all);
+    var rows = all.map(function (x) {
+      var link = (x.k !== 'g' && x.slide && hasSlideFile(x.slide)) ? ' <button class="link" data-evid="' + x.slide + '|' + x.p + '|' + x.k + '" data-evt="' + esc(x.t) + '"' + (x.q ? ' data-evq="' + esc(x.q) + '"' : '') + '>Show in slide ' + String(x.slide).replace('P', '') + '</button>' : '';
+      return '<li><span class="tlabel ' + x.k + '">' + KIND_LABEL[x.k] + '</span>' + esc(x.t) + link + '</li>';
+    }).join('');
+    modal('<div class="mhead"><div><h2 id="mtitle">Why this match?</h2><p class="lead">Every sentence is checked against the slides you added. This is a read-only summary, not a score you set.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div>' +
+      '<div class="two"><div class="card"><div class="row" style="gap:10px"><span class="match m-' + mt + '"><span class="m3" aria-hidden="true"><i></i><i></i><i></i></span>Source match: <b>' + MATCH_NAME[mt] + '</b></span></div>' +
+      '<p style="margin:8px 0 0">' + esc(matchReason(all)) + '</p><ul class="sl">' + rows + '</ul><div class="advice">' + esc(MATCH_ADVICE[mt]) + '</div></div>' +
+      '<div class="card"><div class="h">What the styles mean</div><div class="lg" style="flex-direction:column;gap:10px;font-size:13px;margin-top:10px;color:var(--ink)"><span><i class="sw s"></i>From your slides. Solid underline.</span><span><i class="sw d"></i>Derived from your slides. Dashed underline.</span><span><i class="sw g"></i>General knowledge, not in your slides. Outlined.</span></div></div></div>' +
+      '<div class="fine" style="margin-top:14px">Source matches in this prototype are scripted. In a real product they would come from comparing each sentence with the course material.</div>');
+  }
+
+  /* ---------------- events ---------------- */
+  document.addEventListener('click', function (e) {
+    var t = e.target, o;
+    if ((o = t.closest('[data-undo]'))) { var uid = o.getAttribute('data-undo'); if (undos[uid]) undos[uid](); dismissToast(uid); return; }
+    if (t.closest('[data-vtoggle]')) { S.vmin = !S.vmin; renderViewer(); return; }
+    if ((o = t.closest('[data-dock]'))) { S.dock = S.dock === 'bottom' ? 'right' : 'bottom'; applyLayout(); renderViewer(); return; }
+    if ((o = t.closest('[data-side]'))) { var sv = o.getAttribute('data-side'); S.side = S.side === sv ? null : sv; if (S.side) S.lastSide = S.side; renderLeft(); return; }
+    if ((o = t.closest('[data-close]'))) {
+      var id = o.getAttribute('data-close'), prevTabs = C.tabs.slice(), prevActive = C.active, cc = C, f0 = fileById(id);
+      C.tabs = C.tabs.filter(function (x) { return x !== id; }); if (C.active === id) C.active = C.tabs[C.tabs.length - 1] || null;
+      renderLeft(); renderViewer();
+      toast((f0 ? f0.short || f0.name : 'Tab') + ' closed. The file is still in your material.', function () { cc.tabs = prevTabs; cc.active = prevActive; if (cc === C) { renderLeft(); renderViewer(); } });
+      return;
+    }
+    if ((o = t.closest('[data-tab]'))) { C.active = o.getAttribute('data-tab'); renderLeft(); renderViewer(); return; }
+    if ((o = t.closest('[data-open]'))) { var f = fileById(o.getAttribute('data-open')); if (f && f.status === 'added') openFile(f.id); return; }
+    if ((o = t.closest('[data-retry]'))) { var rid = o.getAttribute('data-retry'); C.files = C.files.filter(function (x) { return x.id !== rid; }); renderLeft(); return; }
+    if ((o = t.closest('[data-topic]'))) { var tid = o.getAttribute('data-topic'); var tf = C.files.filter(function (x) { return x.status === 'added' && x.topics.indexOf(tid) > -1; })[0]; if (tf) openFile(tf.id, TOPIC_DEFS[tid] && TOPIC_DEFS[tid].slide, null); return; }
+    if ((o = t.closest('[data-chat]'))) { C.chat = +o.getAttribute('data-chat'); renderLeft(); renderMsgs(); var inp0 = $('#inp'); if (inp0 && !t.closest('#left')) inp0.focus(); return; }
+    if ((o = t.closest('[data-evid]'))) {
+      var v = o.getAttribute('data-evid').split('|'); if (t.closest('#modal-root')) closeModal();
+      evidenceGo(o, false); return;
+    }
+    if ((o = t.closest('[data-clearev]'))) { C.cited = null; renderViewer(); return; }
+    if ((o = t.closest('[data-nav]'))) { var fa = fileById(C.active); if (fa) { var ni = fa.slides.indexOf(C.slide) + (+o.getAttribute('data-nav')); if (fa.slides[ni]) { C.slide = fa.slides[ni]; C.cited = null; renderViewer(); } } return; }
+    if ((o = t.closest('[data-more]'))) { var mi = +o.getAttribute('data-more'); var mm0 = chat().msgs[mi]; if (mm0) { mm0.moreOpen = !mm0.moreOpen; renderMsgs({ keep: true }); var b0 = $('[data-more="' + mi + '"]'); if (b0) b0.focus(); } return; }
+    if ((o = t.closest('[data-cite]'))) { var cv = o.getAttribute('data-cite'); if (/^P/.test(cv)) { var pf = fileForSlide(cv); if (pf) { C.pdfPage = +cv.slice(1); C.cited = null; openFile(pf.id, null, null, false); renderViewer(); } } else openSlide(+cv); return; }
+    if ((o = t.closest('[data-why]'))) { var m = chat().msgs[+o.getAttribute('data-why')]; if (m && m.sents) openWhy(m); return; }
+    if ((o = t.closest('[data-opens]'))) { var n = +o.getAttribute('data-opens'); closeModal(); openSlide(n); return; }
+    if ((o = t.closest('[data-tagx]'))) { C.tags.splice(+o.getAttribute('data-tagx'), 1); renderTags(); return; }
+    if ((o = t.closest('[data-act]'))) {
+      var a = o.getAttribute('data-act'), arg = o.getAttribute('data-arg');
+      if (a === 'assess') openAssess();
+      else if (a === 'rate1') openAssess(arg);
+      else if (a === 'practice' || a === 'check') startProblem(arg);
+      else if (a === 'next') help(+arg);
+      else if (a === 'ok4') { var m4 = chat().mode; if (m4) { m4.ok4 = true; help(4); } }
+      else if (a === 'focus') $('#inp').focus();
+      else if (a === 'upload') openPicker();
+      else if (a === 'ask') { userSay(arg); answer(arg); }
+      else if (a === 'retry') { var mr = chat().mode; if (mr && !mr.solved) { mr.heat = []; post({ r: 'ai', kick: 'Problem', strong: PROBLEMS[mr.pid].text, text: 'Your turn. Write your own attempt now. I will note that you saw the solution first.' }); $('#inp').focus(); } }
+      else if (a === 'stopcheck') { chat().mode = null; post({ r: 'ai', text: 'Check stopped. Nothing was marked. You can try it again whenever you like.', acts: [{ label: 'Practice the chain rule', act: 'practice', arg: 'p1' }, { label: 'Practice the product rule', act: 'practice', arg: 'p2' }] }); renderLeft(); }
+      else if (a === 'lecture') {
+        var lf = C.files.filter(function (x) { return x.status === 'added' && x.kind === 'lecture'; })[0];
+        if (lf) { openFile(lf.id); toast('Your slides do not cover this. Check the lecture itself or ask your instructor.'); } else openPicker();
+      }
+      return;
+    }
+    if (t.id === 'm-x' || t.closest('#m-x')) { closeModal(); return; }
+    if (t.id === 'ov') { closeModal(); return; }
+    if (t.id === 'm-skip') { closeModal(); return; }
+    if (t.id === 'm-save') {
+      var snap = JSON.stringify({ r: C.ratings, s: C.start }), cs0 = C;
+      $$('#modal-root input[type=range]').forEach(function (r) {
+        if (!r.classList.contains('untouched')) { var id2 = r.getAttribute('data-rt'), v2 = +r.value; if (C.start[id2] == null) C.start[id2] = C.ratings[id2] != null ? C.ratings[id2] : v2; C.ratings[id2] = v2; C.last[id2] = 0; }
+      });
+      closeModal(); renderLeft();
+      toast('Ratings saved.', function () { var o2 = JSON.parse(snap); cs0.ratings = o2.r; cs0.start = o2.s; if (cs0 === C) renderLeft(); });
+      post({ r: 'ai', text: 'Thanks. I will start the help at the level you set. You can change your ratings any time.', acts: [{ label: 'Practice the chain rule', act: 'practice', arg: 'p1', dark: true }, { label: 'Practice the product rule', act: 'practice', arg: 'p2' }] });
+      return;
+    }
+    if (t.closest('#drop')) { openPicker(); return; }
+    if (t.id === 'p-cancel') { closeModal(); return; }
+    if (t.id === 'p-add') {
+      var ids = $$('#modal-root [data-pick]:not(:disabled):checked').map(function (c) { return c.getAttribute('data-pick'); });
+      closeModal(); ids.forEach(function (i2) { addFile(defById(i2)); }); return;
+    }
+    if ((o = t.closest('[data-pc]'))) {
+      var nm = o.getAttribute('data-pc'), cs = S.profile.courses, ix = cs.indexOf(nm);
+      if (ix >= 0) cs.splice(ix, 1); else { if (nm === NONE) cs.length = 0; else if ((ix = cs.indexOf(NONE)) >= 0) cs.splice(ix, 1); cs.push(nm); }
+      $$('#pcs .pc').forEach(function (b) { var on = cs.indexOf(b.getAttribute('data-pc')) >= 0; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+      return;
+    }
+    if (t.id === 'pc-add') { addPc(); return; }
+    if (t.id === 'b-profile') { S.snap = JSON.parse(JSON.stringify(S.profile)); S.editing = true; renderIntro(); return; }
+    if (t.id === 'b-pcancel') { S.profile = S.snap; S.editing = false; renderIntro(); return; }
+    if (t.id === 'b-start') {
+      S.profile.desc = $('#prof-desc').value.trim(); S.started = true; S.editing = false;
+      Object.keys(S.courses).forEach(function (k) { var c = S.courses[k]; if (!c.pdfDemo && c.chats[0].msgs.length === 1 && !c.chats[0].msgs[0].user) c.chats[0].msgs[0].text = greetText(); });
+      renderAll(); return;
+    }
+    if (t.id === 'send') { send(); return; }
+    if (t.id === 'b-addctx') { openAddCtx(); return; }
+    if (t.id === 'ctx-add') { doAddCtx(); return; }
+    if (t.closest('#newchat, [data-newchat]')) {
+      var nc = newChat('New chat'); nc.msgs.push({ r: 'ai', text: 'What would you like to work on?', acts: [{ label: 'Practice the chain rule', act: 'practice', arg: 'p1' }, { label: 'Practice the product rule', act: 'practice', arg: 'p2' }] });
+      C.chats.push(nc); C.chat = C.chats.length - 1; renderLeft(); renderMsgs(); $('#inp').focus(); return;
+    }
+  });
+  document.addEventListener('change', function (e) {
+    if (e.target.matches && e.target.matches('[data-pick]')) {
+      var n = $$('#modal-root [data-pick]:not(:disabled):checked').length;
+      $('#p-add').disabled = !n; $('#pick-n').textContent = n ? n + ' selected' : 'Select one or more files.';
+    }
+  });
+  document.addEventListener('input', function (e) {
+    if (e.target.id === 'pc-new') { $('#pc-add').disabled = !e.target.value.trim(); }
+    if (e.target.id === 'ctx-name') { $('#ctx-add').disabled = !e.target.value.trim(); }
+    var r = e.target;
+    if (r.matches && r.matches('input[type=range][data-rt]')) {
+      r.classList.remove('untouched'); r.style.setProperty('--p', (r.value * 10) + '%');
+      var rd = $('#rd-' + r.getAttribute('data-rt')); if (rd) rd.textContent = r.value;
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    var t = e.target;
+    if (e.key === 'Escape' && $('#ov')) { closeModal(); return; }
+    if (e.key === 'Tab' && $('#ov')) {
+      var fs = $$('#ov button:not(:disabled), #ov input:not(:disabled), #ov [href]').filter(function (x) { return x.offsetParent !== null; });
+      if (fs.length) {
+        var first = fs[0], last = fs[fs.length - 1];
+        if (e.shiftKey && (document.activeElement === first || !$('#ov').contains(document.activeElement))) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && (document.activeElement === last || !$('#ov').contains(document.activeElement))) { e.preventDefault(); first.focus(); }
+      }
+      return;
+    }
+    if (t.id === 'inp' && e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); return; }
+    if (t.id === 'pc-new' && e.key === 'Enter') { e.preventDefault(); addPc(); return; }
+    if (t.id === 'ctx-name' && e.key === 'Enter') { e.preventDefault(); doAddCtx(); return; }
+    if (t.id === 'taginp' && e.key === 'Enter') { e.preventDefault(); var v = t.value.trim(); if (v) { C.tags.push(v); renderTags(); $('#taginp').focus(); } return; }
+    if (t.id === 'manual' && e.key === 'Enter') { e.preventDefault(); var n = t.value.trim(); if (n) { C.topics.push({ id: 'u' + (C.topics.length + 1), name: n, slide: null }); renderLeft(); var mi = $('#manual'); if (mi) mi.focus(); } return; }
+  });
+  /* hover or focus on a sentence shows its passage in the slides */
+  var hovT = null;
+  function peek(o) {
+    var v = o.getAttribute('data-evid').split('|'), txt = o.getAttribute('data-evt');
+    if (C.cited && String(C.cited.slide) === v[0] && String(C.cited.p) === v[1] && C.cited.text === txt && C.active) return;
+    evidenceGo(o, true);
+  }
+  document.addEventListener('mouseover', function (e) {
+    var o = e.target.closest && e.target.closest('.msgs [data-evid]'); clearTimeout(hovT);
+    if (o) hovT = setTimeout(function () { peek(o); }, 220);
+  });
+  document.addEventListener('focusin', function (e) { var o = e.target.closest && e.target.closest('.msgs [data-evid]'); if (o) peek(o); });
+  $('#ctx').addEventListener('change', function (e) { S.ctx = e.target.value; C = S.courses[S.ctx]; if (C.chats[0].msgs.length === 0) greet(C); renderAll(); });
+  var dz = $('#left');
+  ['dragenter', 'dragover'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); var d = $('#drop'); if (d) d.classList.add('over'); }); });
+  ['dragleave', 'drop'].forEach(function (ev) { dz.addEventListener(ev, function (e) { e.preventDefault(); var d = $('#drop'); if (d) d.classList.remove('over'); }); });
+  dz.addEventListener('drop', function () { openPicker(); });
+  dz.addEventListener('keydown', function (e) { if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'drop') { e.preventDefault(); openPicker(); } });
+
+  function renderCtx() {
+    $('#ctx').innerHTML = S.ctxs.map(function (c) { return '<option value="' + c.key + '"' + (c.key === S.ctx ? ' selected' : '') + '>' + esc(c.name) + '</option>'; }).join('');
+  }
+  function openAddCtx() {
+    modal('<div class="mhead"><div><h2 id="mtitle">Add a course context</h2><p class="lead">Each context keeps its own course material, topics and chats.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div>' +
+      '<input class="inp" id="ctx-name" placeholder="e.g. Physics II" maxlength="40" aria-label="Course name" style="height:40px;margin-top:4px">' +
+      '<div class="mfoot"><button class="btn ghost" id="p-cancel">Cancel</button><button class="btn dark" id="ctx-add" disabled>Add context</button></div>');
+    $('#ctx-name').focus();
+  }
+  function doAddCtx() {
+    var inp = $('#ctx-name'), name = inp ? inp.value.trim() : '';
+    if (!name) return;
+    var key = 'c' + (S.ctxs.length + 1);
+    S.extraDefs[key] = [{ id: 'scan_' + key, name: name + ' – Lecture notes.pdf', short: 'Lecture notes', mb: '3.1', pages: 30, kind: 'scan', slides: [], topics: [] }];
+    S.courses[key] = newCourse(); greet(S.courses[key]);
+    S.ctxs.push({ key: key, name: name });
+    S.ctx = key; C = S.courses[key];
+    lastFocus = $('#b-addctx'); closeModal(); renderAll(); toast(name + ' added as a new context.');
+  }
+  function addPc() {
+    var inp = $('#pc-new'), n = inp.value.trim();
+    if (!n) return;
+    var all = PAST.concat(S.profile.custom), dup = all.filter(function (x) { return x.toLowerCase() === n.toLowerCase(); })[0];
+    if (dup) n = dup; else S.profile.custom.push(n);
+    var cs = S.profile.courses, ix = cs.indexOf(NONE); if (ix >= 0) cs.splice(ix, 1);
+    if (cs.indexOf(n) < 0) cs.push(n);
+    S.profile.desc = $('#prof-desc').value;
+    inp.value = ''; $('#pc-add').disabled = true; renderIntro(); inp.focus();
+  }
+  function renderIntro() {
+    var ed = !!S.editing;
+    $('#intro').hidden = S.started && !ed;
+    $('#ititle').textContent = ed ? 'Your profile' : 'Hey, ready to study?';
+    $('#isub').textContent = ed ? 'Change anything. The AI will use it from now on.' : 'Practice with help that comes only from your own course slides.';
+    $('#how').hidden = ed;
+    $('#b-start').textContent = ed ? 'Save changes' : 'Continue';
+    $('#b-pcancel').hidden = !ed;
+    $('#pcs').innerHTML = PAST.concat(S.profile.custom, [NONE]).map(function (n) { var on = S.profile.courses.indexOf(n) >= 0; return '<button type="button" class="pc' + (on ? ' on' : '') + '" data-pc="' + esc(n) + '" aria-pressed="' + on + '">' + esc(n) + '</button>'; }).join('');
+    $('#prof-desc').value = S.profile.desc;
+  }
+  function renderAll() { renderIntro(); renderCtx(); renderLeft(); renderViewer(); renderMsgs(); renderTop(); }
+
+
+  /* ---------------- workspace layout: sidebar, dockable slides, exercise focus ----------------
+     Sidebar views (Chats, Material, Self-assess) sit behind an icon bar. The slides panel can be dragged
+     wider, docked right or bottom, or hidden. Starting an exercise gives the chat the whole width. */
+  var saved = null;
+  $('#b-addctx').innerHTML = UI.plus; $('#b-slides').innerHTML = UI.slides; $('#b-profile').innerHTML = UI.user; $('#send').innerHTML = UI.send;
+  var MK = [['x', 'x'], ['x<sup>2</sup>', '^2'], ['x<sup>n</sup>', '^'], ['(', '('], [')', ')'], ['×', '*'], ['÷', '/']];
+  $('#mkeys').innerHTML = MK.map(function (k) {
+    return '<button type="button" class="mk" data-mk="' + k[1] + '" aria-label="Insert ' + (k[1] === '^2' ? 'squared' : k[1] === '^' ? 'power' : k[1] === '*' ? 'times' : k[1] === '/' ? 'divided by' : k[1]) + '">' + k[0] + '</button>';
+  }).join('');
+
+  function applyLayout() {
+    var ws = $('#ws'); if (!ws) return;
+    ws.classList.toggle('focus', !!S.focus);
+    ws.classList.toggle('noview', !!S.vmin);
+    ws.classList.toggle('dock-bottom', S.dock === 'bottom');
+    var ed = $('#editor');
+    ed.style.setProperty('--vw', S.vw ? S.vw + 'px' : '55%');
+    ed.style.setProperty('--vh', S.vh ? S.vh + 'px' : '42%');
+    $('#split').hidden = !!S.vmin;
+    $('#split').setAttribute('aria-orientation', S.dock === 'bottom' ? 'horizontal' : 'vertical');
+    $('#b-exit').hidden = !S.focus;
+    var sb = $('#b-slides'); if (sb) { sb.setAttribute('aria-pressed', !S.vmin); sb.setAttribute('title', S.vmin ? 'Show slides' : 'Slides'); sb.setAttribute('aria-label', S.vmin ? 'Show slides' : 'Hide slides'); }
+  }
+  function markCited() {
+    var c = C.cited;
+    $$('.msgs .sent[data-evid]').forEach(function (b) { b.classList.toggle('cited', !!c && b.getAttribute('data-evt') === c.text); });
+  }
+  function setFocus(on) {
+    on = !!on;
+    if (on === !!S.focus) { applyLayout(); renderTop(); return; }
+    if (on) { saved = { side: S.side, vmin: S.vmin }; S.side = null; S.vmin = true; }
+    else if (saved) { S.side = saved.side; S.vmin = saved.vmin; saved = null; }
+    S.focus = on;
+    renderLeft(); renderViewer(); renderTop();
+    if (on) { var i = $('#inp'); if (i) i.focus(); }
+  }
+  function renderTop() {
+    var b = $('#b-practice'); if (!b) return;
+    var ex = S.ex && S.ex.phase === 'run' && S.ex.ctx === S.ctx;
+    b.textContent = ex ? 'Continue exercises' : 'Exercise mode';
+    b.classList.toggle('pulse', !ex && hasMaterial() && !C.log.length && !S.focus && !S.exOn && !(S.ex && S.ex.hist.length));
+  }
+  function offerProblems() {
+    var rec = (C.ratings.pq == null ? 0 : C.ratings.pq) < (C.ratings.chain == null ? 0 : C.ratings.chain) ? 'p2' : 'p1';
+    setFocus(true);
+    post({ r: 'ai', text: 'Which exercise do you want to try? I suggest the one for your lower-rated topic.', acts: [
+      { label: 'Chain rule', act: 'practice', arg: 'p1', dark: rec === 'p1' }, { label: 'Product rule', act: 'practice', arg: 'p2', dark: rec === 'p2' }] });
+  }
+
+  /* splitter between chat and slides */
+  (function () {
+    var split = $('#split'), drag = false;
+    function setSize(px) {
+      var ed = $('#editor').getBoundingClientRect(), bottom = S.dock === 'bottom';
+      if (bottom) S.vh = Math.max(160, Math.min(ed.height - 220, px)); else S.vw = Math.max(300, Math.min(ed.width - 400, px));
+      applyLayout();
+    }
+    function fromPointer(e) {
+      var ed = $('#editor').getBoundingClientRect();
+      return S.dock === 'bottom' ? ed.bottom - e.clientY - 6 : ed.right - e.clientX - 6;
+    }
+    split.addEventListener('pointerdown', function (e) { drag = true; split.setPointerCapture(e.pointerId); split.classList.add('drag'); document.body.classList.add('dragging'); e.preventDefault(); });
+    split.addEventListener('pointermove', function (e) { if (drag) setSize(fromPointer(e)); });
+    var end = function () { drag = false; split.classList.remove('drag'); document.body.classList.remove('dragging'); };
+    split.addEventListener('pointerup', end); split.addEventListener('pointercancel', end);
+    split.addEventListener('dblclick', function () { S.vw = null; S.vh = null; applyLayout(); });
+    split.addEventListener('keydown', function (e) {
+      var bottom = S.dock === 'bottom', step = e.shiftKey ? 80 : 24, cur = bottom ? $('#viewer').offsetHeight : $('#viewer').offsetWidth;
+      var grow = bottom ? 'ArrowUp' : 'ArrowLeft', shrink = bottom ? 'ArrowDown' : 'ArrowRight';
+      if (e.key === grow) { e.preventDefault(); setSize(cur + step); } else if (e.key === shrink) { e.preventDefault(); setSize(cur - step); }
+    });
+  })();
+
+  document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('.mk')) e.preventDefault(); });
+  document.addEventListener('keydown', function (e) {
+    if (!(e.metaKey || e.ctrlKey) || e.altKey || $('#ov') || $('#intro') && !$('#intro').hidden) return;
+    if (e.key === 'b' || e.key === 'B') { e.preventDefault(); S.side = S.side ? null : (S.lastSide || 'material'); renderLeft(); }
+    else if (e.key === '\\') { e.preventDefault(); S.vmin = !S.vmin; renderViewer(); }
+  });
+  document.addEventListener('click', function (e) {
+    var o = e.target.closest && e.target.closest('[data-mk]');
+    if (o) {
+      var inp = $('#inp'), k = o.getAttribute('data-mk');
+      var s = inp.selectionStart == null ? inp.value.length : inp.selectionStart, e2 = inp.selectionEnd == null ? s : inp.selectionEnd;
+      inp.value = inp.value.slice(0, s) + k + inp.value.slice(e2);
+      inp.focus(); try { inp.setSelectionRange(s + k.length, s + k.length); } catch (x) { }
+      return;
+    }
+    if (e.target.closest && e.target.closest('#b-exit')) { setFocus(false); return; }
+    if (e.target.closest && e.target.closest('#b-practice')) {
+      if (S.exOn) { exExit(); return; }
+      if (!hasMaterial()) { toast('Add your course material first, then open exercise mode.'); S.side = 'material'; renderLeft(); openPicker(); return; }
+      exOpen();
+    }
+  });
+
+  /* ---------------- real PDF viewer + marking by quote (PDF.js) ----------------
+     The AI will return a page number and a quote. We find the quote in the PDF text layer and draw
+     highlight boxes over the page. Matching is exact first, then tolerant (word overlap), so a slightly
+     different quote still lands on the right passage. */
+  var PDF = { promise: null, lib: null, doc: null, texts: {}, canvases: {}, tok: 0 };
+  function pdfLoad(url) {
+    if (PDF.promise) return PDF.promise;
+    PDF.promise = import('./vendor/pdf.min.mjs').then(function (lib) {
+      lib.GlobalWorkerOptions.workerSrc = './vendor/pdf.worker.min.mjs';
+      PDF.lib = lib; return lib.getDocument(url).promise;
+    }).then(function (doc) { PDF.doc = doc; return doc; });
+    return PDF.promise;
+  }
+  function wordsOf(s) { return String(s).toLowerCase().split(/[^a-z0-9äöüéèàçñ′']+/i).filter(Boolean); }
+  function pageData(n) {
+    if (PDF.texts[n]) return PDF.texts[n];
+    PDF.texts[n] = PDF.doc.getPage(n).then(function (page) {
+      return page.getTextContent().then(function (tc) {
+        var items = tc.items.filter(function (i) { return typeof i.str === 'string' && i.str.trim(); }), toks = [];
+        items.forEach(function (it, idx) {
+          var re = /[A-Za-z0-9äöüéèàçñ′']+/g, m;
+          while ((m = re.exec(it.str))) toks.push({ w: m[0].toLowerCase(), item: idx, s: m.index, e: m.index + m[0].length });
+        });
+        return { page: page, items: items, toks: toks };
+      });
+    });
+    return PDF.texts[n];
+  }
+  /* returns the token range [a, b] of the best match for quote on this page, or null */
+  function matchOnPage(pd, quote) {
+    var q = wordsOf(quote), t = pd.toks; if (!q.length || t.length < 1) return null;
+    for (var i = 0; i + q.length <= t.length; i++) {
+      var ok = true; for (var j = 0; j < q.length; j++) if (t[i + j].w !== q[j]) { ok = false; break; }
+      if (ok) return { a: i, b: i + q.length - 1, score: 1 };
+    }
+    var best = null, qs = {}; q.forEach(function (w) { qs[w] = 1; });
+    for (var s = 0; s + q.length <= t.length; s++) {
+      var hit = 0; for (var k = 0; k < q.length; k++) if (qs[t[s + k].w]) hit++;
+      var sc = hit / q.length; if (!best || sc > best.score) best = { a: s, b: s + q.length - 1, score: sc };
+    }
+    return best && best.score >= 0.7 ? best : null;
+  }
+  function findQuote(quote, hintPage) {
+    var order = []; if (hintPage) order.push(hintPage);
+    for (var p = 1; p <= PDF.doc.numPages; p++) if (p !== hintPage) order.push(p);
+    var best = null, i = 0;
+    function next() {
+      if (i >= order.length) return Promise.resolve(best);
+      var n = order[i++];
+      return pageData(n).then(function (pd) {
+        var m = matchOnPage(pd, quote);
+        if (m && m.score === 1) return { page: n, score: 1 };
+        if (m && (!best || m.score > best.score)) best = { page: n, score: m.score };
+        return next();
+      });
+    }
+    return next();
+  }
+  var IC = {
+    search: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>',
+    x: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'
+  };
+  function pdfBodyHtml() {
+    var c = C.cited && C.cited.pdf ? C.cited : null;
+    return '<div class="pdfwrap"><div class="pdfscroll" id="pdfscroll"><div class="pdfload"><span class="spin"></span></div></div>' +
+      '<form class="markform" id="markform"><button class="mkbtn" type="submit" aria-label="Mark text in the slides" title="Mark text in the slides">' + IC.search + '</button><input id="mark-q" placeholder="Mark text" aria-label="Text to mark"></form>' +
+      '<div class="pgpill" id="pgpill">' + (C.pdfPage || 1) + ' / ' + (PDF.doc ? PDF.doc.numPages : '…') + '</div>' +
+      (c ? '<button class="srcchip" data-clearev="1" title="Clear highlight" aria-label="Clear highlight">Source · p.' + c.page + IC.x + '</button>' : '') + '</div>';
+  }
+  function updatePill(sc) {
+    var pgs = sc.querySelectorAll('.pg'), y = sc.scrollTop + sc.clientHeight * 0.35, cur = 1;
+    for (var i = 0; i < pgs.length; i++) { if (pgs[i].offsetTop <= y) cur = i + 1; else break; }
+    C.pdfPage = cur; var p = $('#pgpill'); if (p) p.textContent = cur + ' / ' + PDF.doc.numPages;
+  }
+  function renderPg(n, el, w, token, cit) {
+    if (el.getAttribute('data-done') === '1') return;
+    el.setAttribute('data-done', '1');
+    pageData(n).then(function (pd) {
+      if (token !== PDF.tok) return;
+      var base = pd.page.getViewport({ scale: 1 }), scale = w / base.width, vp = pd.page.getViewport({ scale: scale }), key = n + '@' + w;
+      el.style.height = Math.floor(vp.height) + 'px';
+      var done;
+      if (PDF.canvases[key]) done = Promise.resolve(PDF.canvases[key]);
+      else {
+        var cv = document.createElement('canvas'), dpr = Math.min(window.devicePixelRatio || 1, 2);
+        cv.width = Math.floor(vp.width * dpr); cv.height = Math.floor(vp.height * dpr); cv.style.width = '100%'; cv.style.height = '100%';
+        done = pd.page.render({ canvasContext: cv.getContext('2d'), viewport: pd.page.getViewport({ scale: scale * dpr }) }).promise.then(function () {
+          PDF.canvases[key] = cv; PDF.order = (PDF.order || []).filter(function (k) { return k !== key; }); PDF.order.push(key);
+          while (PDF.order.length > 14) delete PDF.canvases[PDF.order.shift()];
+          return cv;
+        });
+      }
+      return done.then(function (cv) {
+        if (token !== PDF.tok || el.getAttribute('data-done') !== '1') return;
+        el.innerHTML = ''; el.appendChild(cv);
+        var layer = document.createElement('div'); layer.className = 'pdfhls'; el.appendChild(layer);
+        if (cit && cit.page === n) drawHighlight(layer, pd, vp, cit, el);
+      });
+    });
+  }
+  function pdfRender(f) {
+    var token = ++PDF.tok;
+    if (PDF.io) { PDF.io.disconnect(); PDF.io = null; }
+    pdfLoad(f.url).then(function () {
+      var sc = $('#pdfscroll'); if (token !== PDF.tok || !sc) return;
+      var cit = C.cited && C.cited.pdf ? C.cited : null, N = PDF.doc.numPages, w = sc.clientWidth || 600;
+      return pageData(1).then(function (pd1) {
+        if (token !== PDF.tok || !$('#pdfscroll')) return;
+        var b = pd1.page.getViewport({ scale: 1 }), h = Math.floor(b.height * (w / b.width)), html = '';
+        for (var n = 1; n <= N; n++) html += '<div class="pg" data-n="' + n + '" style="height:' + h + 'px"></div>';
+        sc.innerHTML = html;
+        if (cit) sc.scrollTop = sc.querySelector('.pg[data-n="' + cit.page + '"]').offsetTop - 6;
+        else sc.scrollTop = C.pdfScroll || 0;
+        updatePill(sc);
+        PDF.io = new IntersectionObserver(function (ents) {
+          ents.forEach(function (en) {
+            var el = en.target, n2 = +el.getAttribute('data-n');
+            if (en.isIntersecting) renderPg(n2, el, w, token, C.cited && C.cited.pdf ? C.cited : null);
+            else if (el.getAttribute('data-done') === '1') { el.setAttribute('data-done', '0'); el.innerHTML = ''; }
+          });
+        }, { root: sc, rootMargin: '1200px 0px' });
+        $$('.pg', sc).forEach(function (el) { PDF.io.observe(el); });
+        var raf = 0;
+        sc.addEventListener('scroll', function () { C.pdfScroll = sc.scrollTop; if (raf) return; raf = requestAnimationFrame(function () { raf = 0; updatePill(sc); }); });
+      });
+    }).catch(function (e) {
+      var h = $('#pdfscroll'); if (h) h.innerHTML = '<div class="pdfload">Could not load the PDF. Open this page through the local server.</div>';
+      if (window.console) console.error(e);
+    });
+  }
+  function drawHighlight(layer, pd, vp, cit, pgEl) {
+    var m = matchOnPage(pd, cit.quote); if (!m) return;
+    var T = PDF.lib.Util, byItem = {};
+    for (var i = m.a; i <= m.b; i++) { var t = pd.toks[i], g = byItem[t.item] || (byItem[t.item] = { s: t.s, e: t.e }); g.s = Math.min(g.s, t.s); g.e = Math.max(g.e, t.e); }
+    var first = null;
+    Object.keys(byItem).forEach(function (k) {
+      var it = pd.items[k], g = byItem[k], len = Math.max(1, it.str.length), tx = T.transform(vp.transform, it.transform);
+      var h = Math.hypot(tx[2], tx[3]) || 12, wFull = it.width * vp.scale;
+      var x = tx[4] + wFull * (g.s / len), w = wFull * ((g.e - g.s) / len), y = tx[5] - h * 0.86;
+      var d = document.createElement('div'); d.className = 'pdfhl k-' + (cit.kind || 's');
+      d.style.cssText = 'left:' + (x - 3) + 'px;top:' + (y - 2) + 'px;width:' + (w + 6) + 'px;height:' + (h * 1.1 + 4) + 'px';
+      layer.appendChild(d); if (!first || y < first.y) first = { y: y, x: x };
+    });
+    var sc = $('#pdfscroll');
+    if (first && sc && !cit.scrolled) {
+      cit.scrolled = true;
+      var top = pgEl.offsetTop + first.y - sc.clientHeight * 0.4;
+      setTimeout(function () { sc.scrollTo({ top: Math.max(0, top), behavior: REDUCED ? 'auto' : 'smooth' }); }, 80);
+    }
+  }
+  /* public: mark a quote. hint = page to try first. */
+  function markQuote(quote, kind, text, hint, keepMin) {
+    var f = C.files.filter(function (x) { return x.status === 'added' && x.kind === 'pdf'; })[0]; if (!f) return Promise.resolve(false);
+    return pdfLoad(f.url).then(function () { return findQuote(quote, hint); }).then(function (r) {
+      if (!r) { toast('Not found in your slides. That is what a "not in your slides" answer would look like.'); return false; }
+      C.pdfPage = r.page; C.cited = { pdf: true, slide: 'P' + r.page, page: r.page, quote: quote, kind: kind || 's', text: text || quote, scrolled: false };
+      openFile(f.id, null, null, !!keepMin); renderViewer(); markCited(); mapSeenPage(r.page); return true;
+    });
+  }
+  /* click or hover on a sentence in the chat: normal slide or PDF quote */
+  function evidenceGo(o, keepMin) {
+    var v = o.getAttribute('data-evid').split('|'), txt = o.getAttribute('data-evt'), q = o.getAttribute('data-evq');
+    if (/^P/.test(v[0])) { markQuote(q, v[2], txt, +v[0].slice(1), keepMin); return; }
+    showEvidence(+v[0], +v[1], v[2], txt, keepMin);
+  }
+  document.addEventListener('submit', function (e) {
+    if (e.target.id !== 'markform') return;
+    e.preventDefault(); var q = $('#mark-q').value.trim(); if (q) markQuote(q, 's', q, C.pdfPage, false);
+  });
+  if (window.ResizeObserver) { var rt; new ResizeObserver(function () { clearTimeout(rt); rt = setTimeout(function () { var f = C && C.active ? fileById(C.active) : null; if (f && f.kind === 'pdf' && !S.vmin) pdfRender(f); }, 150); }).observe($('#viewer')); }
+
+  /* scripted demo answers for this deck. The real version: retrieval + an LLM that returns page + quote per sentence. */
+  function pdfAnswer(t) {
+    if (/moore|transistor|exponential/.test(t) && !/who|propos|invent|found/.test(t)) return { s: [
+      T('s', 'P8', 0, 'Moore’s law says that transistor counts double every two years.', 'transistor counts double every two years'),
+      T('s', 'P8', 1, 'Computational power therefore grows exponentially.', 'computational power grows exponentially'),
+      T('s', 'P8', 2, 'The same trend also applies to RAM size and pixel densities.', 'also applies to RAM size and pixel densities')] };
+    if (/who|propos|invent|gordon|found/.test(t) && /moore/.test(t)) return { s: [
+      T('s', 'P8', 0, 'The slide on Moore’s law shows a recap with a photo of its originator.', 'Moore’s Law Recap'),
+      T('g', null, null, 'Gordon Moore, a co-founder of Intel, proposed it in 1965.')], note: 'The name and the date are not written on the slide. Check them in the lecture or a reliable source.' };
+    if (/goal|learn|aim|objective/.test(t)) return { s: [
+      T('s', 'P3', 0, 'The course aims to teach the basic notions of computational design in an HCI context.', 'students will learn the basic notions of computational design in a HCI context'),
+      T('s', 'P3', 1, 'Students should also integrate cutting-edge approaches into their prototypes.', 'integrate cutting-edge approaches into their prototypes')] };
+    if (/week|overview|schedule|w8|next/.test(t)) return { s: [
+      T('s', 'P2', 0, 'This lecture is week 8 and covers computational design.', 'W8 Computational Design'),
+      T('s', 'P2', 1, 'The next weeks move on to user modeling, starting with perception, cognition, and memory.', 'W9 User Modeling: Perception, cognition, and memory')] };
+    if (/menu|task|usability|ucd/.test(t)) return { s: [
+      T('s', 'P5', 0, 'The task is to arrange the elements in the menu to achieve the best usability.', 'arrange elements in the menu to achieve the best usability'),
+      T('s', 'P6', 0, 'The follow-up asks how you would do it with user-centered design.', 'how would you do it with UCD')] };
+    return null;
+  }
+
+  /* Knowledge map is not part of this build. These no-op names keep the rest of the code working. */
+  var MAPICON = '';
+  function mapSeenPage() { }
+  function mapOpen() { }
+  function renderMap() { }
+
+  /* ---------------- account: email sign-in, saved state per email, real replies ----------------
+     There is no password and no server account. The email only picks which saved state to open.
+     State is kept in this browser (localStorage) and saved a moment after any change.
+     Real replies: when the toggle in the chat header is on, a general question is written to agent/log.md by
+     server.js and a terminal agent answers it from the notes. Scripted answers stay the default. */
+  var AK = 'hifi-session', UK = 'hifi-users', RK = 'hifi-real', DEMO = 'demo@local.test';
+  var REAL = false, realWait = null, lastSaved = '';
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { } }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) { } }
+  function acctEmail() { return lsGet(AK); }
+  function acctUsers() { try { return JSON.parse(lsGet(UK)) || {}; } catch (e) { return {}; } }
+
+  function acctSave() {
+    var em = acctEmail(); if (!em || !S) return;
+    var js; try { js = JSON.stringify(S); } catch (e) { return; }
+    if (js === lastSaved) return;
+    var us = acctUsers(); us[em] = JSON.parse(js); lastSaved = js;
+    lsSet(UK, JSON.stringify(us));
+  }
+  function acctClean(s) {
+    s.focus = false; s.map = false; s.exOn = false; s.editing = false; delete s.snap;
+    Object.keys(s.courses).forEach(function (k) {
+      var c = s.courses[k]; c.loading = 0; c.timers = [];
+      c.files.forEach(function (f) { if (f.status === 'uploading') { f.status = 'added'; f.pct = 100; } });
+      c.chats.forEach(function (ch) { ch.msgs = ch.msgs.filter(function (m) { return !m.waiting; }); });
+    });
+    return s;
+  }
+  function acctOpen(email) {
+    var saved = acctUsers()[email];
+    if (saved && saved.courses) { S = acctClean(saved); C = S.courses[S.ctx] || S.courses[Object.keys(S.courses)[0]]; }
+    else { fresh(); if (email === DEMO) demoSeed(); }
+    dropHci(); lsSet(AK, email); lastSaved = '';
+    $('#login').hidden = true; $('#login').removeAttribute('inert');
+    renderAll(); setFocus(false); applyLayout();
+    var who = $('#whoami'); if (who) who.textContent = email;
+  }
+  /* A saved state from a machine that had the course PDF: drop that context when the file is missing. */
+  function dropHci() {
+    if (HAS_PDF || !S.courses.hci) return;
+    delete S.courses.hci; S.ctxs = S.ctxs.filter(function (c) { return c.key !== 'hci'; });
+    if (S.ctx === 'hci') { S.ctx = 'calc'; C = S.courses.calc; }
+  }
+  /* A ready workspace for demos: Calculus I with both lectures added and a rating on every topic. */
+  function demoSeed() {
+    S.started = true;
+    S.profile = { desc: 'I am a first year CS student. I struggle with maths.', courses: ['Calculus I', 'Linear Algebra', 'Statistics'], custom: [] };
+    S.ctx = 'calc'; C = S.courses.calc;
+    FILE_DEFS.calc.forEach(function (d) {
+      C.files.push({ id: 'f' + C.nid++, defId: d.id, name: d.name, short: d.short, mb: d.mb, pages: d.pages, kind: d.kind, preview: d.preview, slides: d.slides, topics: d.topics, status: 'added', pct: 100 });
+    });
+    C.topics = ['basic', 'pq', 'chain', 'tangent', 'optim'].map(function (id) { return TOPIC_DEFS[id]; });
+    C.ratings = { basic: 7, pq: 4, chain: 2, tangent: 3, optim: 2 };
+    C.tabs = [C.files[1].id]; C.active = C.files[1].id;
+    C.chats[0].msgs = [{ r: 'ai', text: 'Hi! You have already taken Calculus I, Linear Algebra and Statistics, so I will not start from zero.' }];
+  }
+  function acctOut() {
+    acctSave(); lsDel(AK); lastSaved = '';
+    S.exOn = false; S.focus = false; setInert(false);
+    $('#login').hidden = false; $('#login-email').value = ''; $('#login-email').focus();
+    $('#intro').hidden = true;
+  }
+  function acctBoot() {
+    REAL = lsGet(RK) === '1'; syncReal();
+    var em = acctEmail();
+    if (em) acctOpen(em); else { $('#intro').hidden = true; $('#login').hidden = false; }
+    setInterval(acctSave, 1500);
+    window.addEventListener('beforeunload', acctSave);
+  }
+  function loginSubmit() {
+    var v = $('#login-email').value.trim();
+    if (!v) { $('#login-note').textContent = 'Write an email first.'; return; }
+    if (!/^\S+@\S+$/.test(v)) { $('#login-note').textContent = 'That does not look like an email address.'; return; }
+    acctOpen(v.toLowerCase());
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target; if (!t.closest) return;
+    if (t.closest('#login-go')) { loginSubmit(); return; }
+    if (t.closest('#login-demo')) { acctOpen(DEMO); return; }
+    if (t.closest('#b-signout')) { acctOut(); return; }
+  });
+  document.addEventListener('keydown', function (e) { if (e.target.id === 'login-email' && e.key === 'Enter') { e.preventDefault(); loginSubmit(); } });
+
+  /* ---- real replies ---- */
+  function syncReal() {
+    var t = $('#real-toggle'); if (t) { t.checked = REAL; t.setAttribute('aria-checked', REAL); }
+    var f = $('.foot'); if (f) f.textContent = REAL ? 'Prototype · chat replies come from the reply agent (real), exercises are scripted' : 'Prototype · scripted answers';
+  }
+  document.addEventListener('change', function (e) {
+    if (e.target.id !== 'real-toggle') return;
+    var on = e.target.checked;
+    if (!on) { REAL = false; lsSet(RK, '0'); syncReal(); toast('Scripted answers are back.'); return; }
+    fetch('/log', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) {
+      if (typeof d.text !== 'string') throw 0;
+      REAL = true; lsSet(RK, '1'); syncReal(); toast('Real replies are on. A reply agent must be running.');
+    }).catch(function () {
+      REAL = false; lsSet(RK, '0'); syncReal();
+      toast('Real replies need the Node server. Run: node server.js');
+    });
+  });
+  function notesFor() {
+    return C.files.filter(function (f) { return f.status === 'added'; }).map(function (f) {
+      var note = (f.slides || []).map(function (n) { var s = SLIDES[n]; return s ? s.t + ': ' + s.p.join(' ') : ''; }).filter(Boolean).join(' | ');
+      return { name: f.name, note: note };
+    });
+  }
+  function replyFor(text, id) {
+    var marker = '## ' + id + ' reply', i = text.indexOf(marker); if (i < 0) return null;
+    var rest = text.slice(i + marker.length).replace(/^\n/, ''), n = rest.search(/\n## /);
+    return (n < 0 ? rest : rest.slice(0, n)).trim() || null;
+  }
+  function realAsk(question) {
+    var ch = chat(), wait = { r: 'ai', text: 'Waiting for the reply agent…', waiting: true };
+    deliver(ch, wait); realWait = wait; renderMsgs();
+    var fail = function (msg) { wait.waiting = false; wait.text = msg; wait.note = 'Real replies are on. Switch them off in the chat header to use scripted answers.'; realWait = null; renderMsgs(); };
+    fetch('/ask', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ question: question, context: (S.ctxs.filter(function (c) { return c.key === S.ctx; })[0] || {}).name || S.ctx, notes: notesFor() }) })
+      .then(function (r) { if (!r.ok) throw 0; return r.json(); })
+      .then(function (d) {
+        (function poll() {
+          if (realWait !== wait) return;
+          fetch('/log', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+            var rep = replyFor(j.text || '', d.id);
+            if (!rep) { setTimeout(poll, 1000); return; }
+            wait.waiting = false; wait.text = rep; wait.real = true;
+            wait.note = 'Real reply from the reply agent. It is not matched to your slides.'; realWait = null; renderMsgs();
+          }).catch(function () { setTimeout(poll, 1500); });
+        })();
+      }).catch(function () { fail('The question could not be saved. Is the Node server running?'); });
+  }
+
+  /* ---------------- Exercise mode ----------------
+     A separate mode from the chat. The student sets a time budget, topics, where exercises may come from and how hard it
+     should feel. A planner then chooses WHICH exercises and in WHAT ORDER, and plans again after every exercise.
+     The planner here follows the objective of the optimization notebook (version 4: learning gained over the session,
+     the level rising along the plan, a bonus for recovering what was just missed, penalties for near-duplicates and for
+     AI-generated exercises). The notebook solves it exactly with Gurobi. This page cannot run Gurobi, so it searches the
+     same objective with a beam search, which is enough for a pool of this size.
+     Prototype content: the exercises, their difficulty, minutes and element tags are made up for this demo.
+     Contract between the screens and the planner: see EXERCISE_MODE_CONTRACT.md. */
+  var EXQ = 'Exercise sheet 3';
+  var HINTS = { basic: 'Power rule (slide 10): d/dx xⁿ = n · xⁿ⁻¹. Apply it to each term and keep constant multiples in front.', pq: 'Product rule (slide 11): (f · g)′ = f′ · g + f · g′. Quotient rule: (f / g)′ = (f′ · g − f · g′) / g².', chain: 'Chain rule (slide 12): differentiate the outside, keep the inside, then multiply by the derivative of the inside.', tangent: 'The slope of the tangent line at x = a is the derivative f′(a) (slide 20).', optim: 'Maxima and minima occur where f′(x) = 0 (slide 21). Check the sign of f′ on both sides.' };
+  function XE(id, topic, d, min, src, el, q, fn, sol) { return { id: id, topic: topic, d: d, min: min, src: src, el: el, q: q, fn: fn, sol: sol }; }
+  var EXB = [
+    XE('b1', 'basic', 2, 3, 'up', ['power'], 'Find f′(x) for f(x) = x⁵.', function (x) { return 5 * Math.pow(x, 4); }, 'f′(x) = 5x⁴.'),
+    XE('b2', 'basic', 3, 4, 'up', ['power', 'sum', 'cm'], 'Find f′(x) for f(x) = 4x³ − 2x + 7.', function (x) { return 12 * x * x - 2; }, 'f′(x) = 12x² − 2. The constant 7 has derivative 0.'),
+    XE('b3', 'basic', 4, 5, 'up', ['power', 'sum', 'cm'], 'Find f′(x) for f(x) = 3x⁴ + x²/2 − 5x.', function (x) { return 12 * Math.pow(x, 3) + x - 5; }, 'f′(x) = 12x³ + x − 5.'),
+    XE('b4', 'basic', 5, 5, 'ai', ['power', 'sum', 'cm'], 'Find f′(x) for f(x) = 5x⁷ − 3x⁵ + 2x³.', function (x) { return 35 * Math.pow(x, 6) - 15 * Math.pow(x, 4) + 6 * x * x; }, 'f′(x) = 35x⁶ − 15x⁴ + 6x².'),
+    XE('q1', 'pq', 4, 5, 'up', ['power', 'product'], 'Find f′(x) for f(x) = x² · (x + 3).', function (x) { return 3 * x * x + 6 * x; }, 'Product rule: 2x(x + 3) + x² · 1 = 3x² + 6x.'),
+    XE('q2', 'pq', 5, 6, 'up', ['power', 'product', 'sum'], 'Find f′(x) for f(x) = (2x + 1)(x² − 4).', function (x) { return 6 * x * x + 2 * x - 8; }, 'Product rule: 2(x² − 4) + (2x + 1)(2x) = 6x² + 2x − 8.'),
+    XE('q3', 'pq', 6, 7, 'ai', ['power', 'quotient'], 'Find f′(x) for f(x) = x / (x + 1).', function (x) { return 1 / ((x + 1) * (x + 1)); }, 'Quotient rule: ((x + 1) − x) / (x + 1)² = 1 / (x + 1)².'),
+    XE('q4', 'pq', 7, 8, 'ai', ['power', 'quotient', 'sum'], 'Find f′(x) for f(x) = (x² + 1) / (x − 2).', function (x) { return (x * x - 4 * x - 1) / ((x - 2) * (x - 2)); }, 'Quotient rule: (2x(x − 2) − (x² + 1)) / (x − 2)² = (x² − 4x − 1) / (x − 2)².'),
+    XE('c0', 'chain', 2, 3, 'up', ['power', 'chain', 'sum'], 'Find f′(x) for f(x) = (x + 1)³.', function (x) { return 3 * Math.pow(x + 1, 2); }, 'Outside: 3(x + 1)². Inside: x + 1, derivative 1. So f′(x) = 3(x + 1)².'),
+    XE('c1', 'chain', 4, 4, 'up', ['power', 'chain', 'sum'], 'Find f′(x) for f(x) = (4x − 1)³.', function (x) { return 12 * Math.pow(4 * x - 1, 2); }, 'Outside: 3(4x − 1)². Inside: 4x − 1, derivative 4. So f′(x) = 12(4x − 1)².'),
+    XE('c2', 'chain', 5, 5, 'up', ['power', 'chain'], 'Find f′(x) for f(x) = (x² + 3)⁵.', function (x) { return 10 * x * Math.pow(x * x + 3, 4); }, 'Outside: 5(x² + 3)⁴. Inside derivative: 2x. So f′(x) = 10x(x² + 3)⁴.'),
+    XE('c3', 'chain', 6, 6, 'ai', ['power', 'chain', 'cm'], 'Find f′(x) for f(x) = (5x² − 2)³.', function (x) { return 30 * x * Math.pow(5 * x * x - 2, 2); }, 'Outside: 3(5x² − 2)². Inside derivative: 10x. So f′(x) = 30x(5x² − 2)².'),
+    XE('c4', 'chain', 8, 8, 'ai', ['power', 'chain', 'product'], 'Find f′(x) for f(x) = x · (x² + 1)³.', function (x) { return Math.pow(x * x + 1, 2) * (7 * x * x + 1); }, 'Product and chain rule: (x² + 1)³ + x · 3(x² + 1)² · 2x = (x² + 1)²(7x² + 1).'),
+    XE('c5', 'chain', 7, 7, 'ai', ['power', 'chain', 'sum'], 'Find f′(x) for f(x) = (x³ − x)⁴.', function (x) { return 4 * Math.pow(x * x * x - x, 3) * (3 * x * x - 1); }, 'Outside: 4(x³ − x)³. Inside derivative: 3x² − 1. So f′(x) = 4(x³ − x)³(3x² − 1).'),
+    XE('t1', 'tangent', 3, 3, 'up', ['power', 'sum', 'tangent'], 'Find the slope of the tangent line to f(x) = x² + 3x at x = 2.', function () { return 7; }, 'f′(x) = 2x + 3, so the slope at x = 2 is 7.'),
+    XE('t2', 'tangent', 5, 6, 'ai', ['power', 'chain', 'tangent'], 'Find the slope of the tangent line to f(x) = (x² + 1)³ at x = 1.', function () { return 24; }, 'f′(x) = 3(x² + 1)² · 2x, so at x = 1 the slope is 3 · 4 · 2 = 24.'),
+    XE('t3', 'tangent', 6, 5, 'up', ['power', 'sum', 'tangent'], 'Find the slope of the tangent line to f(x) = x³ − 4x at x = 2.', function () { return 8; }, 'f′(x) = 3x² − 4, so at x = 2 the slope is 8.'),
+    XE('o0', 'optim', 2, 3, 'up', ['power', 'sum', 'critical'], 'At which x does f(x) = x² − 4x have its smallest value?', function () { return 2; }, 'f′(x) = 2x − 4 = 0 gives x = 2.'),
+    XE('o1', 'optim', 4, 4, 'up', ['power', 'sum', 'critical'], 'At which x does f(x) = x² − 6x + 4 have its smallest value?', function () { return 3; }, 'f′(x) = 2x − 6 = 0 gives x = 3.'),
+    XE('o2', 'optim', 6, 6, 'up', ['power', 'sum', 'critical'], 'At which x > 0 does f(x) = x³ − 12x have a local minimum?', function () { return 2; }, 'f′(x) = 3x² − 12 = 0 gives x = 2. The sign of f′ changes from negative to positive there.'),
+    XE('o3', 'optim', 5, 5, 'ai', ['power', 'critical'], 'What is the largest possible product of two numbers whose sum is 20?', function () { return 100; }, 'With the numbers x and 20 − x, the product x(20 − x) is largest at x = 10, so the product is 100.')
+  ];
+  var SRC = { both: 'Uploaded and AI-generated', up: 'Uploaded only', ai: 'AI-generated only' };
+  var CHAL = { 0.75: ['Gentle', 'Mostly exercises you can solve, with a few stretches.'], 0.6: ['Balanced', 'Most exercises are within reach, some need effort.'], 0.5: ['Stretch', 'More exercises that you may get wrong.'] };
+  var PM = { S: 1.5, W0: 2, W1: 2, B0: 2, FLOOR: 0.05, BETA: 0.5, TREF: 5, ETA: 0.35, LREM: 0.8, LRED: 0.4, LGEN: 0.15, LHRED: 0.3, SIMR: 0.6, WIDTH: 250 };
+  function cl(x, a, b) { return Math.min(b, Math.max(a, x)); }
+  function sg(x) { return 1 / (1 + Math.exp(-x)); }
+  function lgt(p) { return Math.log(p / (1 - p)); }
+  function xById(id) { return EXB.filter(function (e) { return e.id === id; })[0]; }
+  function xSim(a, b) {
+    if (a === b) return 1;
+    var i = a.el.filter(function (t) { return b.el.indexOf(t) >= 0; }).length, u = a.el.length + b.el.length - i;
+    return u ? i / u : 0;
+  }
+  /* what the planner believes about the student: topic level from the self-rating, corrected by results so far */
+  function xAbility(e, rat, hist) {
+    var rd = hist.map(function (h) { var x = xById(h.id); return { x: x, a: x.d + PM.S * lgt(cl(h.r, 0.1, 0.9)) }; });
+    var r0 = rat[e.topic], base = r0 == null ? 5 : r0, w0 = r0 == null ? 0.3 : PM.W0, bias = 0;
+    if (rd.length) { var sm = 0; rd.forEach(function (q) { var rr = rat[q.x.topic]; sm += q.a - (rr == null ? 5 : rr); }); bias = sm / (PM.B0 + rd.length); }
+    var tj = rd.filter(function (q) { return q.x.topic === e.topic; }), st = 0; tj.forEach(function (q) { st += q.a; });
+    var at = (w0 * (base + bias) + st) / (w0 + tj.length), num = PM.W1 * at, den = PM.W1;
+    rd.forEach(function (q) { var k = xSim(e, q.x); num += k * q.a; den += k; });
+    return num / den;
+  }
+  function xValue(e, a, qp) {
+    var p = sg((a - e.d) / PM.S), room = cl((10 - a) / 10, 0, 1);
+    var q = Math.pow(p, 5 * qp) * Math.pow(1 - p, 5 * (1 - qp)) / (Math.pow(qp, 5 * qp) * Math.pow(1 - qp, 5 * (1 - qp)));
+    return { v: (q * (0.4 + 0.6 * room) + PM.FLOOR) * Math.pow(e.min / PM.TREF, PM.BETA), p: p };
+  }
+  /* inp: { remaining, topics:[ids], source:'both'|'up'|'ai', chal, rat:{topic:rating}, hist:[{id, r}] } */
+  function xPlan(inp) {
+    var done = {}; inp.hist.forEach(function (h) { done[h.id] = 1; });
+    var cand = EXB.filter(function (e) { return !done[e.id] && inp.topics.indexOf(e.topic) >= 0 && e.min <= inp.remaining && (inp.source === 'both' || e.src === inp.source); });
+    if (!cand.length) return { items: [], obj: 0 };
+    var est = {}, last = inp.hist.length ? inp.hist[inp.hist.length - 1] : null, lastE = last ? xById(last.id) : null;
+    var sev = last ? cl((0.5 - last.r) / 0.4, 0, 1) : 0;
+    var solved = inp.hist.filter(function (h) { return h.r >= 0.5; }).map(function (h) { return xById(h.id); });
+    cand.forEach(function (e) {
+      var mx = 0; solved.forEach(function (s) { mx = Math.max(mx, xSim(e, s)); });
+      est[e.id] = { a: xAbility(e, inp.rat, inp.hist), rem: lastE ? PM.LREM * sev * xSim(lastE, e) * Math.pow(e.min / PM.TREF, PM.BETA) : 0, hp: mx > PM.SIMR ? PM.LHRED * mx : 0 };
+    });
+    var layer = [{ seq: [], t: 0, A: {}, obj: 0, info: [] }], best = null;
+    for (var step = 0; step < cand.length; step++) {
+      var nxt = [];
+      layer.forEach(function (s) {
+        cand.forEach(function (e) {
+          if (s.seq.indexOf(e) >= 0 || s.t + e.min > inp.remaining) return;
+          var A = s.A[e.topic] || 0, v = xValue(e, est[e.id].a + A, inp.chal), gain = v.v;
+          var add = gain - est[e.id].hp - (e.src === 'ai' ? PM.LGEN : 0) + (s.seq.length === 0 ? est[e.id].rem : 0);
+          s.seq.forEach(function (o) { var k = xSim(e, o); if (k > PM.SIMR) add -= PM.LRED * k; });
+          var A2 = {}; for (var k2 in s.A) A2[k2] = s.A[k2]; A2[e.topic] = A + PM.ETA * gain;
+          nxt.push({ seq: s.seq.concat([e]), t: s.t + e.min, A: A2, obj: s.obj + add, info: s.info.concat([{ p: v.p, rem: s.seq.length === 0 ? est[e.id].rem : 0 }]) });
+        });
+      });
+      if (!nxt.length) break;
+      nxt.sort(function (a, b) { return b.obj - a.obj; });
+      layer = nxt.slice(0, PM.WIDTH);
+      if (!best || layer[0].obj > best.obj) best = layer[0];
+    }
+    if (!best) return { items: [], obj: 0 };
+    var items = best.seq.map(function (e, i) { return { id: e.id, min: e.min, p: best.info[i].p, rem: best.info[i].rem }; });
+    return { items: items, obj: best.obj };
+  }
+  function xWhy(it, i, items, inp) {
+    var e = xById(it.id), prev = i ? xById(items[i - 1].id) : null, parts = [];
+    if (it.rem > 0.05) parts.push('Close to the one you just missed, so you can recover it.');
+    else {
+      var lowest = inp.topics.slice().sort(function (a, b) { var ra = inp.rat[a] == null ? 5 : inp.rat[a], rb = inp.rat[b] == null ? 5 : inp.rat[b]; return ra - rb; })[0];
+      var firstOfTopic = !items.slice(0, i).some(function (o) { return xById(o.id).topic === e.topic; });
+      if (prev && prev.topic === e.topic && e.d >= prev.d) parts.push('Builds on the previous exercise.');
+      else if (e.topic === lowest && firstOfTopic) parts.push('Your lowest-rated topic.');
+      else if (firstOfTopic) parts.push('Keeps this topic in the session.');
+      else parts.push('Practice in the same topic at a similar level.');
+    }
+    return parts.join(' ');
+  }
+  function xFeel(p, chal) { return p >= chal + 0.2 ? 'Easier than usual' : p >= chal - 0.15 ? 'About right' : 'A stretch'; }
+
+  /* ---------------- state and flow ---------------- */
+  function exTopicsAvail() { return C.topics.filter(function (t) { return EXB.some(function (e) { return e.topic === t.id; }); }); }
+  function exNew() {
+    var av = exTopicsAvail(), tp = {}; av.forEach(function (t) { tp[t.id] = true; });
+    return { phase: 'setup', time: 30, topics: tp, source: 'both', chal: 0.6, plan: [], hist: [], cur: 0, used: 0, rat0: null, tries: 0, hint: false, sol: false, input: '', fb: '', res: null, note: '', ctx: S.ctx };
+  }
+  function exInput() { var s = S.ex, tp = Object.keys(s.topics).filter(function (k) { return s.topics[k]; }); return { remaining: s.time - s.used, topics: tp, source: s.source, chal: s.chal, rat: s.rat0 || C.ratings, hist: s.hist.map(function (h) { return { id: h.id, r: h.r }; }) }; }
+  function exOpen() {
+    if (!S.ex || S.ex.ctx !== S.ctx) S.ex = exNew();
+    if (S.focus) setFocus(false);
+    if (S.map && typeof mapOpen === 'function') mapOpen(false);
+    S.exOn = true; exRender(); var b = $('#exview .exh h2'); if (b) b.focus();
+    announce('Exercise mode open');
+  }
+  function exExit() { S.exOn = false; exRender(); renderTop(); }
+  function exBuild() {
+    var s = S.ex, inp = exInput();
+    if (!inp.topics.length) { s.note = 'Pick at least one topic.'; exRender(); return; }
+    s.rat0 = JSON.parse(JSON.stringify(C.ratings)); inp.rat = s.rat0;
+    var r = xPlan(inp);
+    if (!r.items.length) { s.note = 'No exercise fits these settings. Try more time, another source or more topics.'; exRender(); return; }
+    s.note = ''; s.plan = r.items.map(function (it, i, a) { it.why = xWhy(it, i, a, inp); return it; }); s.phase = 'plan'; exRender();
+  }
+  function exStart() { var s = S.ex; s.phase = 'run'; s.cur = 0; s.hist = []; s.used = 0; s.tries = 0; s.hint = false; s.sol = false; s.input = ''; s.fb = ''; s.res = null; exRender(); var i = $('#ex-in'); if (i) i.focus(); }
+  function exCur() { var s = S.ex; return s.plan[s.cur] ? xById(s.plan[s.cur].id) : null; }
+  function exSubmit() {
+    var s = S.ex, e = exCur(), inp = $('#ex-in'); if (!e || s.res) return;
+    var f = parseFn(inp.value); s.input = inp.value;
+    if (!inp.value.trim()) { s.fb = 'Write your answer first.'; exRender(true); return; }
+    if (!f) { s.fb = 'I could not read that. Use x, numbers, + − × ÷, ^ and brackets.'; exRender(true); return; }
+    if (same(f, e.fn)) { exFinish(s.sol ? 'solution' : s.hint ? 'hint' : s.tries ? 'retry' : 'clean'); return; }
+    s.tries++; s.fb = s.tries === 1 ? 'Not quite yet. Try again, or ask for a hint.' : 'Still not right. A hint can help, or you can look at the solution.'; exRender(true);
+  }
+  var RES = { clean: [0.9, 1, 'Solved with no help.'], retry: [0.8, 1, 'Solved after another try, with no help.'], hint: [0.7, 0.5, 'Solved with a hint.'], solution: [0.4, 0, 'Solution seen.'], skip: [0.1, 0, 'Skipped.'] };
+  function exFinish(kind) {
+    var s = S.ex, e = exCur(), r = RES[kind], tp = e.topic;
+    s.hist.push({ id: e.id, r: r[0], kind: kind, min: e.min }); s.used += e.min;
+    var old = C.ratings[tp], base = old == null ? 5 : old, nv = Math.max(0, Math.min(10, base + r[1]));
+    if (C.start[tp] == null) C.start[tp] = base;
+    C.ratings[tp] = nv; C.last[tp] = nv - base; C.pulse[tp] = true; renderLeft();
+    var inp = exInput(), rest = xPlan(inp), oldNext = s.plan[s.cur + 1] ? s.plan[s.cur + 1].id : null;
+    var kept = s.plan.slice(0, s.cur + 1);
+    rest.items.forEach(function (it, i, a) { it.why = xWhy(it, i, a, inp); });
+    var newNext = rest.items[0] ? rest.items[0].id : null, note;
+    if (!newNext) note = 'No exercise fits in the time left.';
+    else if (oldNext && newNext !== oldNext) note = 'The plan changed. Next is now ' + exTitle(xById(newNext)) + ' instead of ' + exTitle(xById(oldNext)) + (why(kind, e, xById(newNext)));
+    else note = 'The plan was checked again. The next exercise stays.';
+    s.plan = kept.concat(rest.items); s.res = { kind: kind, text: r[2], rating: [base, nv], note: note, more: !!newNext }; s.fb = '';
+    exRender();
+  }
+  function why(kind, cur, nx) {
+    if ((kind === 'solution' || kind === 'skip') && xSim(cur, nx) > 0.4) return ', because it is related to the one you just missed.';
+    return ', because your estimated level changed after this result.';
+  }
+  function exTitle(e) { return e ? ({ basic: 'Basic rules', pq: 'Product and quotient', chain: 'Chain rule', tangent: 'Tangent lines', optim: 'Optimization' })[e.topic] + ' (' + e.min + ' min)' : ''; }
+  function exNext() {
+    var s = S.ex; if (!s.res) return;
+    if (!s.res.more) { s.phase = 'done'; exRender(); return; }
+    s.cur++; s.tries = 0; s.hint = false; s.sol = false; s.input = ''; s.fb = ''; s.res = null; exRender(); var i = $('#ex-in'); if (i) i.focus();
+  }
+
+  /* ---------------- rendering ---------------- */
+  function seg(attr, items, on) {
+    return '<div class="seg" role="group">' + items.map(function (it) { return '<button type="button" class="' + (String(it[0]) === String(on) ? 'on' : '') + '" data-ex="' + attr + '" data-v="' + it[0] + '" aria-pressed="' + (String(it[0]) === String(on)) + '">' + esc(it[1]) + '</button>'; }).join('') + '</div>';
+  }
+  function exHead(sub) {
+    return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2><p class="soft small">' + esc(sub) + '</p></div><span class="spacer"></span><button class="btn small" data-ex="exit">Back to chat</button></div>';
+  }
+  function bar(r) { return '<span class="exbar" aria-hidden="true"><i style="width:' + (r == null ? 0 : r * 10) + '%"></i></span>'; }
+  function exSetup() {
+    var s = S.ex, av = exTopicsAvail(), ctxName = (S.ctxs.filter(function (c) { return c.key === S.ctx; })[0] || {}).name;
+    if (!av.length) return exHead(ctxName) + '<div class="exbody"><div class="excard narrow"><h3>No exercises for this course yet</h3><p class="soft">The exercise bank in this prototype covers Calculus I. Add the Calculus I lectures in Material and rate your topics, then come back.</p><div class="row" style="gap:8px;margin-top:14px"><button class="btn dark" data-ex="material">Open material</button></div></div></div>';
+    var rows = av.map(function (t) {
+      var r = C.ratings[t.id], n = EXB.filter(function (e) { return e.topic === t.id; }).length;
+      return '<label class="extopic"><input type="checkbox" data-ex="topic" data-v="' + t.id + '"' + (s.topics[t.id] ? ' checked' : '') + '><span class="tn">' + esc(t.name) + '</span><span class="tc soft small">' + n + ' exercises</span>' + bar(r) + '<span class="tr small">' + (r == null ? 'Not rated' : fmt(r) + '/10') + '</span></label>';
+    }).join('');
+    var nup = EXB.filter(function (e) { return e.src === 'up'; }).length, nai = EXB.length - nup;
+    return exHead(ctxName + ' · set up your session') + '<div class="exbody"><div class="excard">' +
+      '<div class="exsec"><h3>How much time do you have?</h3>' + seg('time', [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']], s.time) + '</div>' +
+      '<div class="exsec"><h3>Which topics?</h3><div class="extopics">' + rows + '</div><p class="fine">Your ratings come from Self-assess. They update as you practice.</p></div>' +
+      '<div class="exsec"><h3>Where can exercises come from?</h3>' + seg('src', [['both', SRC.both], ['up', SRC.up], ['ai', SRC.ai]], s.source) + '<p class="fine">' + nup + ' uploaded from ' + EXQ + ', ' + nai + ' AI-generated for this demo. AI-generated exercises are used when they add something the sheets do not.</p></div>' +
+      '<div class="exsec"><h3>How hard should it feel?</h3>' + seg('chal', [[0.75, 'Gentle'], [0.6, 'Balanced'], [0.5, 'Stretch']], s.chal) + '<p class="fine">' + CHAL[s.chal][1] + '</p></div>' +
+      (s.note ? '<p class="exwarn" role="alert">' + esc(s.note) + '</p>' : '') +
+      '<div class="row" style="gap:10px;margin-top:6px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="build">Build my plan</button><span class="soft small">The plan picks exercises and their order for ' + s.time + ' minutes.</span></div></div>' +
+      '<aside class="exside"><h3>How it works</h3><ol><li>You choose time, topics and how hard it should feel.</li><li>The planner picks which exercises to do and in what order.</li><li>After every exercise it plans again with what happened.</li></ol><p class="fine">Plans are made for you from your ratings and results, not from a fixed list.</p></aside></div>';
+  }
+  function itemRow(it, i, state) {
+    var e = xById(it.id), h = S.ex.hist[i];
+    return '<li class="exit ' + state + '"><span class="exn">' + (state === 'done' ? '✓' : i + 1) + '</span><span class="exm"><b>' + esc(exTitle(e)) + '</b><span class="soft small">' + esc(e.q) + '</span>' +
+      '<span class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span>' + (state === 'done' ? '<span class="soft">' + esc(RES[h.kind][2]) + '</span>' : '<span class="soft">' + xFeel(it.p, S.ex.chal) + ' · about ' + Math.round(it.p * 10) + ' in 10 solved on your own (estimate)</span>') + '</span>' +
+      (state !== 'done' && it.why ? '<span class="exwhy small">' + esc(it.why) + '</span>' : '') + '</span></li>';
+  }
+  function exPlanView() {
+    var s = S.ex, tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0);
+    return exHead('Your plan for ' + s.time + ' minutes') + '<div class="exbody"><div class="excard"><div class="exsum"><b>' + s.plan.length + ' exercises, about ' + tot + ' of ' + s.time + ' minutes</b><span class="exbudget"><i style="width:' + Math.round(100 * tot / s.time) + '%"></i></span></div>' +
+      '<ol class="exlist">' + s.plan.map(function (it, i) { return itemRow(it, i, 'todo'); }).join('') + '</ol>' +
+      '<p class="fine">Minutes are estimates. Only the next exercise is certain: after each one, the plan is made again with your result.</p>' +
+      '<div class="row" style="gap:10px;margin-top:8px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="start">Start</button><button class="btn" style="height:40px" data-ex="back">Change settings</button></div></div></div>';
+  }
+  function exRun() {
+    var s = S.ex, e = exCur(), r = s.res;
+    var list = s.plan.map(function (it, i) { return itemRow(it, i, i < s.cur || (i === s.cur && r) ? 'done' : i === s.cur ? 'now' : 'todo'); }).join('');
+    var keys = [['x', 'x'], ['x²', '^2'], ['xⁿ', '^'], ['(', '('], [')', ')'], ['×', '*'], ['÷', '/']].map(function (k) { return '<button type="button" class="mk" data-ex="key" data-v="' + k[1] + '" aria-label="Insert ' + esc(k[0]) + '">' + k[0] + '</button>'; }).join('');
+    var main = '<div class="excur"><div class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span><span class="soft">' + esc(exTitle(e)) + ' · exercise ' + (s.cur + 1) + '</span></div><p class="exq">' + esc(e.q) + '</p>';
+    if (!r) {
+      main += '<div class="exans"><div class="mkeys" role="group" aria-label="Math keys">' + keys + '</div><div class="row" style="gap:8px"><input class="inp" id="ex-in" autocomplete="off" placeholder="Write your answer…" aria-label="Your answer" value="' + esc(s.input) + '" style="height:40px"><button class="btn dark" style="height:40px;padding:0 20px" data-ex="submit">Check</button></div></div>';
+      if (s.fb) main += '<p class="exfb" role="status">' + esc(s.fb) + '</p>';
+      if (s.hint) main += '<div class="exhint"><b>Hint</b> ' + esc(HINTS[e.topic]) + '</div>';
+      if (s.sol) main += '<div class="exhint sol"><b>Solution</b> ' + esc(e.sol) + '</div>';
+      main += '<div class="row" style="gap:8px;margin-top:12px"><button class="btn small" data-ex="hint"' + (s.hint ? ' disabled' : '') + '>Show a hint</button><button class="btn small" data-ex="sol"' + (s.sol ? ' disabled' : '') + '>Show the solution</button><button class="btn small ghost" data-ex="skip">Skip</button></div>';
+    } else {
+      main += '<div class="exres ' + r.kind + '"><b>' + esc(r.text) + '</b><span class="small">' + (r.rating[1] > r.rating[0] ? 'Your rating for this topic went from ' + fmt(r.rating[0]) + ' to ' + fmt(r.rating[1]) + ' of 10.' : 'Your rating for this topic stays at ' + fmt(r.rating[1]) + ' of 10.') + '</span>' + (r.kind !== 'clean' && r.kind !== 'retry' ? '<span class="small">Solution: ' + esc(e.sol) + '</span>' : '') + '</div>' +
+        '<div class="explan"><b>Plan updated</b><span>' + esc(r.note) + '</span></div><div class="row" style="gap:8px;margin-top:12px"><button class="btn dark" style="height:40px;padding:0 20px" data-ex="next">' + (r.more ? 'Next exercise' : 'See summary') + '</button></div>';
+    }
+    main += '</div>';
+    var left = S.ex.time - s.used;
+    return exHead('Session in progress') + '<div class="exbody run"><aside class="exrail"><div class="exsum"><b>' + s.used + ' of ' + s.time + ' min</b><span class="exbudget"><i style="width:' + Math.min(100, Math.round(100 * s.used / s.time)) + '%"></i></span></div><ol class="exlist small">' + list + '</ol><p class="fine">' + left + ' min left. Exercises below may change after your next answer.</p></aside>' + main + '</div>';
+  }
+  function exDone() {
+    var s = S.ex, solved = s.hist.filter(function (h) { return h.r >= 0.5; }).length, clean = s.hist.filter(function (h) { return h.kind === 'clean' || h.kind === 'retry'; }).length, tp = {};
+    s.hist.forEach(function (h) { tp[xById(h.id).topic] = 1; });
+    var rows = Object.keys(tp).map(function (k) { var a = s.rat0[k] == null ? 5 : s.rat0[k], b = C.ratings[k]; return '<li><span>' + esc(TOPIC_DEFS[k].name) + '</span><span class="soft">' + fmt(a) + ' → ' + fmt(b) + ' of 10</span></li>'; }).join('');
+    return exHead('Session finished') + '<div class="exbody"><div class="excard narrow"><h3>' + s.hist.length + ' exercises in ' + s.used + ' of ' + s.time + ' minutes</h3><ul class="exstats"><li><b>' + solved + '</b> solved</li><li><b>' + clean + '</b> with no help</li><li><b>' + s.hist.filter(function (h) { return h.kind === 'skip'; }).length + '</b> skipped</li></ul>' +
+      '<h3 style="margin-top:18px">Your ratings</h3><ul class="exrates">' + rows + '</ul><p class="fine">Rating changes follow a simple prototype rule, not a measurement.</p><div class="row" style="gap:8px;margin-top:12px"><button class="btn dark" data-ex="again">Plan another session</button><button class="btn" data-ex="exit">Back to chat</button></div></div></div>';
+  }
+  function exRender(keepFocus) {
+    var v = $('#exview'); if (!v) return;
+    v.hidden = !S.exOn;
+    var b = $('#b-practice'); if (b) b.classList.toggle('on', !!S.exOn);
+    if (!S.exOn) return;
+    var had = keepFocus && document.activeElement && document.activeElement.id === 'ex-in', pos = had ? document.activeElement.selectionStart : 0;
+    var ph = S.ex.phase;
+    v.innerHTML = ph === 'setup' ? exSetup() : ph === 'plan' ? exPlanView() : ph === 'run' ? exRun() : exDone();
+    if (had) { var i = $('#ex-in'); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (x) { } } }
+  }
+  document.addEventListener('click', function (e) {
+    var o = e.target.closest && e.target.closest('[data-ex]'); if (!o || !S.ex && o.dataset.ex !== 'open') return;
+    var a = o.getAttribute('data-ex'), v = o.getAttribute('data-v'), s = S.ex;
+    if (a === 'exit') exExit();
+    else if (a === 'time') { s.time = +v; exRender(); }
+    else if (a === 'src') { s.source = v; exRender(); }
+    else if (a === 'chal') { s.chal = +v; exRender(); }
+    else if (a === 'topic') { s.topics[v] = o.checked; s.note = ''; }
+    else if (a === 'build') exBuild();
+    else if (a === 'back') { s.phase = 'setup'; exRender(); }
+    else if (a === 'start') exStart();
+    else if (a === 'submit') exSubmit();
+    else if (a === 'hint') { s.hint = true; exRender(true); }
+    else if (a === 'sol') { s.sol = true; s.hint = true; exRender(true); }
+    else if (a === 'skip') exFinish('skip');
+    else if (a === 'next') exNext();
+    else if (a === 'again') { var keep = { time: s.time, source: s.source, chal: s.chal, topics: s.topics }; S.ex = exNew(); S.ex.time = keep.time; S.ex.source = keep.source; S.ex.chal = keep.chal; S.ex.topics = keep.topics; exRender(); }
+    else if (a === 'material') { S.exOn = false; S.side = 'material'; exRender(); renderLeft(); }
+    else if (a === 'key') {
+      var inp = $('#ex-in'); if (!inp) return;
+      var st = inp.selectionStart == null ? inp.value.length : inp.selectionStart, en = inp.selectionEnd == null ? st : inp.selectionEnd;
+      inp.value = inp.value.slice(0, st) + v + inp.value.slice(en); inp.focus(); try { inp.setSelectionRange(st + v.length, st + v.length); } catch (x) { }
+    }
+  });
+  document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('#exview .mk')) e.preventDefault(); });
+  document.addEventListener('keydown', function (e) {
+    if (e.target.id === 'ex-in' && e.key === 'Enter') { e.preventDefault(); exSubmit(); }
+    if (e.key === 'Escape' && S.exOn && !$('#ov')) exExit();
+  });
+  document.addEventListener('input', function (e) { if (e.target.id === 'ex-in' && S.ex) S.ex.input = e.target.value; });
+  window.__ex = { bank: EXB, plan: xPlan, ability: xAbility, S: function () { return S.ex; }, open: exOpen };
+  fresh(); acctBoot(); renderAll();
+  window.__proto = {
+    S: function () { return S; }, parseFn: parseFn, same: same, flush: flush,
+    HELP_POLICIES: HELP_POLICIES, policyId: function () { return POLICY_ID; },
+    setPolicy: function (id) { if (HELP_POLICIES[id]) POLICY_ID = id; return POLICY_ID; },
+    registerPolicy: function (id, label, cells) { HELP_POLICIES[id] = { label: label, cells: cells }; },
+    policyCell: policyCell, map: function () { return MV; }
+  };
+})();
+</script>
+<script>
+/* Dev only: reloads this page when the file changes. Runs only on localhost, so it is inert elsewhere. */
+(function () {
+  if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+  var last = null;
+  setInterval(function () {
+    fetch(location.pathname, { method: 'HEAD', cache: 'no-store' }).then(function (r) {
+      var m = r.headers.get('last-modified') || r.headers.get('etag');
+      if (last === null) last = m; else if (m && m !== last) location.reload();
+    }).catch(function () {});
+  }, 1000);
+})();
+</script>
+</html>

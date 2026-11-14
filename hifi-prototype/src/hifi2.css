@@ -1,0 +1,87 @@
+
+/* ---- sign-in, real replies toggle, exercise mode ---- */
+#login { position: fixed; inset: 0; background: var(--white, #fff); z-index: 40; display: flex; align-items: center; justify-content: center; animation: fade .3s ease; overflow-y: auto; }
+#login[hidden] { display: none; }
+#login .ibox { width: min(460px, 90vw); }
+#login .ititle { font-size: 34px; font-weight: 600; margin-bottom: 8px; text-align: center; }
+#login .isub { color: var(--soft); margin: 0 0 24px; font-size: 15px; text-align: center; }
+#login .flab { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: block; }
+#login .inp { border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; }
+#intro .row .small { font-size: 12px; }
+#b-signout { margin-left: 2px; }
+
+.rtog { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 12px; color: var(--soft); user-select: none; }
+.rtog input { position: absolute; opacity: 0; width: 0; height: 0; }
+.rtog .trk { width: 30px; height: 18px; border-radius: 999px; background: var(--line); position: relative; transition: background .15s; flex: none; }
+.rtog .trk::after { content: ''; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform .15s var(--ease); box-shadow: 0 1px 2px rgba(0, 0, 0, .25); }
+.rtog input:checked + .trk { background: var(--ink); }
+.rtog input:checked + .trk::after { transform: translateX(12px); }
+.rtog input:focus-visible + .trk { box-shadow: 0 0 0 3px var(--blue-bg); outline: 1px solid var(--blue); }
+.rtog input:checked ~ .rl { color: var(--ink); font-weight: 600; }
+
+#b-practice.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.exview { position: absolute; inset: 0; z-index: 21; display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line2); border-radius: 12px; overflow: hidden; animation: rise .25s var(--ease); }
+.exview[hidden] { display: none; }
+.exh { display: flex; align-items: center; gap: 10px; padding: 16px 22px 12px; border-bottom: 1px solid var(--line2); }
+.exh h2 { margin: 0; font-size: 20px; font-weight: 600; outline: 0; }
+.exh p { margin: 2px 0 0; }
+.exbody { flex: 1; min-height: 0; overflow-y: auto; padding: 22px; display: flex; gap: 22px; align-items: flex-start; justify-content: center; }
+.excard { flex: 1 1 560px; max-width: 700px; border: 1px solid var(--line2); border-radius: 12px; padding: 22px 24px; background: #fff; }
+.excard.narrow { max-width: 520px; flex: 0 1 520px; }
+.excard h3, .exside h3 { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+.exsec { margin-bottom: 20px; }
+.exside { flex: 0 1 260px; border-radius: 12px; background: var(--fill); padding: 18px 20px; font-size: 13px; color: var(--soft); }
+.exside ol { margin: 0 0 10px; padding-left: 18px; display: grid; gap: 6px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; background: #fff; flex-wrap: wrap; }
+.seg button { height: 34px; padding: 0 16px; border: 0; border-right: 1px solid var(--line2); background: #fff; font: inherit; font-size: 13px; cursor: pointer; transition: background .15s, color .15s; }
+.seg button:last-child { border-right: 0; }
+.seg button:hover { background: var(--fill); }
+.seg button.on { background: var(--ink); color: #fff; }
+.seg button:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+.extopics { display: grid; gap: 4px; }
+.extopic { display: grid; grid-template-columns: 20px 1fr auto 90px 64px; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; }
+.extopic:hover { background: var(--fill); }
+.extopic .tr { text-align: right; color: var(--soft); }
+.exbar { height: 6px; border-radius: 99px; background: var(--line2); overflow: hidden; display: block; }
+.exbar i { display: block; height: 100%; background: var(--ink); border-radius: 99px; }
+.exwarn { color: var(--amber); background: var(--amber-bg); border-radius: 8px; padding: 8px 12px; font-size: 13px; margin: 0 0 12px; }
+.exwarn:empty { display: none; }
+.exsum { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; font-size: 14px; }
+.exbudget { flex: 1; height: 8px; border-radius: 99px; background: var(--line2); overflow: hidden; min-width: 80px; }
+.exbudget i { display: block; height: 100%; background: var(--blue); border-radius: 99px; transition: width .4s var(--ease); }
+.exlist { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 8px; }
+.exit { display: flex; gap: 12px; padding: 12px 14px; border: 1px solid var(--line2); border-radius: 10px; background: #fff; }
+.exit.now { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.exit.done { background: var(--fill); }
+.exn { flex: none; width: 24px; height: 24px; border-radius: 50%; background: var(--sel); display: grid; place-items: center; font-size: 12px; font-weight: 600; }
+.exit.now .exn { background: var(--ink); color: #fff; }
+.exit.done .exn { background: var(--green-bg); color: var(--green); }
+.exm { display: grid; gap: 3px; min-width: 0; }
+.exm b { font-weight: 600; font-size: 14px; }
+.exmeta { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.exwhy { color: var(--ink); }
+.exsrc { display: inline-block; margin: 0; color: var(--ink); padding: 1px 8px; border-radius: 99px; font-size: 11px; border: 1px solid var(--line); background: #fff; }
+.exsrc.ai { border-color: var(--blue-line); background: var(--blue-bg); color: var(--blue); }
+.exbody.run { align-items: flex-start; }
+.exrail { flex: 0 1 340px; position: sticky; top: 0; }
+.exrail .exit { padding: 9px 11px; }
+.exrail .exm .soft, .exrail .exwhy, .exrail .exsrc { display: none; }
+.exrail .exit.now .exwhy { display: block; }
+.excur { flex: 1 1 520px; max-width: 700px; border: 1px solid var(--line2); border-radius: 12px; padding: 22px 24px; }
+.exq { font-size: 22px; line-height: 1.35; margin: 12px 0 16px; font-weight: 500; }
+.exans { display: grid; gap: 8px; }
+.mkeys { display: flex; gap: 6px; flex-wrap: wrap; }
+.exview .mk { min-width: 34px; height: 30px; border: 1px solid var(--line); border-radius: 7px; background: #fff; font: inherit; cursor: pointer; padding: 0 8px; }
+.exview .mk:hover { background: var(--fill); }
+.exfb { margin: 10px 0 0; color: var(--amber); font-size: 14px; }
+.exhint { margin-top: 12px; padding: 10px 14px; border-radius: 10px; background: var(--blue-bg); border: 1px solid var(--blue-line); font-size: 14px; }
+.exhint.sol { background: var(--amber-bg); border-color: var(--amber-line); }
+.exres { display: grid; gap: 4px; padding: 14px 16px; border-radius: 10px; background: var(--green-bg); border: 1px solid #b6dfc7; }
+.exres.solution, .exres.skip { background: var(--amber-bg); border-color: var(--amber-line); }
+.explan { margin-top: 12px; padding: 12px 16px; border-radius: 10px; background: var(--fill); display: grid; gap: 3px; font-size: 14px; animation: rise .3s var(--ease); }
+.exstats { list-style: none; margin: 0; padding: 0; display: flex; gap: 22px; font-size: 14px; }
+.exstats b { font-size: 26px; display: block; }
+.exrates { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.exrates li { display: flex; justify-content: space-between; font-size: 14px; padding: 6px 0; border-bottom: 1px solid var(--line2); }
+@media (max-width: 900px) { .exbody { flex-direction: column; align-items: stretch; } .exrail { position: static; flex-basis: auto; } .extopic { grid-template-columns: 20px 1fr 64px; } .extopic .exbar, .extopic .tc { display: none; } }
+@media (prefers-reduced-motion: reduce) { .exview, #login, .explan { animation: none; } .exbudget i, .rtog .trk::after { transition: none; } }
