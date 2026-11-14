@@ -1,7 +1,7 @@
 """Exercise-mode planner that runs the integer program (version 4 of the model in model.py) with Gurobi.
 
 Reads one JSON request on stdin, writes one JSON answer on stdout. Called by server.js for POST /plan.
-Request:  { bank: [{id, topic, d, min, src, el}], remaining, topics, source, chal, rat: {topic: rating|null}, hist: [{id, r}] }
+Request:  { bank: [{id, topic, d, min, src, el}], remaining, topics, source, rat: {topic: rating|null}, hist: [{id, r}] }
 Answer:   { items: [{id, min, p, rem}], solver: 'gurobi', status, gap, runtime, nvars, ncons, obj }
 All numbers in the model are assumptions, see EXERCISE_PATH.md. gurobipy's pip license is size limited (2000 variables).
 """
@@ -30,7 +30,7 @@ def main():
     b.SIM = [[1.0 if i == j else jaccard(allowed[i]['el'], allowed[j]['el']) for j in range(b.N)] for i in range(b.N)]
     idx = {x['id']: i for i, x in enumerate(b.X)}
     topics = [t for t in req['topics']]
-    P = dict(V4, K_CAND=int(os.environ.get('PLAN_KCAND', 12)), MIPGAP=float(os.environ.get('PLAN_GAP', 0.03)), TIME_LIMIT=float(os.environ.get('PLAN_TIME', 4)), QPEAK=float(req['chal']))   # candidates kept, optimality gap, seconds
+    P = dict(V4, K_CAND=int(os.environ.get('PLAN_KCAND', 12)), MIPGAP=float(os.environ.get('PLAN_GAP', 0.03)), TIME_LIMIT=float(os.environ.get('PLAN_TIME', 4)), QPEAK=0.6)   # candidates kept, optimality gap, seconds
     model = Model(b, P)
     st = dict(rating={t: (None if req['rat'].get(t) is None else float(req['rat'][t])) for t in topics},
               hist=[dict(i=idx[h['id']], r=float(h['r'])) for h in req['hist'] if h['id'] in idx])

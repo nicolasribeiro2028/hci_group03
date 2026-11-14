@@ -9,7 +9,6 @@
 | `remaining` | 15, 30, 45 or 60 minutes at the start | Time budget left. Falls as exercises are finished. |
 | `topics` | ids of the topics chosen | Only these topics are planned. |
 | `source` | `both`, `up` (uploaded only), `ai` (AI-generated only) | Where exercises may come from. |
-| `chal` | 0.75 gentle, 0.6 balanced, 0.5 stretch | The chance of success the plan aims at for the typical exercise. |
 | `rat` | topic id to 0 to 10, or missing | Self-rating at the start of the session. A missing rating counts as 5 with little weight. |
 | `hist` | list of `{ id, r }` | What already happened in this session. `r` is the result score below. |
 
@@ -51,7 +50,7 @@ Only the first item is certain. The rest is a forecast that is replaced after ev
 
 ## What may change later (open on purpose)
 
-- The set of settings (for example whether challenge level stays a user setting, or is learned).
+- The set of settings. The target chance of success is fixed at 0.6 inside the model (`QPEAK`), not a setting. It may later adapt inside the model (for example after several failures in a row), but not as a button.
 - Whether `hist` also carries time spent, hints used per exercise and the student's own rating of difficulty.
 - Whether the plan shows its reasons, and how much.
 - The objective itself (see `EXERCISE_PATH.md`). The screens only depend on the shape above.

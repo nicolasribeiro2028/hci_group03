@@ -2109,8 +2109,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     XE('o3', 'optim', 5, 5, 'ai', ['power', 'critical'], 'What is the largest possible product of two numbers whose sum is 20?', function () { return 100; }, 'With the numbers x and 20 − x, the product x(20 − x) is largest at x = 10, so the product is 100.')
   ];
   var SRC = { both: 'Uploaded and AI-generated', up: 'Uploaded only', ai: 'AI-generated only' };
-  var CHAL = { 0.75: ['Gentle', 'Mostly exercises you can solve, with a few stretches.'], 0.6: ['Balanced', 'Most exercises are within reach, some need effort.'], 0.5: ['Stretch', 'More exercises that you may get wrong.'] };
-  var PM = { S: 1.5, W0: 2, W1: 2, B0: 2, FLOOR: 0.05, BETA: 0.5, TREF: 5, ETA: 0.35, LREM: 0.8, LRED: 0.4, LGEN: 0.15, LHRED: 0.3, SIMR: 0.6, WIDTH: 250 };
+  var PM = { QPEAK: 0.6, S: 1.5, W0: 2, W1: 2, B0: 2, FLOOR: 0.05, BETA: 0.5, TREF: 5, ETA: 0.35, LREM: 0.8, LRED: 0.4, LGEN: 0.15, LHRED: 0.3, SIMR: 0.6, WIDTH: 250 };
   function cl(x, a, b) { return Math.min(b, Math.max(a, x)); }
   function sg(x) { return 1 / (1 + Math.exp(-x)); }
   function lgt(p) { return Math.log(p / (1 - p)); }
@@ -2135,7 +2134,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     var q = Math.pow(p, 5 * qp) * Math.pow(1 - p, 5 * (1 - qp)) / (Math.pow(qp, 5 * qp) * Math.pow(1 - qp, 5 * (1 - qp)));
     return { v: (q * (0.4 + 0.6 * room) + PM.FLOOR) * Math.pow(e.min / PM.TREF, PM.BETA), p: p };
   }
-  /* inp: { remaining, topics:[ids], source:'both'|'up'|'ai', chal, rat:{topic:rating}, hist:[{id, r}] } */
+  /* inp: { remaining, topics:[ids], source:'both'|'up'|'ai', rat:{topic:rating}, hist:[{id, r}] } */
   function xPlan(inp) {
     var done = {}; inp.hist.forEach(function (h) { done[h.id] = 1; });
     var cand = EXB.filter(function (e) { return !done[e.id] && inp.topics.indexOf(e.topic) >= 0 && e.min <= inp.remaining && (inp.source === 'both' || e.src === inp.source); });
@@ -2153,7 +2152,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
       layer.forEach(function (s) {
         cand.forEach(function (e) {
           if (s.seq.indexOf(e) >= 0 || s.t + e.min > inp.remaining) return;
-          var A = s.A[e.topic] || 0, v = xValue(e, est[e.id].a + A, inp.chal), gain = v.v;
+          var A = s.A[e.topic] || 0, v = xValue(e, est[e.id].a + A, PM.QPEAK), gain = v.v;
           var add = gain - est[e.id].hp - (e.src === 'ai' ? PM.LGEN : 0) + (s.seq.length === 0 ? est[e.id].rem : 0);
           s.seq.forEach(function (o) { var k = xSim(e, o); if (k > PM.SIMR) add -= PM.LRED * k; });
           var A2 = {}; for (var k2 in s.A) A2[k2] = s.A[k2]; A2[e.topic] = A + PM.ETA * gain;
@@ -2182,12 +2181,12 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     }
     return parts.join(' ');
   }
-  function xFeel(p, chal) { return p >= chal + 0.2 ? 'Easier than usual' : p >= chal - 0.15 ? 'About right' : 'A stretch'; }
+  function xFeel(p) { return p >= PM.QPEAK + 0.2 ? 'Easier than usual' : p >= PM.QPEAK - 0.15 ? 'About right' : 'A stretch'; }
 
   /* ---------------- state and flow ---------------- */
   /* Asks the local server to solve the integer program with Gurobi (solver/plan.py). If that is not available, searches in the page. */
   function exPlanner(inp) {
-    var body = JSON.stringify({ bank: EXB.map(function (e) { return { id: e.id, topic: e.topic, d: e.d, min: e.min, src: e.src, el: e.el }; }), remaining: inp.remaining, topics: inp.topics, source: inp.source, chal: inp.chal, rat: inp.rat, hist: inp.hist });
+    var body = JSON.stringify({ bank: EXB.map(function (e) { return { id: e.id, topic: e.topic, d: e.d, min: e.min, src: e.src, el: e.el }; }), remaining: inp.remaining, topics: inp.topics, source: inp.source, rat: inp.rat, hist: inp.hist });
     var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
     return fetch('/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, signal: ctl ? ctl.signal : undefined })
       .then(function (r) { clearTimeout(to); if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || 'solver error'); }); return r.json(); })
@@ -2201,9 +2200,9 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   function exTopicsAvail() { return C.topics.filter(function (t) { return EXB.some(function (e) { return e.topic === t.id; }); }); }
   function exNew() {
     var av = exTopicsAvail(), tp = {}; av.forEach(function (t) { tp[t.id] = true; });
-    return { phase: 'setup', time: 30, topics: tp, source: 'both', chal: 0.6, plan: [], hist: [], cur: 0, used: 0, rat0: null, tries: 0, hint: false, sol: false, input: '', fb: '', res: null, note: '', ctx: S.ctx };
+    return { phase: 'setup', time: 30, topics: tp, source: 'both', plan: [], hist: [], cur: 0, used: 0, rat0: null, tries: 0, hint: false, sol: false, input: '', fb: '', res: null, note: '', ctx: S.ctx };
   }
-  function exInput() { var s = S.ex, tp = Object.keys(s.topics).filter(function (k) { return s.topics[k]; }); return { remaining: s.time - s.used, topics: tp, source: s.source, chal: s.chal, rat: s.rat0 || C.ratings, hist: s.hist.map(function (h) { return { id: h.id, r: h.r }; }) }; }
+  function exInput() { var s = S.ex, tp = Object.keys(s.topics).filter(function (k) { return s.topics[k]; }); return { remaining: s.time - s.used, topics: tp, source: s.source, rat: s.rat0 || C.ratings, hist: s.hist.map(function (h) { return { id: h.id, r: h.r }; }) }; }
   function exOpen() {
     if (!S.ex || S.ex.ctx !== S.ctx) S.ex = exNew();
     if (S.focus) setFocus(false);
@@ -2286,7 +2285,6 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
       '<div class="exsec"><h3>How much time do you have?</h3>' + seg('time', [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']], s.time) + '</div>' +
       '<div class="exsec"><h3>Which topics?</h3><div class="extopics">' + rows + '</div><p class="fine">Your ratings come from Self-assess. They update as you practice.</p></div>' +
       '<div class="exsec"><h3>Where can exercises come from?</h3>' + seg('src', [['both', SRC.both], ['up', SRC.up], ['ai', SRC.ai]], s.source) + '<p class="fine">' + nup + ' uploaded from ' + EXQ + ', ' + nai + ' AI-generated for this demo. AI-generated exercises are used when they add something the sheets do not.</p></div>' +
-      '<div class="exsec"><h3>How hard should it feel?</h3>' + seg('chal', [[0.75, 'Gentle'], [0.6, 'Balanced'], [0.5, 'Stretch']], s.chal) + '<p class="fine">' + CHAL[s.chal][1] + '</p></div>' +
       (s.note ? '<p class="exwarn" role="alert">' + esc(s.note) + '</p>' : '') +
       '<div class="row" style="gap:10px;margin-top:6px"><button class="btn dark" style="height:40px;padding:0 22px" data-ex="build"' + (s.busy ? ' disabled' : '') + '>' + (s.busy ? 'Planning…' : 'Build my plan') + '</button><span class="soft small">The plan picks exercises and their order for ' + s.time + ' minutes.</span></div></div>' +
       '<aside class="exside"><h3>How it works</h3><ol><li>You choose time, topics and how hard it should feel.</li><li>The planner picks which exercises to do and in what order.</li><li>After every exercise it plans again with what happened.</li></ol><p class="fine">Plans are made for you from your ratings and results, not from a fixed list.</p></aside></div>';
@@ -2294,7 +2292,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   function itemRow(it, i, state) {
     var e = xById(it.id), h = S.ex.hist[i];
     return '<li class="exit ' + state + '"><span class="exn">' + (state === 'done' ? '✓' : i + 1) + '</span><span class="exm"><b>' + esc(exTitle(e)) + '</b><span class="soft small">' + esc(e.q) + '</span>' +
-      '<span class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span>' + (state === 'done' ? '<span class="soft">' + esc(RES[h.kind][2]) + '</span>' : '<span class="soft">' + xFeel(it.p, S.ex.chal) + ' · about ' + Math.round(it.p * 10) + ' in 10 solved on your own (estimate)</span>') + '</span>' +
+      '<span class="exmeta small"><span class="exsrc ' + e.src + '">' + (e.src === 'up' ? 'Uploaded · ' + EXQ : 'AI-generated') + '</span>' + (state === 'done' ? '<span class="soft">' + esc(RES[h.kind][2]) + '</span>' : '<span class="soft">' + xFeel(it.p) + ' · about ' + Math.round(it.p * 10) + ' in 10 solved on your own (estimate)</span>') + '</span>' +
       (state !== 'done' && it.why ? '<span class="exwhy small">' + esc(it.why) + '</span>' : '') + '</span></li>';
   }
   function exPlanView() {
@@ -2346,7 +2344,6 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     if (a === 'exit') exExit();
     else if (a === 'time') { s.time = +v; exRender(); }
     else if (a === 'src') { s.source = v; exRender(); }
-    else if (a === 'chal') { s.chal = +v; exRender(); }
     else if (a === 'topic') { s.topics[v] = o.checked; s.note = ''; }
     else if (a === 'build') exBuild();
     else if (a === 'back') { s.phase = 'setup'; exRender(); }
@@ -2356,7 +2353,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     else if (a === 'sol') { s.sol = true; s.hint = true; exRender(true); }
     else if (a === 'skip') exFinish('skip');
     else if (a === 'next') exNext();
-    else if (a === 'again') { var keep = { time: s.time, source: s.source, chal: s.chal, topics: s.topics }; S.ex = exNew(); S.ex.time = keep.time; S.ex.source = keep.source; S.ex.chal = keep.chal; S.ex.topics = keep.topics; exRender(); }
+    else if (a === 'again') { var keep = { time: s.time, source: s.source, topics: s.topics }; S.ex = exNew(); S.ex.time = keep.time; S.ex.source = keep.source; S.ex.topics = keep.topics; exRender(); }
     else if (a === 'material') { S.exOn = false; S.side = 'all'; exRender(); renderLeft(); }
     else if (a === 'key') {
       var inp = $('#ex-in'); if (!inp) return;

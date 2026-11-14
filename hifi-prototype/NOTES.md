@@ -1,8 +1,8 @@
 # Idea B, hi-fi direction: build notes
 
-**Run:** `node server.js` in this folder (or `python3 -m http.server 8765` if you do not need real replies or Gurobi), open `http://localhost:8765` (Safari or Chrome).
+**Run:** `node server.js` in this folder (or `python3 -m http.server 8765` if you do not need real replies), open `http://localhost:8765` (Safari or Chrome).
 Add `?fast` to skip the typing delay, `?policy=baseline` to run the baseline help policy.
-**Rebuild:** edit the parts in `src/`, then run `./build.sh` (`./build.sh --no-map` builds `index.nomap.html` without the knowledge map, which is what goes to the group repository). `index.html` is the single self-contained file. 
+**Rebuild:** edit the parts in `src/`, then run `./build.sh` (`./build.sh --no-map` builds `index.nomap.html` without the knowledge map, which is what goes to the group repository). `index.html` is the single self-contained file. `src/original-lofi.html` is the untouched lo-fi prototype.
 
 ## What changed
 - **Help policy object** (`HELP_POLICIES` in `src/js1.js`): `[band][difficulty] = { levels, startLevel, attemptsBeforeSolution, offerNextAfter }`. Hand-made `adaptive` default and a `baseline` policy. All ladder logic reads it through `policyCell()`. A Milestone 3 policy can be added as data (`__proto.registerPolicy`, then `__proto.setPolicy`).
@@ -32,7 +32,7 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 ## Account, sidebar, graph, uploads, real replies and Exercise mode (src/js7.js, js8.js, js9.js, server.js, solver/)
 - **Sign-in:** email only, no password. Saved state is kept per email in this browser (localStorage) and saved every 1.5 s. "Open the demo workspace" (demo@local.test) opens Calculus I with both lectures and a rating on every topic. Sign out is in the profile screen. Ported in spirit from Nicolas's `app-building` (login, profile, contexts); the code is new and sits in this prototype's own state.
 - **Real replies:** a switch in the chat header. Off (default) = scripted answers with slide sources and confidence. On = `server.js` writes the question and the notes of the added files to `agent/log.md`, and a terminal agent (see `agent/PROMPT.md`) writes the reply under the same id. The page polls `/log`. Real replies are not matched to slides. If the Node server is not running the switch turns itself off with a message. `agent/log.md` is in `.gitignore`.
-- **Exercise mode:** header button, separate from the chat. Setup (time, topics, source, challenge level), plan (which exercises, in what order, with a reason each), session (one exercise at a time, one hint, solution on request, skip) and summary. The plan is made again after every result. Contract: `EXERCISE_MODE_CONTRACT.md`. The planner in the page is a beam search of the objective in `EXERCISE_PATH.md` (the notebook uses Gurobi).
+- **Exercise mode:** header button, separate from the chat. Setup (time, topics, source), plan (which exercises, in what order, with a reason each), session (one exercise at a time, one hint, solution on request, skip) and summary. The plan is made again after every result. Contract: `EXERCISE_MODE_CONTRACT.md`. The planner in the page is a beam search of the objective in `EXERCISE_PATH.md` (the notebook uses Gurobi).
 - **Prototype content:** the 21 exercises, their difficulty and minutes, the "Exercise sheet 3" source and the rating rule are made up for the demo.
 - **AI use (for the report):** Claude (Sonnet 5.5, Claude Code) wrote the sign-in, saved state, real-reply toggle, server and Exercise mode code and checked the flows in a browser. Nothing here comes from real users.
 
