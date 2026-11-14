@@ -31,9 +31,11 @@
 </div>
 
 <div id="app">
+  <aside class="panel sidebar" id="left" aria-label="Sidebar"></aside>
+  <div class="mainc">
   <header class="top">
     <button class="btn icon" id="b-side" data-side="all" aria-label="Show sidebar" title="Show sidebar (Ctrl or Cmd + B)" hidden></button>
-    <select class="sel" id="ctx" aria-label="Course context"></select>
+    <select class="sel" id="ctx" aria-label="Course"></select>
     <button class="btn small icon" id="b-addctx" aria-label="Add context" title="Add context"></button>
     <span class="spacer"></span>
     <button class="btn icon" id="b-slides" data-vtoggle="1" aria-pressed="true" aria-label="Slides"></button>
@@ -43,7 +45,6 @@
   </header>
 
   <main class="ws" id="ws">
-    <aside class="panel sidebar" id="left" aria-label="Sidebar"></aside>
     <div class="editor" id="editor">
       <section class="exview" id="exview" aria-label="Exercise mode" hidden></section>
       <section class="panel" id="chat" aria-label="Chat">
@@ -67,6 +68,7 @@
     </div>
   </main>
   <div class="foot">Prototype · scripted answers</div>
+  </div>
 </div>
 
 <input type="file" id="file-input" accept=".pdf,application/pdf" multiple hidden>

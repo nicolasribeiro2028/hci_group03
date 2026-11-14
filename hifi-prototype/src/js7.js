@@ -92,7 +92,7 @@
   document.addEventListener('change', function (e) {
     if (e.target.id !== 'real-toggle') return;
     var on = e.target.checked;
-    if (!on) { REAL = false; lsSet(RK, '0'); syncReal(); toast('Scripted answers are back.'); return; }
+    if (!on) { REAL = false; realWait = null; lsSet(RK, '0'); syncReal(); toast('Scripted answers are back.'); return; }
     fetch('/log', { cache: 'no-store' }).then(function (r) { if (!r.ok) throw 0; return r.json(); }).then(function (d) {
       if (typeof d.text !== 'string') throw 0;
       REAL = true; lsSet(RK, '1'); syncReal(); toast('Real replies are on. A reply agent must be running.');

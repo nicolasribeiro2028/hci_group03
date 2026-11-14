@@ -225,7 +225,7 @@
   }
   function exInput() { var s = S.ex, tp = Object.keys(s.topics).filter(function (k) { return s.topics[k]; }); return { remaining: s.time - s.used, topics: tp, source: s.source, rat: s.rat0 || C.ratings, hist: s.hist.map(function (h) { return { id: h.id, r: h.r }; }) }; }
   function exOpen() {
-    if (!S.ex || S.ex.ctx !== S.ctx) S.ex = exNew();
+    if (!S.ex || S.ex.ctx !== S.ctx || (S.ex.phase === 'setup' && !Object.keys(S.ex.topics).length)) S.ex = exNew();
     if (S.focus) setFocus(false);
     S.gOn = false; renderViewer();
     S.exOn = true; exRender(); var b = $('#exview .exh h2'); if (b) b.focus();
@@ -294,11 +294,26 @@
     return '<div class="seg" role="group">' + items.map(function (it) { return '<button type="button" class="' + (String(it[0]) === String(on) ? 'on' : '') + '" data-ex="' + attr + '" data-v="' + it[0] + '" aria-pressed="' + (String(it[0]) === String(on)) + '">' + esc(it[1]) + '</button>'; }).join('') + '</div>';
   }
   function exHead(sub) {
-    return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2>' + (sub ? '<p class="soft small">' + esc(sub) + '</p>' : '') + '</div><span class="spacer"></span><button class="btn small" data-ex="exit">Back to chat</button></div>';
+    var ph = S.ex && S.ex.phase, cancel = ph === 'plan' || ph === 'run';
+    return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2>' + (sub ? '<p class="soft small">' + esc(sub) + '</p>' : '') + '</div><span class="spacer"></span>' + (cancel ? '<button class="btn small" data-ex="cancel">Cancel</button>' : '') + '<button class="btn small" data-ex="exit">Back to chat</button></div>';
+  }
+  /* A short look at what the stop is about, without giving the answer away. */
+  function teaser(e) {
+    var m = /f\(x\) = (.+?)(?: at x = | have |\?|\.$)/.exec(e.q);
+    return m ? m[1] : e.q.replace(/\?$/, '').slice(0, 34) + '…';
+  }
+  function exResetToSetup() { var s = S.ex; S.ex = exNew(); S.ex.time = s.time; S.ex.source = s.source; S.ex.topics = s.topics; exRender(); }
+  function exWaitTopics(n) { /* sample lectures are read for about a second; show the setup again once their topics are there */
+    if (C.topics.length || n > 20) { S.ex = exNew(); exRender(); return; }
+    setTimeout(function () { exWaitTopics((n || 0) + 1); }, 400);
   }
   function exSetup() {
     var s = S.ex, av = exTopicsAvail(), ctxName = (S.ctxs.filter(function (c) { return c.key === S.ctx; })[0] || {}).name;
-    if (!av.length) return exHead(ctxName) + '<div class="exbody"><div class="excard narrow"><h3>No exercises for this course yet</h3><p class="soft">The exercises in this prototype cover Calculus I. Add the Calculus I lectures in Material, then come back.</p><div class="row" style="margin-top:14px"><button class="btn dark" data-ex="material">Open material</button></div></div></div>';
+    if (!av.length) {
+      var reading = C.loading > 0 || C.files.some(function (f) { return f.status === 'uploading'; });
+      return exHead(ctxName) + '<div class="exbody"><div class="excard narrow center"><div class="extrophy" aria-hidden="true">xⁿ</div><h3 class="exbig">' + (reading ? 'Reading your lectures…' : 'Let\u2019s get your material in') + '</h3><p class="soft">' + (S.ctx === 'calc' ? 'The exercises in this prototype are about derivatives. Add the sample lectures to try Exercise mode right away, or add your own PDF.' : 'The exercises in this prototype are about derivatives, in the Calculus I course.') + '</p><div class="row" style="gap:8px;margin-top:16px;justify-content:center;flex-wrap:wrap">' +
+        (reading ? '' : S.ctx === 'calc' ? '<button class="btn dark exbigbtn" data-ex="samples">Add sample lectures</button><button class="btn" style="height:44px" data-ex="material">Add my own PDF</button>' : '<button class="btn dark exbigbtn" data-ex="calc">Switch to Calculus I</button>') + '</div></div></div>';
+    }
     var pills = av.map(function (t) {
       var r = C.ratings[t.id];
       return '<button type="button" class="expill' + (s.topics[t.id] ? ' on' : '') + '" data-ex="topic" data-v="' + t.id + '" aria-pressed="' + !!s.topics[t.id] + '"><span class="pgl">' + GLYPH[t.id] + '</span>' + esc(TNAME[t.id]) + '<span class="expr">' + (r == null ? '–' : fmt(r)) + '</span></button>';
@@ -314,7 +329,7 @@
   /* The path: a winding road of stops. Each stop is one exercise, drawn as its topic symbol. The student sees the topic and
      the minutes, nothing else. Order is the order of the road, from top to bottom. */
   function roadHtml(items, budget) {
-    var n = items.length, DX = [0, -64, 0, 64], W = 360, cx = W / 2, GAP = 104, H = (n + 1) * GAP + 30;
+    var n = items.length, DX = [0, -56, 0, 56], W = 560, cx = W / 2, GAP = 108, H = (n + 1) * GAP + 30;
     var pts = items.map(function (it, i) { return { x: cx + DX[i % 4], y: 52 + i * GAP }; }); pts.push({ x: cx, y: 52 + n * GAP });
     var d = 'M' + pts[0].x + ' ' + pts[0].y;
     for (var i = 1; i < pts.length; i++) d += ' C' + pts[i - 1].x + ' ' + (pts[i - 1].y + 52) + ' ' + pts[i].x + ' ' + (pts[i].y - 52) + ' ' + pts[i].x + ' ' + pts[i].y;
@@ -323,7 +338,7 @@
     items.forEach(function (it, k) {
       var e = xById(it.id), p = pts[k], right = p.x <= cx;
       h += '<span class="stop' + (k === 0 ? ' next' : '') + '" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-hidden="true">' + GLYPH[e.topic] + '</span>' +
-        '<span class="stoplab ' + (right ? 'r' : 'l') + '" style="left:' + (right ? p.x + 46 : p.x - 46 - 150) + 'px;top:' + (p.y - 20) + 'px" aria-hidden="true"><b>' + TNAME[e.topic] + '</b>' + e.min + ' min</span>';
+        '<span class="stoplab ' + (right ? 'r' : 'l') + '" style="left:' + (right ? p.x + 46 : p.x - 46 - 170) + 'px;top:' + (p.y - 26) + 'px" aria-hidden="true"><b>' + TNAME[e.topic] + '</b><span class="tz">' + esc(teaser(e)) + '</span>' + e.min + ' min</span>';
     });
     var f = pts[n], more = budget - tot >= 5;   /* time is left: the path is not over, more stops appear as the student progresses */
     h += '<span class="stop finish' + (more ? ' more' : '') + '" style="left:' + f.x + 'px;top:' + f.y + 'px" aria-hidden="true">' + (more ? '…' : '⚑') + '</span><span class="stoplab r" style="left:' + (f.x + 46) + 'px;top:' + (f.y - 20) + 'px" aria-hidden="true"><b>' + (more ? 'More ahead' : 'Finish') + '</b>' + (more ? 'new stops appear as you go' : 'about ' + tot + ' min') + '</span></div>';
@@ -383,6 +398,7 @@
     if (had) { var i = $('#ex-in'); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (x) { } } }
   }
   document.addEventListener('click', function (e) {
+    if (e.target.closest && e.target.closest('#ex-cancel-ok')) { closeModal(); exResetToSetup(); return; }
     var o = e.target.closest && e.target.closest('[data-ex]'); if (!o || !S.ex && o.dataset.ex !== 'open') return;
     var a = o.getAttribute('data-ex'), v = o.getAttribute('data-v'), s = S.ex;
     if (a === 'exit') exExit();
@@ -398,6 +414,12 @@
     else if (a === 'skip') exFinish('skip');
     else if (a === 'next') exNext();
     else if (a === 'again') { var keep = { time: s.time, source: s.source, topics: s.topics }; S.ex = exNew(); S.ex.time = keep.time; S.ex.source = keep.source; S.ex.topics = keep.topics; exRender(); }
+    else if (a === 'cancel') {
+      if (s.phase === 'run' && s.hist.length) modal('<div class="mhead"><div><h2 id="mtitle">Cancel this session?</h2><p class="lead">Your path is dropped and you go back to the start. Ratings you already earned stay.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div><div class="mfoot"><button class="btn ghost" id="p-cancel">Keep going</button><button class="btn dark" id="ex-cancel-ok">Cancel session</button></div>');
+      else exResetToSetup();
+    }
+    else if (a === 'samples') { defsFor('calc').forEach(function (d) { addFile(d); }); S.ex = exNew(); exRender(); setTimeout(function () { exWaitTopics(0); }, 300); }
+    else if (a === 'calc') { S.ctx = 'calc'; C = S.courses.calc; S.ex = exNew(); renderAll(); exRender(); }
     else if (a === 'material') { S.exOn = false; S.side = 'all'; exRender(); renderLeft(); }
     else if (a === 'key') {
       var inp = $('#ex-in'); if (!inp) return;

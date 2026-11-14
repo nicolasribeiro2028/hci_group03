@@ -86,7 +86,6 @@
     if (e.target.closest && e.target.closest('#b-exit')) { setFocus(false); return; }
     if (e.target.closest && e.target.closest('#b-practice')) {
       if (S.exOn) { exExit(); return; }
-      if (!hasMaterial()) { toast('Add your course material first, then open exercise mode.'); S.side = 'all'; renderLeft(); openPicker(); return; }
       exOpen();
     }
   });

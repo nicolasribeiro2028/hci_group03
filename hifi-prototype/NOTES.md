@@ -49,3 +49,9 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 - **Path end:** when the plan does not use all the time, the road ends in "More ahead" instead of a flag. The first plan only sees what suits the current level. After each result the plan is made again, so new stops appear as the student progresses.
 - **Bank:** 96 exercises, 18 to 20 per topic (80 to 117 minutes per topic). Most are generated from parameter lists in `js8.js`, so every answer is computed and was checked numerically. Tags that measure similarity keep what tells exercises apart.
 - **Page scroll:** the app is fixed to the window. The exercise view stays inside the editor area.
+
+## Update: layout, new accounts, cleaner help
+- **Layout:** the sidebar now runs the full height of the window (the toggle sits at its top-left). The header sits over the main area: the course menu is the page title (Calculus I, Linear Algebra, HCI), then the buttons on the right. When the sidebar is hidden its toggle moves into the header.
+- **New accounts** open Calculus I (HCI is only a choice in the course menu, and only on a machine that has the course PDF). Empty Material shows "Use sample lectures". Exercise mode opens even without material and offers "Add sample lectures" itself.
+- **Exercise mode:** "Cancel" in the header while a path is planned or running (asks first if exercises were already done; earned ratings stay). Each stop on the road shows a glimpse of the exercise (the expression, not the answer).
+- **Chat help:** an answer shows only a small coloured tag with its own level (Hint, Concept, Example, Solution). The four-step ladder is gone.

@@ -194,3 +194,26 @@
 .exdevbox { margin: 18px 0 0; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 8px; font-size: 12px; color: var(--soft); }
 .exdevbox ol { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; }
 @media (prefers-reduced-motion: reduce) { .expill { transition: none; } }
+
+/* ---- layout: full-height sidebar on the left, header over the main area (course menu in the header) ---- */
+#app { flex-direction: row; }
+.mainc { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
+#left.sidebar { width: 280px; margin: 0; flex: none; border: 0; border-right: 1px solid var(--line2); border-radius: 0; box-shadow: none; background: #fbfbfc; }
+.sb-off #left.sidebar { width: 0; border-right-width: 0; }
+.top { padding: 10px 20px; min-height: 58px; gap: 8px; border-bottom: 1px solid var(--line2); background: #fff; }
+.ws { padding: 14px 20px 14px 20px; }
+.foot { margin-top: 0; padding-bottom: 6px; }
+/* the course menu reads as the title of the page */
+#ctx { appearance: none; -webkit-appearance: none; border: 1px solid transparent; background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a6068' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 8px center; font-size: 16px; font-weight: 600; min-width: 0; height: 38px; padding: 0 28px 0 10px; border-radius: 8px; cursor: pointer; color: var(--ink); }
+#ctx:hover { background-color: var(--fill); }
+/* chat help level: one small coloured tag for the level of this answer */
+.lvchip { display: inline-flex; align-items: center; gap: 6px; margin: 0 0 6px; padding: 2px 10px 2px 8px; border-radius: 99px; font-size: 12px; font-weight: 600; background: var(--blue-bg); color: var(--blue); }
+.lvchip i { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.lvchip.lv2 { background: var(--green-bg); color: var(--green); }
+.lvchip.lv3 { background: var(--amber-bg); color: var(--amber); }
+.lvchip.lv4 { background: var(--sel); color: var(--ink); }
+/* path labels: topic, a glimpse of the exercise, minutes */
+.stoplab { width: 170px; }
+.stoplab .tz { display: block; color: var(--ink); opacity: .72; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 12.5px; }
+.exroad { width: 560px; }
+.exroadwrap { max-width: 600px; overflow-x: auto; }

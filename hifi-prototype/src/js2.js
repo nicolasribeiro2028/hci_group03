@@ -11,8 +11,8 @@
   var HAS_PDF = (function () { try { var x = new XMLHttpRequest(); x.open('HEAD', 'material/computational-design.pdf', false); x.send(); return x.status === 200; } catch (e) { return false; } })();
   function fresh() {
     var ctxs = [{ key: 'calc', name: 'Calculus I' }, { key: 'linalg', name: 'Linear Algebra' }], courses = { calc: newCourse(), linalg: newCourse() };
-    if (HAS_PDF) { ctxs.unshift({ key: 'hci', name: 'HCI (real PDF test)' }); courses.hci = newCourse(); }
-    S = { side: 'all', sbc: {}, vw: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: HAS_PDF ? 'hci' : 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
+    if (HAS_PDF) { ctxs.push({ key: 'hci', name: 'HCI (real PDF test)' }); courses.hci = newCourse(); }
+    S = { side: 'all', sbc: {}, vw: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
     C = S.courses[S.ctx];
     if (HAS_PDF) {
       var h = S.courses.hci, d = FILE_DEFS.hci[0];
@@ -125,14 +125,14 @@
   function materialHtml() {
     var added = C.files.some(function (f) { return f.status === 'added'; }), defs = defsFor(S.ctx), more = defs.some(function (d) { return !C.files.some(function (f) { return f.defId === d.id; }); });
     var h = filesHtml();
-    if (!C.files.length) h += '<div class="sbempty"><strong>Start here</strong><span>Add a PDF of your slides. The topics, the graph and Exercise mode build on it.</span><button class="btn dark small" data-addfiles="1">Choose PDF files</button></div>';
+    if (!C.files.length) h += '<div class="sbempty"><strong>Start here</strong><span>Add a PDF of your slides. The topics, the graph and Exercise mode build on it.</span><span class="row" style="gap:6px;flex-wrap:wrap"><button class="btn dark small" data-addfiles="1">Choose PDF files</button>' + (more ? '<button class="btn small" data-act="samples">Use sample lectures</button>' : '') + '</span></div>';
     if (C.files.length) h += DROP_HTML;
-    if (more) h += '<button class="link sbsample" type="button" data-act="samples">' + (added ? 'Add more sample files' : 'Or add sample files') + '</button>';
+    if (more) h += '<button class="link sbsample" type="button" data-act="samples">' + (added ? 'Add more sample lectures' : 'Or add sample lectures') + '</button>';
     return h;
   }
   function renderLeft() {
     renderActbar();
-    var ws = $('#ws'); if (ws) ws.classList.toggle('sb-off', !S.side);
+    var ws = $('#app'); if (ws) ws.classList.toggle('sb-off', !S.side);
     var pad0 = $('#left .p-pad'), scroll = pad0 ? pad0.scrollTop : 0, h = '';
     if (S.side) {
       h = '<div class="p-pad"><div class="sbtop"><button type="button" class="btn icon sbtog" data-side="all" aria-label="Hide sidebar" title="Hide sidebar (Ctrl or Cmd + B)">' + ICONS.side + '</button></div>' +
@@ -207,14 +207,6 @@
     if (mt === 'none' && !pr) h += '<div class="banner">' + UI.warn + '<span>Not in your slides</span><button class="btn small" data-act="lecture">Check lecture</button></div>';
     return h;
   }
-  function ladderHtml(m) {
-    var hp = m.help;
-    var steps = [1, 2, 3, 4].map(function (n) {
-      var st = hp.levels.indexOf(n) < 0 ? 'off' : n < hp.lv ? 'done' : n === hp.lv ? 'cur' : 'todo';
-      return '<li class="st ' + st + '"' + (st === 'cur' ? ' aria-current="step"' : '') + (st === 'off' ? ' title="Skipped at your level"' : '') + '><span class="dot">' + (st === 'done' ? '✓' : n) + '</span><span>' + LV[n - 1] + '</span></li>';
-    }).join('');
-    return '<div class="ladcard"><ol class="lad" aria-label="Help steps">' + steps + '</ol></div>';
-  }
   function renderMsgs(opt) {
     var ch = chat(), el = $('#msgs'), keep = opt && opt.keep, top = el.scrollTop;
     var pending = Q.some(function (q) { return q.ch === ch; });
@@ -224,9 +216,9 @@
       var o = '<div class="msg ai' + enter + '"><span class="av" aria-hidden="true">AI</span><div class="bubble">';
       var kick = m.kick && m.kick !== 'AI note' ? m.kick : '';
       if (kick) o += '<div class="kick">' + esc(kick) + '</div>';
-      if (m.title) o += '<div class="btitle">' + esc(m.title) + '</div>';
+      if (m.title && !m.help) o += '<div class="btitle">' + esc(m.title) + '</div>';
       if (m.sub) o += '<div class="bsub">' + esc(m.sub) + '</div>';
-      if (m.help) o += ladderHtml(m);
+      if (m.help) o += '<div class="lvchip lv' + m.help.lv + '"><i aria-hidden="true"></i>' + LV[m.help.lv - 1] + '</div>';   /* only the level of THIS answer; earlier levels are not repeated */
       if (m.strong) o += '<div class="btext strong">' + esc(m.strong) + '</div>';
       if (m.text) o += '<div class="btext">' + esc(m.text) + '</div>';
       if (m.sents) o += '<div class="btext sents">' + m.sents.map(sentHtml).join('') + '</div>';
