@@ -227,3 +227,15 @@
 .exhelp { margin: 8px 0 0; font-size: 13px; color: var(--soft); }
 .exhelp.ok { color: var(--ink); }
 .exbigbtn:disabled { opacity: .45; cursor: not-allowed; }
+
+/* header: Graph and Exercise mode are two views of the same kind, so they share one control; filled only while open */
+.hgrp { display: inline-flex; }
+.hgrp .btn { border-radius: 0; margin-left: -1px; }
+.hgrp .btn:first-child { border-radius: 8px 0 0 8px; margin-left: 0; }
+.hgrp .btn:last-child { border-radius: 0 8px 8px 0; }
+.hgrp .btn:hover { z-index: 1; position: relative; }
+/* one plain line about the source of an answer */
+.srcline { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; color: var(--soft); }
+.srcline svg { flex: none; color: var(--green); }
+.srcline.src-none svg { color: var(--amber); }
+.srcline.src-none { color: var(--amber); }

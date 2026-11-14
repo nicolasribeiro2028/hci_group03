@@ -1,6 +1,7 @@
 # Idea B, hi-fi direction: build notes
 
-**Run:** `node server.js` in this folder (or `python3 -m http.server 8765` if you do not need real replies), open `http://localhost:8765` (Safari or Chrome).
+**Run:** `./run.sh` in this folder (first run sets up the Gurobi solver; needs Node.js and python3), then open `http://localhost:8765`. Without the script: `python3 -m http.server 8765` is enough for everything except real replies and Gurobi.
+Add `?fast` to skip the typing delay, `?dev` to show the team-only details.
 Add `?fast` to skip the typing delay, `?policy=baseline` to run the baseline help policy.
 **Rebuild:** edit the parts in `src/`, then run `./build.sh` (`./build.sh --no-map` builds `index.nomap.html` without the knowledge map, which is what goes to the group repository). `index.html` is the single self-contained file. `src/original-lofi.html` is the untouched lo-fi prototype.
 
@@ -64,3 +65,9 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 ## Update: topics start empty, road test version
 - Exercise setup starts with no topic chosen ("Choose your topics", a hint under the pills, and "Build my path" stays off until one is chosen).
 - **Road, second version (a test):** stops of the same topic sit under one topic marker (symbol and name once), each stop shows its number, the expression and minutes, and the road wanders instead of zigzagging. To go back to the first version change `ROAD_STYLE` from `'groups'` to `'grid'` in `src/js8.js` and run `./build.sh`.
+
+## Update: simpler chat answers, grouped header, one run command
+- Chat answers carry one plain line about the source ("From your slides, p. 12", "Partly from your slides", "Not in your slides"). Clicking a sentence still shows the exact passage in the slides ("source of your answer"). The match meter, the count, the "why" dialog and the warning banner are off the screen.
+- Header: Graph and Exercise mode are one grouped control, filled only while a view is open. No filled button at rest.
+- Material has one "Add files" control (the dashed drop area).
+- `./run.sh` starts everything. "Real replies" stays as a testing switch only: it exists to help the team decide what is scripted and what should be real AI, and it is removed in the final version.

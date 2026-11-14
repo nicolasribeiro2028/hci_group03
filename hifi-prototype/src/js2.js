@@ -137,7 +137,7 @@
     if (S.side) {
       h = '<div class="p-pad"><div class="sbtop"><button type="button" class="btn icon sbtog" data-side="all" aria-label="Hide sidebar" title="Hide sidebar (Ctrl or Cmd + B)">' + ICONS.side + '</button></div>' +
         sbSection('chats', 'Chats', '<button class="btn small icon" data-newchat="1" title="New chat" aria-label="New chat">' + UI.plus + '</button>', chatsHtml()) +
-        sbSection('material', 'Material', '<button class="btn small" data-addfiles="1">Add files</button>', materialHtml()) +
+        sbSection('material', 'Material', '', materialHtml()) +
         sbSection('assess', 'Self-assessment', C.topics.length ? '<button class="btn small icon" data-act="assess" title="Rate my knowledge" aria-label="Rate my knowledge">' + UI.sliders + '</button>' : '', topicsHtml()) + '</div>';
     }
     $('#left').innerHTML = h;
@@ -197,15 +197,14 @@
     }
     return '<span class="sent k-g" title="Not in your slides">' + lab + esc(x.t) + '<span class="cite" aria-hidden="true">!</span></span> ';
   }
+  /* One plain line says whether the answer comes from the student's slides, and on which pages. The sentences themselves are still clickable
+     and show the exact passage in the slides. The match strength, the count and the "why" dialog were taken off the screen (see UI_REVIEW.md, C1 and F1). */
   function evidenceHtml(m, i, pr) {
-    var all = m.sents.concat(m.moreOpen && m.more ? m.more : []), mt = matchOf(all), c = counts(all);
-    var slides = []; all.forEach(function (x) { if (x.k !== 'g' && x.slide && hasSlideFile(x.slide) && slides.indexOf(x.slide) < 0) slides.push(x.slide); });
-    var grounded = c.s + c.d, n = all.length;
-    var h = '<div class="evsum"><span class="match m-' + mt + '" tabindex="0" aria-describedby="tip-' + i + '"><span class="m3" aria-hidden="true"><i></i><i></i><i></i></span><b>' + MATCH_NAME[mt] + '</b><span class="cnt" title="' + esc(countLine(all)) + '">' + c.s + '/' + n + '</span><span class="tip" role="tooltip" id="tip-' + i + '">' + esc(matchReason(all)) + '</span></span>';
-    if (!pr) h += '<button class="iconlink" data-why="' + i + '" title="Why this match" aria-label="Why this match">' + UI.info + '</button>';
-    h += '</div>';
-    if (mt === 'none' && !pr) h += '<div class="banner">' + UI.warn + '<span>Not in your slides</span><button class="btn small" data-act="lecture">Check lecture</button></div>';
-    return h;
+    var all = m.sents.concat(m.moreOpen && m.more ? m.more : []), mt = matchOf(all), slides = [];
+    all.forEach(function (x) { if (x.k !== 'g' && x.slide && hasSlideFile(x.slide) && slides.indexOf(x.slide) < 0) slides.push(x.slide); });
+    var pages = slides.map(function (x) { return String(x).replace('P', ''); }).join(', ');
+    var label = mt === 'none' ? 'Not in your slides' : (mt === 'partial' ? 'Partly from your slides' : 'From your slides') + (pages ? ', p. ' + pages : '');
+    return '<div class="srcline src-' + mt + '">' + (mt === 'none' ? UI.warn : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>') + '<span>' + esc(label) + '</span></div>';
   }
   function renderMsgs(opt) {
     var ch = chat(), el = $('#msgs'), keep = opt && opt.keep, top = el.scrollTop;

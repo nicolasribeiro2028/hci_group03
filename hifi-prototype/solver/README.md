@@ -4,6 +4,10 @@
 
 ## Set up
 
+Easiest: run `./run.sh` in the folder above. It does the three steps below for you the first time.
+
+By hand:
+
 ```
 python3 -m venv solver/.venv
 solver/.venv/bin/pip install -r solver/requirements.txt
