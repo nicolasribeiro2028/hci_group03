@@ -1,0 +1,7 @@
+# local state, do not commit
+agent/log.md
+*.local.json
+.DS_Store
+solver/.venv/
+__pycache__/
+gurobi.lic

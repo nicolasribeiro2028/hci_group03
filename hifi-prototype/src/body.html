@@ -1,0 +1,79 @@
+</style>
+
+<div id="login" hidden>
+  <div class="ibox">
+    <div class="ititle">Sign in</div>
+    <p class="isub">Enter your email to open your saved workspace. There is no password. A new email starts with a short profile.</p>
+    <label class="flab" for="login-email">Email</label>
+    <input class="inp" id="login-email" type="email" autocomplete="username" placeholder="you@example.com" style="height:42px;width:100%">
+    <p class="exwarn" id="login-note" role="alert" style="margin:8px 0 0"></p>
+    <div class="row" style="gap:10px;margin-top:20px"><button class="btn dark" id="login-go" style="height:42px;padding:0 28px;font-size:15px">Continue</button><button class="btn" id="login-demo" style="height:42px">Open the demo workspace</button></div>
+    <p class="fine" style="margin-top:14px">Your work is saved in this browser only.</p>
+  </div>
+</div>
+
+<div id="intro">
+  <div class="ibox">
+    <div class="ititle" id="ititle">Hey, ready to study?</div>
+    <p class="isub" id="isub">Practice with help that comes only from your own course slides.</p>
+    <ul class="how" id="how">
+      <li><b>1</b><span>Add your slides. The AI answers from them and shows where each sentence comes from.</span></li>
+      <li><b>2</b><span>Try a problem yourself first. Help comes in small steps, only as much as you need.</span></li>
+      <li><b>3</b><span>Watch your topics improve as you need fewer hints.</span></li>
+    </ul>
+    <label class="flab" for="prof-desc">About you</label>
+    <textarea class="area" id="prof-desc" rows="3" maxlength="300" placeholder="e.g. First-year CS student. I like examples and I get stuck on word problems."></textarea>
+    <div class="flab" style="margin-top:20px">Math courses you finished in earlier semesters</div>
+    <div class="pcs" id="pcs" role="group" aria-label="Math courses you finished in earlier semesters"></div>
+    <div class="row" style="gap:8px;margin-top:12px"><input class="inp" id="pc-new" placeholder="Add another course" maxlength="40" aria-label="Add another course" style="height:36px"><button class="btn" id="pc-add" style="height:36px" disabled>Add</button></div>
+    <div class="row" style="gap:10px;margin-top:28px"><button class="btn dark" id="b-start" style="height:42px;padding:0 28px;font-size:15px">Continue</button><button class="btn ghost" id="b-pcancel" style="height:42px" hidden>Cancel</button><span class="spacer"></span><span class="soft small" id="whoami"></span><button class="btn ghost small" id="b-signout">Sign out</button></div>
+  </div>
+</div>
+
+<div id="app">
+  <aside class="panel sidebar" id="left" aria-label="Sidebar"></aside>
+  <div class="mainc">
+  <header class="top">
+    <button class="btn icon" id="b-side" data-side="all" aria-label="Show sidebar" title="Show sidebar (Ctrl or Cmd + B)" hidden></button>
+    <select class="sel" id="ctx" aria-label="Course"></select>
+    <button class="btn small icon" id="b-addctx" aria-label="Add context" title="Add context"></button>
+    <span class="spacer"></span>
+    <button class="btn icon" id="b-slides" data-vtoggle="1" aria-pressed="true" aria-label="Slides"></button>
+    <button class="btn" id="b-graph" aria-pressed="false">Graph</button>
+    <button class="btn dark" id="b-practice">Exercise mode</button>
+    <button class="btn icon" id="b-profile" aria-label="Profile" title="Profile"></button>
+  </header>
+
+  <main class="ws" id="ws">
+    <div class="editor" id="editor">
+      <section class="exview" id="exview" aria-label="Exercise mode" hidden></section>
+      <section class="panel" id="chat" aria-label="Chat">
+        <div class="chead">
+          <span class="h" id="ctitle">Chat</span>
+          <span class="spacer"></span>
+          <label class="rtog" title="Off: scripted answers. On: a terminal reply agent answers general questions from your notes."><input type="checkbox" id="real-toggle" role="switch" aria-checked="false"><span class="trk"></span><span class="rl">Real replies</span></label>
+          <button class="btn small" id="b-exit" hidden title="Back to the full workspace">Exit</button>
+        </div>
+        <div class="msgs" id="msgs"></div>
+        <div class="compose">
+          <div class="mkeys" id="mkeys" hidden role="group" aria-label="Math keys"></div>
+          <div class="box">
+            <textarea id="inp" placeholder="Ask a question…" aria-label="Message"></textarea>
+            <div class="r"><span class="hintline" id="hintline"></span><button class="btn dark small icon" id="send" aria-label="Send" title="Send"></button></div>
+          </div>
+        </div>
+      </section>
+      <div class="split" id="split" role="separator" tabindex="0" aria-label="Resize slides panel. Use arrow keys, or double-click to reset." hidden></div>
+      <section class="panel" id="viewer" aria-label="Slides"></section>
+    </div>
+  </main>
+  <div class="foot">Prototype · scripted answers</div>
+  </div>
+</div>
+
+<input type="file" id="file-input" accept=".pdf,application/pdf" multiple hidden>
+<div id="modal-root"></div>
+<div id="toasts"></div>
+<div id="sr" class="sr" aria-live="polite"></div>
+
+<script>

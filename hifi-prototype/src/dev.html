@@ -1,0 +1,13 @@
+<script>
+/* Dev only: reloads this page when the file changes. Runs only on localhost, so it is inert elsewhere. */
+(function () {
+  if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) return;
+  var last = null;
+  setInterval(function () {
+    fetch(location.pathname, { method: 'HEAD', cache: 'no-store' }).then(function (r) {
+      var m = r.headers.get('last-modified') || r.headers.get('etag');
+      if (last === null) last = m; else if (m && m !== last) location.reload();
+    }).catch(function () {});
+  }, 1000);
+})();
+</script>
