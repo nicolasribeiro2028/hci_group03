@@ -36,7 +36,7 @@
     var b = $('#b-practice'); if (!b) return;
     var ex = S.ex && S.ex.phase === 'run' && S.ex.ctx === S.ctx;
     b.textContent = ex ? 'Continue exercises' : 'Exercise mode';
-    b.classList.toggle('pulse', !ex && hasMaterial() && !C.log.length && !S.focus && !S.exOn && !(S.ex && S.ex.hist.length));
+
   }
   function offerProblems() {
     var rec = (C.ratings.pq == null ? 0 : C.ratings.pq) < (C.ratings.chain == null ? 0 : C.ratings.chain) ? 'p2' : 'p1';

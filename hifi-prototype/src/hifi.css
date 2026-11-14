@@ -155,7 +155,6 @@ ul.sl li:first-child { border-top: 0; }
 
 /* ===== Workspace layout (VSCode-like) ===== */
 #b-practice { height: 36px; padding: 0 20px; }
-#b-practice.pulse { animation: ring 2s ease-out infinite; }
 @keyframes ring { 0% { box-shadow: 0 0 0 0 rgba(27, 29, 33, .35); } 70%, 100% { box-shadow: 0 0 0 12px rgba(27, 29, 33, 0); } }
 .ws { flex: 1; min-height: 0; display: flex; padding: 0 24px 24px 16px; }
 .actbar { width: 62px; flex: none; display: flex; flex-direction: column; gap: 6px; padding: 2px 0; align-items: center; }

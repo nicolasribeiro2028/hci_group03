@@ -68,7 +68,7 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 
 ## Update: simpler chat answers, grouped header, one run command
 - Chat answers carry one plain line about the source ("From your slides, p. 12", "Partly from your slides", "Not in your slides"). Clicking that line shows the passages in the slides ("source of your answer"). The match meter, the count, the "why" dialog and the warning banner are off the screen.
-- Header: Graph and Exercise mode are one grouped control, filled only while a view is open. No filled button at rest.
+- Header: Graph (outlined) and Exercise mode (the one filled button, static, no animation) are separate buttons. While Exercise mode is open it gets a soft ring.
 - Material has one "Add files" control (the dashed drop area).
 - `./run.sh` starts everything. "Real replies" stays as a testing switch only: it exists to help the team decide what is scripted and what should be real AI, and it is removed in the final version.
 
