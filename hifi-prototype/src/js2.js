@@ -12,7 +12,7 @@
   function fresh() {
     var ctxs = [{ key: 'calc', name: 'Calculus I' }, { key: 'linalg', name: 'Linear Algebra' }], courses = { calc: newCourse(), linalg: newCourse() };
     if (HAS_PDF) { ctxs.unshift({ key: 'hci', name: 'HCI (real PDF test)' }); courses.hci = newCourse(); }
-    S = { side: 'all', sbc: {}, dock: 'right', vw: null, vh: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: HAS_PDF ? 'hci' : 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
+    S = { side: 'all', sbc: {}, vw: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: HAS_PDF ? 'hci' : 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
     C = S.courses[S.ctx];
     if (HAS_PDF) {
       var h = S.courses.hci, d = FILE_DEFS.hci[0];
@@ -59,9 +59,7 @@
   var UI = {
     plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
     user: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg>',
-    slides: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M14.5 4.5v15"/></svg>',
-    dockR: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M13.5 4.5v15"/></svg>',
-    dockB: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 13.5h17"/></svg>',
+    slides: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></svg>',
     hide: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
     send: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
     sliders: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h9M18 7h1M5 17h1M10 17h9"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>',
@@ -169,7 +167,7 @@
     else body = '<div class="p-pad"><div class="soft small" style="margin-bottom:14px">Scanned pages. Short preview only.</div><div class="sk"><i style="width:90%"></i><i style="width:100%"></i><i style="width:78%"></i><i style="width:100%"></i><i style="width:86%"></i></div></div>';
     applyLayout();
     if (S.vmin) { $('#viewer').innerHTML = ''; return; }
-    $('#viewer').innerHTML = '<div class="vhead"><div class="tabs">' + tabs + '</div><div class="vtools"><button type="button" class="vbtn icon" data-dock="1" title="' + (S.dock === 'bottom' ? 'Dock right' : 'Dock bottom') + '" aria-label="' + (S.dock === 'bottom' ? 'Dock right' : 'Dock bottom') + '">' + (S.dock === 'bottom' ? UI.dockR : UI.dockB) + '</button><button type="button" class="vbtn icon" data-vtoggle="1" aria-label="Hide slides" title="Hide slides">' + UI.hide + '</button></div></div>' + body;
+    $('#viewer').innerHTML = '<div class="vhead"><div class="tabs">' + tabs + '</div><div class="vtools"><button type="button" class="vbtn icon" data-vtoggle="1" aria-label="Hide slides" title="Hide slides">' + UI.hide + '</button></div></div>' + body;
     markCited();
     if (f && f.kind === 'pdf' && f.status === 'added') pdfRender(f);
     var hl = $('#viewer p.hl');
@@ -524,7 +522,6 @@
     var t = e.target, o;
     if ((o = t.closest('[data-undo]'))) { var uid = o.getAttribute('data-undo'); if (undos[uid]) undos[uid](); dismissToast(uid); return; }
     if (t.closest('[data-vtoggle]')) { S.vmin = !S.vmin; renderViewer(); return; }
-    if ((o = t.closest('[data-dock]'))) { S.dock = S.dock === 'bottom' ? 'right' : 'bottom'; applyLayout(); renderViewer(); return; }
     if ((o = t.closest('[data-side]'))) { S.side = S.side ? null : 'all'; renderLeft(); return; }
     if ((o = t.closest('[data-sbt]'))) { var sk = o.getAttribute('data-sbt'); S.sbc = S.sbc || {}; S.sbc[sk] = !S.sbc[sk]; renderLeft(); return; }
     if (t.closest('[data-addfiles]')) { openPicker(); return; }

@@ -192,12 +192,6 @@ ul.sl li:first-child { border-top: 0; }
 .split:hover::after, .split.drag::after, .split:focus-visible::after { background: var(--blue); }
 .split:focus-visible { outline: 0; }
 body.dragging { cursor: col-resize; user-select: none; } body.dragging.dragging iframe { pointer-events: none; }
-.dock-bottom .editor { flex-direction: column; }
-.dock-bottom .editor > #chat { min-height: 220px; min-width: 0; }
-.dock-bottom .editor > #viewer { flex: 0 0 var(--vh); }
-.dock-bottom .split { width: auto; height: 12px; cursor: row-resize; }
-.dock-bottom .split::after { top: 5px; bottom: auto; left: 0; right: 0; width: auto; height: 2px; }
-.dock-bottom.ws body.dragging, body.dragging .dock-bottom .split { cursor: row-resize; }
 .vhead { align-items: center; }
 .vtools { display: flex; gap: 6px; padding: 0 10px; flex: none; }
 .vtools .vbtn { margin: 0; }

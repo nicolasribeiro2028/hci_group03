@@ -408,12 +408,6 @@ ul.sl li:first-child { border-top: 0; }
 .split:hover::after, .split.drag::after, .split:focus-visible::after { background: var(--blue); }
 .split:focus-visible { outline: 0; }
 body.dragging { cursor: col-resize; user-select: none; } body.dragging.dragging iframe { pointer-events: none; }
-.dock-bottom .editor { flex-direction: column; }
-.dock-bottom .editor > #chat { min-height: 220px; min-width: 0; }
-.dock-bottom .editor > #viewer { flex: 0 0 var(--vh); }
-.dock-bottom .split { width: auto; height: 12px; cursor: row-resize; }
-.dock-bottom .split::after { top: 5px; bottom: auto; left: 0; right: 0; width: auto; height: 2px; }
-.dock-bottom.ws body.dragging, body.dragging .dock-bottom .split { cursor: row-resize; }
 .vhead { align-items: center; }
 .vtools { display: flex; gap: 6px; padding: 0 10px; flex: none; }
 .vtools .vbtn { margin: 0; }
@@ -926,7 +920,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   function fresh() {
     var ctxs = [{ key: 'calc', name: 'Calculus I' }, { key: 'linalg', name: 'Linear Algebra' }], courses = { calc: newCourse(), linalg: newCourse() };
     if (HAS_PDF) { ctxs.unshift({ key: 'hci', name: 'HCI (real PDF test)' }); courses.hci = newCourse(); }
-    S = { side: 'all', sbc: {}, dock: 'right', vw: null, vh: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: HAS_PDF ? 'hci' : 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
+    S = { side: 'all', sbc: {}, vw: null, vmin: false, started: false, profile: { desc: '', courses: [], custom: [] }, ctx: HAS_PDF ? 'hci' : 'calc', ctxs: ctxs, extraDefs: {}, courses: courses };
     C = S.courses[S.ctx];
     if (HAS_PDF) {
       var h = S.courses.hci, d = FILE_DEFS.hci[0];
@@ -973,9 +967,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   var UI = {
     plus: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
     user: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><circle cx="12" cy="8.5" r="3.6"/><path d="M5 20c.8-3.6 3.6-5.4 7-5.4s6.2 1.8 7 5.4"/></svg>',
-    slides: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M14.5 4.5v15"/></svg>',
-    dockR: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M13.5 4.5v15"/></svg>',
-    dockB: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 13.5h17"/></svg>',
+    slides: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4M8 20h8"/></svg>',
     hide: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>',
     send: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg>',
     sliders: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 7h9M18 7h1M5 17h1M10 17h9"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>',
@@ -1083,7 +1075,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     else body = '<div class="p-pad"><div class="soft small" style="margin-bottom:14px">Scanned pages. Short preview only.</div><div class="sk"><i style="width:90%"></i><i style="width:100%"></i><i style="width:78%"></i><i style="width:100%"></i><i style="width:86%"></i></div></div>';
     applyLayout();
     if (S.vmin) { $('#viewer').innerHTML = ''; return; }
-    $('#viewer').innerHTML = '<div class="vhead"><div class="tabs">' + tabs + '</div><div class="vtools"><button type="button" class="vbtn icon" data-dock="1" title="' + (S.dock === 'bottom' ? 'Dock right' : 'Dock bottom') + '" aria-label="' + (S.dock === 'bottom' ? 'Dock right' : 'Dock bottom') + '">' + (S.dock === 'bottom' ? UI.dockR : UI.dockB) + '</button><button type="button" class="vbtn icon" data-vtoggle="1" aria-label="Hide slides" title="Hide slides">' + UI.hide + '</button></div></div>' + body;
+    $('#viewer').innerHTML = '<div class="vhead"><div class="tabs">' + tabs + '</div><div class="vtools"><button type="button" class="vbtn icon" data-vtoggle="1" aria-label="Hide slides" title="Hide slides">' + UI.hide + '</button></div></div>' + body;
     markCited();
     if (f && f.kind === 'pdf' && f.status === 'added') pdfRender(f);
     var hl = $('#viewer p.hl');
@@ -1438,7 +1430,6 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     var t = e.target, o;
     if ((o = t.closest('[data-undo]'))) { var uid = o.getAttribute('data-undo'); if (undos[uid]) undos[uid](); dismissToast(uid); return; }
     if (t.closest('[data-vtoggle]')) { S.vmin = !S.vmin; renderViewer(); return; }
-    if ((o = t.closest('[data-dock]'))) { S.dock = S.dock === 'bottom' ? 'right' : 'bottom'; applyLayout(); renderViewer(); return; }
     if ((o = t.closest('[data-side]'))) { S.side = S.side ? null : 'all'; renderLeft(); return; }
     if ((o = t.closest('[data-sbt]'))) { var sk = o.getAttribute('data-sbt'); S.sbc = S.sbc || {}; S.sbc[sk] = !S.sbc[sk]; renderLeft(); return; }
     if (t.closest('[data-addfiles]')) { openPicker(); return; }
@@ -1620,9 +1611,9 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   function renderAll() { renderIntro(); renderCtx(); renderLeft(); renderViewer(); renderMsgs(); renderTop(); }
 
 
-  /* ---------------- workspace layout: sidebar, dockable slides, exercise focus ----------------
+  /* ---------------- workspace layout: sidebar, slides panel, exercise focus ----------------
      Sidebar views (Chats, Material, Self-assess) sit behind an icon bar. The slides panel can be dragged
-     wider, docked right or bottom, or hidden. Starting an exercise gives the chat the whole width. */
+     wider, or hidden. Starting an exercise gives the chat the whole width. */
   var saved = null;
   $('#b-addctx').innerHTML = UI.plus; $('#b-slides').innerHTML = UI.slides; $('#b-profile').innerHTML = UI.user; $('#send').innerHTML = UI.send;
   var MK = [['x', 'x'], ['x<sup>2</sup>', '^2'], ['x<sup>n</sup>', '^'], ['(', '('], [')', ')'], ['×', '*'], ['÷', '/']];
@@ -1634,12 +1625,9 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     var ws = $('#ws'); if (!ws) return;
     ws.classList.toggle('focus', !!S.focus);
     ws.classList.toggle('noview', !!S.vmin);
-    ws.classList.toggle('dock-bottom', S.dock === 'bottom');
     var ed = $('#editor');
     ed.style.setProperty('--vw', S.vw ? S.vw + 'px' : '55%');
-    ed.style.setProperty('--vh', S.vh ? S.vh + 'px' : '42%');
     $('#split').hidden = !!S.vmin;
-    $('#split').setAttribute('aria-orientation', S.dock === 'bottom' ? 'horizontal' : 'vertical');
     $('#b-exit').hidden = !S.focus;
     var sb = $('#b-slides'); if (sb) { sb.setAttribute('aria-pressed', !S.vmin); sb.setAttribute('title', S.vmin ? 'Show slides' : 'Slides'); sb.setAttribute('aria-label', S.vmin ? 'Show slides' : 'Hide slides'); }
   }
@@ -1673,22 +1661,21 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
   (function () {
     var split = $('#split'), drag = false;
     function setSize(px) {
-      var ed = $('#editor').getBoundingClientRect(), bottom = S.dock === 'bottom';
-      if (bottom) S.vh = Math.max(160, Math.min(ed.height - 220, px)); else S.vw = Math.max(300, Math.min(ed.width - 400, px));
+      var ed = $('#editor').getBoundingClientRect();
+      S.vw = Math.max(300, Math.min(ed.width - 400, px));
       applyLayout();
     }
     function fromPointer(e) {
       var ed = $('#editor').getBoundingClientRect();
-      return S.dock === 'bottom' ? ed.bottom - e.clientY - 6 : ed.right - e.clientX - 6;
+      return ed.right - e.clientX - 6;
     }
     split.addEventListener('pointerdown', function (e) { drag = true; split.setPointerCapture(e.pointerId); split.classList.add('drag'); document.body.classList.add('dragging'); e.preventDefault(); });
     split.addEventListener('pointermove', function (e) { if (drag) setSize(fromPointer(e)); });
     var end = function () { drag = false; split.classList.remove('drag'); document.body.classList.remove('dragging'); };
     split.addEventListener('pointerup', end); split.addEventListener('pointercancel', end);
-    split.addEventListener('dblclick', function () { S.vw = null; S.vh = null; applyLayout(); });
+    split.addEventListener('dblclick', function () { S.vw = null; applyLayout(); });
     split.addEventListener('keydown', function (e) {
-      var bottom = S.dock === 'bottom', step = e.shiftKey ? 80 : 24, cur = bottom ? $('#viewer').offsetHeight : $('#viewer').offsetWidth;
-      var grow = bottom ? 'ArrowUp' : 'ArrowLeft', shrink = bottom ? 'ArrowDown' : 'ArrowRight';
+      var step = e.shiftKey ? 80 : 24, cur = $('#viewer').offsetWidth, grow = 'ArrowLeft', shrink = 'ArrowRight';
       if (e.key === grow) { e.preventDefault(); setSize(cur + step); } else if (e.key === shrink) { e.preventDefault(); setSize(cur - step); }
     });
   })();
@@ -1930,7 +1917,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
     lsSet(UK, JSON.stringify(us));
   }
   function acctClean(s) {
-    s.focus = false; s.map = false; s.exOn = false; s.gOn = false; s.gNode = null; s.editing = false; delete s.snap;
+    delete s.dock; delete s.vh; s.focus = false; s.map = false; s.exOn = false; s.gOn = false; s.gNode = null; s.editing = false; delete s.snap;
     if (s.ex) { s.ex.busy = false; if (s.ex.res && s.ex.res.pending) { s.ex.res.pending = false; s.ex.res.more = s.ex.plan.length > s.ex.cur + 1; s.ex.res.note = 'Planning was interrupted by a reload.'; } }
     Object.keys(s.courses).forEach(function (k) {
       var c = s.courses[k]; c.loading = 0; c.timers = [];

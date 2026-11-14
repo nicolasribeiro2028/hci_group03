@@ -1,7 +1,7 @@
 
-  /* ---------------- workspace layout: sidebar, dockable slides, exercise focus ----------------
+  /* ---------------- workspace layout: sidebar, slides panel, exercise focus ----------------
      Sidebar views (Chats, Material, Self-assess) sit behind an icon bar. The slides panel can be dragged
-     wider, docked right or bottom, or hidden. Starting an exercise gives the chat the whole width. */
+     wider, or hidden. Starting an exercise gives the chat the whole width. */
   var saved = null;
   $('#b-addctx').innerHTML = UI.plus; $('#b-slides').innerHTML = UI.slides; $('#b-profile').innerHTML = UI.user; $('#send').innerHTML = UI.send;
   var MK = [['x', 'x'], ['x<sup>2</sup>', '^2'], ['x<sup>n</sup>', '^'], ['(', '('], [')', ')'], ['×', '*'], ['÷', '/']];
@@ -13,12 +13,9 @@
     var ws = $('#ws'); if (!ws) return;
     ws.classList.toggle('focus', !!S.focus);
     ws.classList.toggle('noview', !!S.vmin);
-    ws.classList.toggle('dock-bottom', S.dock === 'bottom');
     var ed = $('#editor');
     ed.style.setProperty('--vw', S.vw ? S.vw + 'px' : '55%');
-    ed.style.setProperty('--vh', S.vh ? S.vh + 'px' : '42%');
     $('#split').hidden = !!S.vmin;
-    $('#split').setAttribute('aria-orientation', S.dock === 'bottom' ? 'horizontal' : 'vertical');
     $('#b-exit').hidden = !S.focus;
     var sb = $('#b-slides'); if (sb) { sb.setAttribute('aria-pressed', !S.vmin); sb.setAttribute('title', S.vmin ? 'Show slides' : 'Slides'); sb.setAttribute('aria-label', S.vmin ? 'Show slides' : 'Hide slides'); }
   }
@@ -52,22 +49,21 @@
   (function () {
     var split = $('#split'), drag = false;
     function setSize(px) {
-      var ed = $('#editor').getBoundingClientRect(), bottom = S.dock === 'bottom';
-      if (bottom) S.vh = Math.max(160, Math.min(ed.height - 220, px)); else S.vw = Math.max(300, Math.min(ed.width - 400, px));
+      var ed = $('#editor').getBoundingClientRect();
+      S.vw = Math.max(300, Math.min(ed.width - 400, px));
       applyLayout();
     }
     function fromPointer(e) {
       var ed = $('#editor').getBoundingClientRect();
-      return S.dock === 'bottom' ? ed.bottom - e.clientY - 6 : ed.right - e.clientX - 6;
+      return ed.right - e.clientX - 6;
     }
     split.addEventListener('pointerdown', function (e) { drag = true; split.setPointerCapture(e.pointerId); split.classList.add('drag'); document.body.classList.add('dragging'); e.preventDefault(); });
     split.addEventListener('pointermove', function (e) { if (drag) setSize(fromPointer(e)); });
     var end = function () { drag = false; split.classList.remove('drag'); document.body.classList.remove('dragging'); };
     split.addEventListener('pointerup', end); split.addEventListener('pointercancel', end);
-    split.addEventListener('dblclick', function () { S.vw = null; S.vh = null; applyLayout(); });
+    split.addEventListener('dblclick', function () { S.vw = null; applyLayout(); });
     split.addEventListener('keydown', function (e) {
-      var bottom = S.dock === 'bottom', step = e.shiftKey ? 80 : 24, cur = bottom ? $('#viewer').offsetHeight : $('#viewer').offsetWidth;
-      var grow = bottom ? 'ArrowUp' : 'ArrowLeft', shrink = bottom ? 'ArrowDown' : 'ArrowRight';
+      var step = e.shiftKey ? 80 : 24, cur = $('#viewer').offsetWidth, grow = 'ArrowLeft', shrink = 'ArrowRight';
       if (e.key === grow) { e.preventDefault(); setSize(cur + step); } else if (e.key === shrink) { e.preventDefault(); setSize(cur - step); }
     });
   })();
