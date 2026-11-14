@@ -319,6 +319,7 @@
         (reading ? '' : '<button class="btn dark exbigbtn" data-ex="samples">Use sample lectures</button><button class="btn" style="height:44px" data-ex="material">Add my own PDF</button>') + '</div></div></div>';
     }
     var picked = av.filter(function (t) { return s.topics[t.id]; }).length;
+    var unrated = av.some(function (t) { return C.ratings[t.id] == null; });   /* the planner needs the self-ratings to personalise the path */
     var pills = av.map(function (t) {
       var r = C.ratings[t.id];
       return '<button type="button" class="expill' + (s.topics[t.id] ? ' on' : '') + '" data-ex="topic" data-v="' + t.id + '" aria-pressed="' + !!s.topics[t.id] + '">' + esc(TNAME[t.id]) + '<span class="expr">' + (r == null ? '–' : fmt(r)) + '</span></button>';
@@ -327,6 +328,7 @@
       '<h3 class="exbig">Plan your practice</h3>' +
       '<div class="exsec"><span class="exlab">Time</span>' + seg('time', [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']], s.time) + '</div>' +
       '<div class="exsec"><span class="exlab">Choose your topics</span><div class="expills">' + pills + '</div><p class="exhelp' + (picked ? ' ok' : '') + '">' + (picked ? picked + (picked === 1 ? ' topic' : ' topics') + ' chosen' : 'Tap one or more topics to practice') + '</p></div>' +
+      (unrated ? '<div class="exrate"><span><b>Rate your topics</b> so the path fits you.</span><button class="btn small" data-act="assess">Rate my knowledge</button></div>' : '<p class="exrelink"><button class="link" data-act="assess">Update my ratings</button></p>') +
       '<div class="exsec"><span class="exlab">Exercises from</span>' + seg('src', [['both', 'Mine and AI'], ['up', 'Mine only'], ['ai', 'AI only']], s.source) + '</div>' +
       (s.note ? '<p class="exwarn" role="alert">' + esc(s.note) + '</p>' : '') +
       '<button class="btn dark exbigbtn" data-ex="build"' + (s.busy || !picked ? ' disabled' : '') + '>' + (s.busy ? 'Building your path…' : 'Build my path') + '</button></div></div>';

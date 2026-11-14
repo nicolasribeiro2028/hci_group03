@@ -242,3 +242,8 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
 .srcpg { font: inherit; font-size: 12px; min-width: 22px; height: 20px; padding: 0 6px; border: 1px solid var(--line); border-radius: 99px; background: #fff; color: var(--ink); cursor: pointer; }
 .srcpg:hover, .srcpg:focus-visible { background: #fff3b8; border-color: #e0a800; }
 .sent.k-s, .sent.k-d { padding: 0; }
+
+/* Exercise setup: ask for the self-ratings when some are missing */
+.exrate { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: -8px 0 20px; padding: 10px 14px; border-radius: 10px; background: var(--fill); font-size: 14px; }
+.exrate b { font-weight: 600; }
+.exrelink { margin: -10px 0 18px; font-size: 13px; }

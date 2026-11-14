@@ -726,6 +726,11 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
 .srcpg { font: inherit; font-size: 12px; min-width: 22px; height: 20px; padding: 0 6px; border: 1px solid var(--line); border-radius: 99px; background: #fff; color: var(--ink); cursor: pointer; }
 .srcpg:hover, .srcpg:focus-visible { background: #fff3b8; border-color: #e0a800; }
 .sent.k-s, .sent.k-d { padding: 0; }
+
+/* Exercise setup: ask for the self-ratings when some are missing */
+.exrate { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: -8px 0 20px; padding: 10px 14px; border-radius: 10px; background: var(--fill); font-size: 14px; }
+.exrate b { font-weight: 600; }
+.exrelink { margin: -10px 0 18px; font-size: 13px; }
 </style>
 
 <div id="login" hidden>
@@ -1582,9 +1587,9 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
       $$('#modal-root input[type=range]').forEach(function (r) {
         if (!r.classList.contains('untouched')) { var id2 = r.getAttribute('data-rt'), v2 = +r.value; if (C.start[id2] == null) C.start[id2] = C.ratings[id2] != null ? C.ratings[id2] : v2; C.ratings[id2] = v2; C.last[id2] = 0; }
       });
-      closeModal(); renderLeft();
-      toast('Ratings saved.', function () { var o2 = JSON.parse(snap); cs0.ratings = o2.r; cs0.start = o2.s; if (cs0 === C) renderLeft(); });
-      post({ r: 'ai', text: 'Thanks. I will start the help at the level you set. You can change your ratings any time.', acts: [{ label: 'Practice the chain rule', act: 'practice', arg: 'p1', dark: true }, { label: 'Practice the product rule', act: 'practice', arg: 'p2' }] });
+      closeModal(); renderLeft(); if (S.exOn) exRender();
+      toast('Ratings saved.', function () { var o2 = JSON.parse(snap); cs0.ratings = o2.r; cs0.start = o2.s; if (cs0 === C) { renderLeft(); if (S.exOn) exRender(); } });
+      if (!S.exOn) post({ r: 'ai', text: 'Thanks. I will start the help at the level you set. You can change your ratings any time.', acts: starterActs() });
       return;
     }
     if (t.closest('#drop')) { openPicker(); return; }
@@ -2497,6 +2502,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
         (reading ? '' : '<button class="btn dark exbigbtn" data-ex="samples">Use sample lectures</button><button class="btn" style="height:44px" data-ex="material">Add my own PDF</button>') + '</div></div></div>';
     }
     var picked = av.filter(function (t) { return s.topics[t.id]; }).length;
+    var unrated = av.some(function (t) { return C.ratings[t.id] == null; });   /* the planner needs the self-ratings to personalise the path */
     var pills = av.map(function (t) {
       var r = C.ratings[t.id];
       return '<button type="button" class="expill' + (s.topics[t.id] ? ' on' : '') + '" data-ex="topic" data-v="' + t.id + '" aria-pressed="' + !!s.topics[t.id] + '">' + esc(TNAME[t.id]) + '<span class="expr">' + (r == null ? '–' : fmt(r)) + '</span></button>';
@@ -2505,6 +2511,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
       '<h3 class="exbig">Plan your practice</h3>' +
       '<div class="exsec"><span class="exlab">Time</span>' + seg('time', [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']], s.time) + '</div>' +
       '<div class="exsec"><span class="exlab">Choose your topics</span><div class="expills">' + pills + '</div><p class="exhelp' + (picked ? ' ok' : '') + '">' + (picked ? picked + (picked === 1 ? ' topic' : ' topics') + ' chosen' : 'Tap one or more topics to practice') + '</p></div>' +
+      (unrated ? '<div class="exrate"><span><b>Rate your topics</b> so the path fits you.</span><button class="btn small" data-act="assess">Rate my knowledge</button></div>' : '<p class="exrelink"><button class="link" data-act="assess">Update my ratings</button></p>') +
       '<div class="exsec"><span class="exlab">Exercises from</span>' + seg('src', [['both', 'Mine and AI'], ['up', 'Mine only'], ['ai', 'AI only']], s.source) + '</div>' +
       (s.note ? '<p class="exwarn" role="alert">' + esc(s.note) + '</p>' : '') +
       '<button class="btn dark exbigbtn" data-ex="build"' + (s.busy || !picked ? ' disabled' : '') + '>' + (s.busy ? 'Building your path…' : 'Build my path') + '</button></div></div>';

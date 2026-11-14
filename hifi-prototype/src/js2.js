@@ -576,9 +576,9 @@
       $$('#modal-root input[type=range]').forEach(function (r) {
         if (!r.classList.contains('untouched')) { var id2 = r.getAttribute('data-rt'), v2 = +r.value; if (C.start[id2] == null) C.start[id2] = C.ratings[id2] != null ? C.ratings[id2] : v2; C.ratings[id2] = v2; C.last[id2] = 0; }
       });
-      closeModal(); renderLeft();
-      toast('Ratings saved.', function () { var o2 = JSON.parse(snap); cs0.ratings = o2.r; cs0.start = o2.s; if (cs0 === C) renderLeft(); });
-      post({ r: 'ai', text: 'Thanks. I will start the help at the level you set. You can change your ratings any time.', acts: [{ label: 'Practice the chain rule', act: 'practice', arg: 'p1', dark: true }, { label: 'Practice the product rule', act: 'practice', arg: 'p2' }] });
+      closeModal(); renderLeft(); if (S.exOn) exRender();
+      toast('Ratings saved.', function () { var o2 = JSON.parse(snap); cs0.ratings = o2.r; cs0.start = o2.s; if (cs0 === C) { renderLeft(); if (S.exOn) exRender(); } });
+      if (!S.exOn) post({ r: 'ai', text: 'Thanks. I will start the help at the level you set. You can change your ratings any time.', acts: starterActs() });
       return;
     }
     if (t.closest('#drop')) { openPicker(); return; }
