@@ -219,6 +219,21 @@
     var s = S.ex; if (!DEV || !s || !s.solver) return '';
     return '<p class="fine exdev">' + (s.solver === 'gurobi' ? 'Gurobi: ' : 'In-page search, not Gurobi: ') + esc(s.solverInfo) + '</p>';
   }
+
+  /* ---- rewards: a star for every finished exercise (full: no help, half: a hint, outline: the solution or a skip) ---- */
+  var STARPATH = 'M12 3.2l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17.2l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z';
+  var STARDEFS = '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="starHalf" x1="0" x2="1" y1="0" y2="0"><stop offset="50%" stop-color="#e5a50a"/><stop offset="50%" stop-color="#fff" stop-opacity="0"/></linearGradient></defs></svg>';
+  function starKind(kind) { return kind === 'clean' || kind === 'retry' ? 'full' : kind === 'hint' ? 'half' : 'none'; }
+  function starSvg(kind, cls) { return '<svg class="star ' + kind + ' ' + (cls || '') + '" viewBox="0 0 24 24" width="22" height="22" aria-label="' + (kind === 'full' ? 'Full star' : kind === 'half' ? 'Half star' : 'Empty star') + '"><path d="' + STARPATH + '"/></svg>'; }
+  function levelBar(tp, a, b) {
+    return '<div class="exlvl"><span class="exlvln">' + esc(TNAME[tp]) + '</span><span class="exlvlbar"><i data-to="' + (b * 10) + '" style="width:' + (a * 10) + '%"></i></span><span class="exlvlv soft small">' + fmt(a) + (b > a ? ' → ' + fmt(b) : '') + ' of 10</span></div>';
+  }
+  function animateLevels() { Array.prototype.slice.call(document.querySelectorAll('#exview .exlvlbar i[data-to]')).forEach(function (i) { i.style.width = i.getAttribute('data-to') + '%'; }); }
+  function changeSummary(c) {
+    var sw = Math.min(c.added.length, c.removed.length), net = c.added.length - c.removed.length, p = [];
+    if (sw) p.push(sw + ' swapped'); if (net > 0) p.push('+' + net + ' ahead'); if (net < 0) p.push((-net) + ' removed'); if (c.reordered) p.push('reordered');
+    return p.join(', ');
+  }
   function exTopicsAvail() { return C.topics.filter(function (t) { return EXB.some(function (e) { return e.topic === t.id; }); }); }
   function exNew() {
     var av = exTopicsAvail(), tp = {}; av.forEach(function (t) { tp[t.id] = false; });   /* nothing is selected until the student chooses */
@@ -234,7 +249,13 @@
   function fmtClock(sec) { sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ':' + ('0' + (sec % 60)).slice(-2); }
   function exClockText() { var s = S.ex; return fmtClock((s.sec || 0) + (s.res || s.view === 'path' ? 0 : exTimerElapsed())) + ' of ' + s.time + ' min'; }
   document.addEventListener('visibilitychange', function () { if (document.hidden) exTimerPause(); else exTimerResume(); });
-  setInterval(function () { var c = $('#exclock'); if (c && S.ex && S.ex.phase === 'run') c.textContent = exClockText(); }, 1000);
+  setInterval(function () {
+    var c = $('#exclock'); if (!c || !S.ex || S.ex.phase !== 'run') return;
+    c.textContent = exClockText();
+    var used = (S.ex.sec || 0) + (S.ex.res || S.ex.view === 'path' ? 0 : exTimerElapsed()), f = $('#extfill'), tu = $('#extimeup');
+    if (f) f.style.width = Math.min(100, used / (S.ex.time * 60) * 100) + '%';
+    if (tu) tu.hidden = used < S.ex.time * 60;
+  }, 1000);
   function exInput() { var s = S.ex, tp = Object.keys(s.topics).filter(function (k) { return s.topics[k]; }); return { remaining: s.time - s.used, topics: tp, source: s.source, rat: s.rat0 || C.ratings, speed: s.speed || 1, hist: s.hist.map(function (h) { return { id: h.id, r: h.r }; }) }; }
   function exOpen() {
     if (!S.ex || S.ex.ctx !== S.ctx || (S.ex.phase === 'setup' && !Object.keys(S.ex.topics).length)) S.ex = exNew();
@@ -262,7 +283,7 @@
       exRender();
     });
   }
-  function exStart() { var s = S.ex; s.phase = 'run'; s.cur = 0; s.hist = []; s.used = 0; s.sec = 0; s.speed = 1; s.view = 'ex'; s.changes = null; exTimerStart(); s.tries = 0; s.hint = false; s.sol = false; s.input = ''; s.fb = ''; s.res = null; exRender(); var i = $('#ex-in'); if (i) i.focus(); }
+  function exStart() { var s = S.ex; s.phase = 'run'; s.cur = 0; s.hist = []; s.used = 0; s.sec = 0; s.speed = 1; s.view = 'ex'; s.changes = null; s.half = false; exTimerStart(); s.tries = 0; s.hint = false; s.sol = false; s.input = ''; s.fb = ''; s.res = null; exRender(); var i = $('#ex-in'); if (i) i.focus(); }
   function exCur() { var s = S.ex; return s.plan[s.cur] ? xById(s.plan[s.cur].id) : null; }
   function exSubmit() {
     var s = S.ex, e = exCur(), inp = $('#ex-in'); if (!e || s.res) return;
@@ -284,7 +305,10 @@
     if (C.start[tp] == null) C.start[tp] = base;
     C.ratings[tp] = nv; C.last[tp] = nv - base; C.pulse[tp] = true; renderLeft();
     var inp = exInput(), oldNext = s.plan[s.cur + 1] ? s.plan[s.cur + 1].id : null, kept = s.plan.slice(0, s.cur + 1);
-    s.res = { kind: kind, text: r[2], rating: [base, nv], dev: '', adjusted: false, more: false, pending: true }; s.fb = '';
+    var cheer = '', run = 0; for (var hi = s.hist.length - 1; hi >= 0 && (s.hist[hi].kind === 'clean' || s.hist[hi].kind === 'retry'); hi--) run++;
+    if (!s.half && s.sec >= s.time * 30) { s.half = true; cheer = 'Halfway there.'; }
+    if (run >= 3 && (kind === 'clean' || kind === 'retry')) cheer = run + ' on your own in a row.';
+    s.res = { kind: kind, text: r[2], rating: [base, nv], cheer: cheer, dev: '', adjusted: false, more: false, pending: true }; s.fb = '';
     exRender();
     exPlanner(inp).then(function (rest) {
       if (S.ex !== s || !s.res) return;
@@ -317,9 +341,12 @@
     return '<div class="seg" role="group">' + items.map(function (it) { return '<button type="button" class="' + (String(it[0]) === String(on) ? 'on' : '') + '" data-ex="' + attr + '" data-v="' + it[0] + '" aria-pressed="' + (String(it[0]) === String(on)) + '">' + esc(it[1]) + '</button>'; }).join('') + '</div>';
   }
   function exHead(sub) {
-    var ph = S.ex && S.ex.phase, cancel = ph === 'plan' || ph === 'run', inPath = ph === 'run' && S.ex.view === 'path';
-    var pathBtn = ph === 'run' ? (inPath ? '<button class="btn small" data-ex="pathback">Back to exercise</button>' : '<button class="btn small" data-ex="path">Full path</button>') : '';
-    return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2>' + (sub ? '<p class="soft small">' + esc(sub) + '</p>' : '') + '</div><span class="spacer"></span>' + pathBtn + (cancel ? '<button class="btn small" data-ex="cancel">Cancel</button>' : '') + '<button class="btn small" data-ex="exit">Back to chat</button></div>';
+    var ph = S.ex && S.ex.phase, inPath = ph === 'run' && S.ex.view === 'path', b = '';
+    if (ph === 'run') {
+      b += (inPath ? '<button class="btn small" data-ex="pathback">Back to exercise</button>' : '<button class="btn small" data-ex="path">Full path</button>') + '<button class="btn small dark" data-ex="finish">Finish session</button>' +
+        '<span class="exmenuwrap"><button class="btn small icon" data-ex="menu" aria-haspopup="true" aria-label="More options" title="More options">⋯</button><div class="exmenu" id="exmenu" hidden><button type="button" data-ex="cancel">Discard this session</button><button type="button" data-ex="exit">Back to chat, keep my place</button></div></span>';
+    } else b += (ph === 'plan' ? '<button class="btn small" data-ex="cancel">Cancel</button>' : '') + '<button class="btn small" data-ex="exit">Back to chat</button>';
+    return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2>' + (sub ? '<p class="soft small">' + esc(sub) + '</p>' : '') + '</div><span class="spacer"></span>' + b + '</div>';
   }
   /* A short look at what the stop is about, without giving the answer away. */
   function teaser(e) {
@@ -423,7 +450,7 @@
   function exPlanView() {
     var s = S.ex, tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0);
     return exHead(s.plan.length + ' stops · about ' + fm(tot) + ' min') + '<div class="exbody road"><div class="exroadwrap">' + roadHtml(s.plan, s.time) + devPlan(s.plan) + '</div></div>' +
-      '<div class="exfoot"><button class="btn" data-ex="back">Change</button><button class="btn dark exbigbtn" data-ex="start">Start</button></div>';
+      '<div class="exfoot"><p class="exfootnote">Your path adapts after each exercise. It ends when your time is up.</p><div class="row" style="gap:10px"><button class="btn" data-ex="back">Change</button><button class="btn dark exbigbtn" data-ex="start">Start</button></div></div>';
   }
   /* The whole path during a session: what is done, where the student is, what is next, and what the last re-plan changed. */
   function changesHtml(s) {
@@ -438,17 +465,30 @@
   function exPathView() {
     var s = S.ex, done = s.cur + (s.res ? 1 : 0), left = Math.max(0, Math.round(s.time - s.used));
     var fresh = s.changes ? s.changes.added : [];
-    return exHead('Stop ' + Math.min(done + 1, s.plan.length) + ' of ' + s.plan.length + ' · ' + fmtClock(s.sec || 0) + ' of ' + s.time + ' min used') + '<div class="exbody road"><div class="exroadwrap">' + changesHtml(s) +
+    return exHead(fmtClock(s.sec || 0) + ' of ' + s.time + ' min used') + '<div class="exbody road"><div class="exroadwrap"><div class="exsplit"><span><b>' + done + '</b> done</span><span><b>' + Math.max(0, s.plan.length - done) + '</b> ahead, may change after each exercise</span></div>' + changesHtml(s) +
       roadHtml(s.plan, s.time, { done: done, cur: s.res ? -1 : s.cur, hist: s.hist, fresh: fresh }) + '</div></div>' +
       '<div class="exfoot"><button class="btn dark exbigbtn" data-ex="pathback">Back to exercise</button></div>';
   }
-  function exSeeChanges(s) { return s.res && s.res.adjusted ? '<button class="link exseechg" data-ex="path">See what changed</button>' : ''; }
-  function stepperHtml(s, r) {
-    var n = s.plan.length;
-    return '<div class="exsteps" role="img" aria-label="Stop ' + (s.cur + 1) + ' of ' + n + '">' + s.plan.map(function (it, i) {
-      var st = i < s.cur || (i === s.cur && r) ? 'done' : i === s.cur ? 'now' : 'todo';
-      return (i ? '<i class="exstl' + (st === 'done' || st === 'now' ? ' on' : '') + '"></i>' : '') + '<span class="exst ' + st + '">' + (st === 'done' ? '✓' : '') + '</span>';
-    }).join('') + '</div><p class="exclock soft small" id="exclock">' + exClockText() + '</p>';
+  function exSeeChanges(s) { return s.res && s.res.adjusted ? '<button class="link exseechg" data-ex="path">See details</button>' : ''; }
+  /* Progress is shown against what does not move (the time goal) and what the student collects (stars), never as "stop k of N", because N can change. */
+  function trailHtml(s, r) {
+    var n = s.plan.length, doneCount = s.cur + (r ? 1 : 0), nodes = [], ahead = s.plan.slice(doneCount, doneCount + (r ? 3 : 4));
+    var from = Math.max(0, doneCount - 3);
+    if (from > 0) nodes.push('<span class="tkmore">+' + from + '</span>');
+    for (var i = from; i < doneCount; i++) nodes.push('<span class="tk done" aria-label="Done">' + starSvg(starKind(s.hist[i] ? s.hist[i].kind : 'skip')) + '</span>');
+    ahead.forEach(function (it, k) { var e = xById(it.id), isNow = !r && k === 0; nodes.push('<span class="tk' + (isNow ? ' now' : '') + '" title="' + esc(TNAME[e.topic]) + '" aria-label="' + (isNow ? 'Now: ' : 'Next: ') + esc(TNAME[e.topic]) + '">' + GLYPH[e.topic] + '</span>'); });
+    if (n > doneCount + ahead.length) nodes.push('<span class="tkmore">…</span>');
+    return '<div class="extrail" aria-label="Your path">' + nodes.join('<i class="tkl"></i>') + '</div>';
+  }
+  function progressHtml(s, r) {
+    var total = s.time * 60, used = (s.sec || 0) + (r || s.view === 'path' ? 0 : exTimerElapsed()), done = s.hist.length, acc = 0;
+    var stars = s.hist.map(function (h, i) { return starSvg(starKind(h.kind), r && i === done - 1 ? 'pop' : ''); }).join('');
+    var marks = s.hist.map(function (h) { acc += h.sec; return '<i class="exmark" style="left:' + Math.min(100, acc / total * 100) + '%"></i>'; }).join('');
+    return '<div class="exprog"><div class="exstars">' + (stars || '<span class="soft small">Your stars appear here</span>') + '<span class="exdone soft small">' + done + ' done</span></div>' +
+      '<div class="extbar" role="progressbar" aria-valuemin="0" aria-valuemax="' + s.time + '" aria-valuenow="' + Math.round(used / 60) + '" aria-label="Time goal"><i class="extfill" id="extfill" style="width:' + Math.min(100, used / total * 100) + '%"></i>' + marks + '</div>' +
+      '<p class="exclock soft small" id="exclock">' + exClockText() + '</p>' +
+      '<p class="extimeup" id="extimeup"' + (used < total ? ' hidden' : '') + '>Time is up. Finish this exercise, then end the session.</p></div>' + trailHtml(s, r) +
+      (!done && !r ? '<p class="exnote">Your path adapts after each exercise. It ends when your time is up.</p>' : '');
   }
   function exRun() {
     var s = S.ex, e = exCur(), r = s.res;
@@ -461,20 +501,22 @@
       if (s.sol) main += '<div class="exhint sol"><b>Solution</b> ' + esc(e.sol) + '</div>';
       main += '<div class="row exsub"><button class="btn small ghost" data-ex="hint"' + (s.hint ? ' disabled' : '') + '>Hint</button><button class="btn small ghost" data-ex="sol"' + (s.sol ? ' disabled' : '') + '>Solution</button><button class="btn small ghost" data-ex="skip">Skip</button></div>';
     } else {
-      var up = r.rating[1] > r.rating[0];
-      main += '<div class="exres ' + r.kind + '"><b>' + esc(r.text) + '</b>' + (up ? '<span class="exgain">' + esc(TNAME[e.topic]) + ' ' + fmt(r.rating[0]) + ' → ' + fmt(r.rating[1]) + '</span>' : '') + (r.kind !== 'clean' && r.kind !== 'retry' ? '<span class="small">' + esc(e.sol) + '</span>' : '') + '</div>' +
-        (r.adjusted ? '<p class="exadj">✦ Your path was adjusted. ' + exSeeChanges(s) + '</p>' : '') + (DEV && r.dev ? '<p class="fine exdev">' + esc(r.dev) + '</p>' : '') +
-        '<div class="row" style="margin-top:14px"><button class="btn dark exbigbtn" data-ex="next"' + (r.pending ? ' disabled' : '') + '>' + (r.pending ? 'One moment…' : r.more ? 'Next' : 'Finish') + '</button></div>';
+      main += '<div class="exres ' + r.kind + '"><div class="exresrow">' + starSvg(starKind(r.kind), 'pop big') + '<b>' + esc(r.text) + '</b></div>' + levelBar(e.topic, r.rating[0], r.rating[1]) +
+        (r.kind !== 'clean' && r.kind !== 'retry' ? '<span class="small">' + esc(e.sol) + '</span>' : '') + '</div>' +
+        (r.cheer ? '<p class="excheer">✦ ' + esc(r.cheer) + '</p>' : '') +
+        (r.adjusted ? '<p class="exadj">✦ Your path was adjusted' + (s.changes && changeSummary(s.changes) ? ': ' + esc(changeSummary(s.changes)) : '') + '. ' + exSeeChanges(s) + '</p>' : '') + (DEV && r.dev ? '<p class="fine exdev">' + esc(r.dev) + '</p>' : '') +
+        '<div class="row" style="margin-top:14px"><button class="btn dark exbigbtn" data-ex="next"' + (r.pending ? ' disabled' : '') + '>' + (r.pending ? 'One moment…' : r.more ? 'Next' : 'Finish session') + '</button></div>';
     }
     main += '</div>';
-    return exHead('') + '<div class="exbody run"><div class="exrunwrap">' + stepperHtml(s, r) + main + (DEV ? '<p class="fine exdev">' + solverNote().replace(/<[^>]+>/g, '') + '</p>' : '') + '</div></div>';
+    return exHead('') + '<div class="exbody run"><div class="exrunwrap">' + progressHtml(s, r) + main + (DEV ? '<p class="fine exdev">' + solverNote().replace(/<[^>]+>/g, '') + '</p>' : '') + '</div></div>';
   }
   function exDone() {
     var s = S.ex, solved = s.hist.filter(function (h) { return h.r >= 0.5; }).length, clean = s.hist.filter(function (h) { return h.kind === 'clean' || h.kind === 'retry'; }).length, tp = {};
     s.hist.forEach(function (h) { tp[xById(h.id).topic] = 1; });
-    var rows = Object.keys(tp).map(function (k) { var a = s.rat0[k] == null ? 5 : s.rat0[k], b = C.ratings[k]; return '<li><span class="pgl">' + GLYPH[k] + '</span><span>' + TNAME[k] + '</span><span class="soft">' + fmt(a) + ' → ' + fmt(b) + '</span></li>'; }).join('');
-    return exHead('') + '<div class="exbody"><div class="excard narrow center"><div class="extrophy" aria-hidden="true">⚑</div><h3 class="exbig">Path complete</h3><ul class="exstats"><li><b>' + solved + '</b>solved</li><li><b>' + clean + '</b>on your own</li><li><b>' + Math.max(1, Math.round(s.used)) + '</b>minutes</li></ul>' +
-      '<ul class="exrates">' + rows + '</ul><div class="row" style="gap:8px;margin-top:18px;justify-content:center"><button class="btn dark exbigbtn" data-ex="again">New path</button><button class="btn" style="height:44px" data-ex="exit">Back to chat</button></div></div></div>';
+    var rows = Object.keys(tp).map(function (k) { var a = s.rat0[k] == null ? 5 : s.rat0[k], b = C.ratings[k]; return levelBar(k, a, b); }).join('');
+    var stars = s.hist.map(function (h) { return starSvg(starKind(h.kind)); }).join('');
+    return exHead('') + '<div class="exbody"><div class="excard narrow center"><div class="extrophy" aria-hidden="true">⚑</div><h3 class="exbig">Session complete</h3><div class="exstars big">' + stars + '</div><ul class="exstats"><li><b>' + solved + '</b>solved</li><li><b>' + clean + '</b>on your own</li><li><b>' + Math.max(1, Math.round(s.used)) + '</b>minutes</li></ul>' +
+      '<div class="exlvls">' + rows + '</div><div class="row" style="gap:8px;margin-top:18px;justify-content:center"><button class="btn dark exbigbtn" data-ex="again">New path</button><button class="btn" style="height:44px" data-ex="exit">Back to chat</button></div></div></div>';
   }
   function exRender(keepFocus) {
     var v = $('#exview'); if (!v) return;
@@ -483,13 +525,15 @@
     if (!S.exOn) return;
     var had = keepFocus && document.activeElement && document.activeElement.id === 'ex-in', pos = had ? document.activeElement.selectionStart : 0;
     var ph = S.ex.phase;
-    v.innerHTML = ph === 'setup' ? exSetup() : ph === 'plan' ? exPlanView() : ph === 'run' ? (S.ex.view === 'path' ? exPathView() : exRun()) : exDone();
+    v.innerHTML = STARDEFS + (ph === 'setup' ? exSetup() : ph === 'plan' ? exPlanView() : ph === 'run' ? (S.ex.view === 'path' ? exPathView() : exRun()) : exDone());
+    setTimeout(animateLevels, 40);
     var eb = v.querySelector('.exbody.road');
     if (eb) { var here = ph === 'run' ? v.querySelector('.exbody.road .stop.cur, .exbody.road .stop.next') : null; if (here) here.scrollIntoView({ block: 'center' }); else eb.scrollTop = eb.scrollHeight; }   /* the plan opens at its Start; the full path opens where the student is */
     if (had) { var i = $('#ex-in'); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (x) { } } }
   }
   document.addEventListener('click', function (e) {
     if (e.target.closest && e.target.closest('#ex-cancel-ok')) { closeModal(); exResetToSetup(); return; }
+    var mm0 = $('#exmenu'); if (mm0 && !mm0.hidden && !(e.target.closest && e.target.closest('[data-ex=menu]'))) mm0.hidden = true;
     var o = e.target.closest && e.target.closest('[data-ex]'); if (!o || !S.ex && o.dataset.ex !== 'open') return;
     var a = o.getAttribute('data-ex'), v = o.getAttribute('data-v'), s = S.ex;
     if (a === 'exit') exExit();
@@ -505,10 +549,12 @@
     else if (a === 'skip') exFinish('skip');
     else if (a === 'next') exNext();
     else if (a === 'again') { var keep = { time: s.time, source: s.source, topics: s.topics }; S.ex = exNew(); S.ex.time = keep.time; S.ex.source = keep.source; S.ex.topics = keep.topics; exRender(); }
+    else if (a === 'menu') { var mm = $('#exmenu'); if (mm) mm.hidden = !mm.hidden; }
+    else if (a === 'finish') { if (!s.hist.length) { exTimerPause(); exResetToSetup(); } else { exTimerPause(); s.phase = 'done'; s.view = 'ex'; exRender(); } }
     else if (a === 'path') { exTimerPause(); s.view = 'path'; exRender(); }
     else if (a === 'pathback') { s.view = 'ex'; exTimerResume(); exRender(); var inp0 = $('#ex-in'); if (inp0) inp0.focus(); }
     else if (a === 'cancel') {
-      if (s.phase === 'run' && s.hist.length) modal('<div class="mhead"><div><h2 id="mtitle">Cancel this session?</h2><p class="lead">Your path is dropped and you go back to the start. Ratings you already earned stay.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div><div class="mfoot"><button class="btn ghost" id="p-cancel">Keep going</button><button class="btn dark" id="ex-cancel-ok">Cancel session</button></div>');
+      if (s.phase === 'run' && s.hist.length) modal('<div class="mhead"><div><h2 id="mtitle">Discard this session?</h2><p class="lead">Your path is dropped and you go back to the start. Ratings you already earned stay. To keep what you did, use "Finish session" instead.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div><div class="mfoot"><button class="btn ghost" id="p-cancel">Keep going</button><button class="btn dark" id="ex-cancel-ok">Discard session</button></div>');
       else exResetToSetup();
     }
     else if (a === 'samples') { defsFor('calc').forEach(function (d) { addFile(d); }); S.ex = exNew(); exRender(); setTimeout(function () { exWaitTopics(0); }, 300); }
@@ -523,7 +569,7 @@
   document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('#exview .mk')) e.preventDefault(); });
   document.addEventListener('keydown', function (e) {
     if (e.target.id === 'ex-in' && e.key === 'Enter') { e.preventDefault(); exSubmit(); }
-    if (e.key === 'Escape' && S.exOn && !$('#ov')) exExit();
+    if (e.key === 'Escape' && S.exOn && !$('#ov')) { var mm1 = $('#exmenu'); if (mm1 && !mm1.hidden) { mm1.hidden = true; return; } exExit(); }
   });
   document.addEventListener('input', function (e) { if (e.target.id === 'ex-in' && S.ex) S.ex.input = e.target.value; });
   window.__ex = { bank: EXB, plan: xPlan, planner: exPlanner, ability: xAbility, S: function () { return S.ex; }, open: exOpen };

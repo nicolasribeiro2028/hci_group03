@@ -154,7 +154,7 @@
 .stoplab { position: absolute; width: 150px; font-size: 13px; line-height: 1.3; color: var(--soft); }
 .stoplab b { display: block; font-size: 14px; color: var(--ink); }
 .stoplab.l { text-align: right; }
-.exfoot { display: flex; justify-content: center; gap: 10px; padding: 14px 22px; border-top: 1px solid var(--line2); background: #fff; }
+.exfoot { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 22px 14px; border-top: 1px solid var(--line2); background: #fff; }
 /* session */
 .exbody.run { justify-content: center; }
 .exrunwrap { width: 100%; max-width: 680px; margin: 0 auto; }
@@ -258,3 +258,48 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
 .chgk { display: inline-block; margin-right: 8px; padding: 0 8px; border-radius: 99px; font-size: 11px; font-weight: 600; background: var(--sel); }
 .chgk.add { background: #fff3b8; color: #6b5200; }
 .exseechg { font-size: 13px; }
+
+/* ---- session progress: time goal, stars, a short trail ---- */
+.exprog { margin: 0 0 4px; }
+.exstars { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2px; min-height: 28px; }
+.exstars.big { margin: 4px 0 6px; gap: 4px; }
+.exstars.big .star { width: 30px; height: 30px; }
+.exdone { margin-left: 10px; }
+.star { flex: none; }
+.star.full path { fill: #e5a50a; stroke: #b9810a; stroke-width: 1; }
+.star.half path { fill: url(#starHalf); stroke: #b9810a; stroke-width: 1.4; }
+.star.none path { fill: none; stroke: #b4b9c0; stroke-width: 1.5; }
+.star.pop { animation: starpop .6s var(--ease); transform-origin: center; }
+.star.big { width: 28px; height: 28px; }
+@keyframes starpop { 0% { transform: scale(.2) rotate(-25deg); opacity: 0; } 55% { transform: scale(1.35) rotate(8deg); opacity: 1; } 100% { transform: scale(1) rotate(0); } }
+.extbar { position: relative; height: 12px; margin: 8px auto 4px; max-width: 520px; border-radius: 99px; background: var(--line2); overflow: hidden; }
+.extfill { position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 99px; background: var(--ink); transition: width .8s var(--ease); }
+.exmark { position: absolute; top: 2px; width: 8px; height: 8px; margin-left: -4px; border-radius: 50%; background: #e5a50a; box-shadow: 0 0 0 2px #fff; }
+.exclock { text-align: center; margin: 0 0 6px; }
+.extimeup { margin: 6px auto 8px; max-width: 520px; padding: 8px 12px; border-radius: 8px; background: var(--amber-bg); color: var(--amber); text-align: center; font-size: 13px; }
+.extimeup[hidden] { display: none; }
+.extrail { display: flex; align-items: center; justify-content: center; margin: 8px 0 10px; }
+.tk { flex: none; width: 34px; height: 34px; border-radius: 50%; border: 2px solid var(--line); background: #fff; color: var(--soft); display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+.tk.done { border-color: transparent; background: transparent; }
+.tk.now { border-color: var(--ink); color: var(--ink); box-shadow: 0 0 0 5px var(--sel); }
+.tkl { flex: 0 1 26px; min-width: 10px; height: 2px; background: var(--line); }
+.tkmore { flex: none; padding: 0 6px; color: var(--faint); font-size: 14px; }
+.exnote { margin: 0 0 12px; text-align: center; font-size: 13px; color: var(--soft); }
+.exfootnote { margin: 0; font-size: 13px; color: var(--soft); text-align: center; }
+/* result, level bar, cheers */
+.exresrow { display: flex; align-items: center; gap: 10px; }
+.exlvl { display: grid; grid-template-columns: 140px 1fr auto; align-items: center; gap: 12px; margin: 6px 0 2px; font-size: 14px; }
+.exlvlbar { height: 8px; border-radius: 99px; background: var(--line2); overflow: hidden; display: block; }
+.exlvlbar i { display: block; height: 100%; background: var(--ink); border-radius: 99px; transition: width .9s var(--ease); }
+.exlvls { display: grid; gap: 4px; text-align: left; margin-top: 6px; }
+.excheer { margin: 10px 0 0; font-size: 14px; font-weight: 600; }
+.exadj { margin: 8px 0 0; font-size: 13px; color: var(--soft); }
+/* header menu */
+.exmenuwrap { position: relative; display: inline-block; }
+.exmenu { position: absolute; right: 0; top: calc(100% + 6px); z-index: 6; min-width: 230px; padding: 4px; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); display: grid; }
+.exmenu[hidden] { display: none; }
+.exmenu button { text-align: left; border: 0; background: none; padding: 9px 12px; border-radius: 7px; font: inherit; font-size: 14px; cursor: pointer; }
+.exmenu button:hover { background: var(--fill); }
+.exsplit { display: flex; justify-content: space-between; gap: 12px; margin: 0 0 10px; padding: 8px 12px; border-radius: 10px; background: var(--fill); font-size: 13px; color: var(--soft); }
+.exsplit b { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .star.pop { animation: none; } .extfill, .exlvlbar i { transition: none; } }
