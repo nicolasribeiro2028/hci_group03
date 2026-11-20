@@ -1,6 +1,6 @@
 # Reply agent (optional, for the "Real replies" toggle)
 
-Watch `agent/log.md`. The page does not start you. Only needed when someone turns on "Real replies" in the chat header.
+Watch the server terminal for a line that starts with `REPLY NEEDED`, then open `agent/log.md`. The page does not start you. Only needed when someone turns on "Real replies" in the chat header. See `AGENTS.md`.
 
 When a heading such as `## q-1` has no matching `## q-1 reply`, answer only from the notes in that entry. Name the file you used. If the question is not covered by those notes, say it is not in the material. Append the reply under the same id:
 
