@@ -1,5 +1,5 @@
 // Local server for the prototype. Serves the files and, for the optional "Real replies" toggle, keeps a question log.
-// No model is called here. A terminal agent reads agent/log.md and writes the replies (see agent/PROMPT.md).
+// No model is called here. Each question is printed as "REPLY NEEDED" so a local agent can write the reply (see AGENTS.md).
 // Run: node server.js   (PORT=8765 by default)
 const fs = require("fs");
 const { spawn } = require("child_process");
@@ -69,6 +69,8 @@ function appendQuestion(req, res) {
     const block = [`## ${id}`, `question: ${question}`, `context: ${context}`, "notes:", ...(lines.length ? lines : ["-"]), ""].join("\n");
     fs.mkdirSync(path.dirname(logPath), { recursive: true });
     fs.appendFileSync(logPath, `${existing && !existing.endsWith("\n") ? "\n" : ""}${block}`);
+    // Printed on purpose. A local agent watches this terminal for "REPLY NEEDED" and writes the reply. See AGENTS.md.
+    console.log(["REPLY NEEDED " + id, "question: " + question, "context: " + (context || "(none)"), "log: agent/log.md"].join("\n"));
     sendJson(res, 200, { id });
   }).catch(() => sendJson(res, 500, { error: "Could not write the log" }));
 }
@@ -107,4 +109,7 @@ http.createServer((req, res) => {
   if (req.method === "POST" && url.pathname === "/plan") return planWithGurobi(req, res);
   if (req.method === "GET" || req.method === "HEAD") return serveStatic(req, res);
   send(res, 405, "Method not allowed", "text/plain; charset=utf-8");
-}).listen(port, "127.0.0.1", () => console.log(`http://127.0.0.1:${port}`));
+}).listen(port, "127.0.0.1", () => {
+  console.log(`http://127.0.0.1:${port}`);
+  console.log("Real replies: watch this terminal for REPLY NEEDED, then write the reply in agent/log.md (see AGENTS.md).");
+});
