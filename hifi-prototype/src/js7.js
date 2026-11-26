@@ -38,6 +38,7 @@
     $('#login').hidden = true; $('#login').removeAttribute('inert');
     renderAll(); setFocus(false); applyLayout();
     if (S.started) openStudyModule();
+    extractSavedUploads();
     var who = $('#whoami'); if (who) who.textContent = email;
   }
   /* A saved state from a machine that had the course PDF: drop that context when the file is missing. */
@@ -109,8 +110,9 @@
   });
   function notesFor() {
     return C.files.filter(function (f) { return f.status === 'added'; }).map(function (f) {
-      var note = (f.slides || []).map(function (n) { var s = SLIDES[n]; return s ? s.t + ': ' + s.p.join(' ') : ''; }).filter(Boolean).join(' | ');
-      return { name: f.name, note: note };
+      var slides = (f.slides || []).map(function (n) { var s = SLIDES[n]; return s ? s.t + ': ' + s.p.join(' ') : ''; }).filter(Boolean);
+      var pages = (f.pageText || []).map(function (p) { return p && p.text ? 'p.' + p.page + ': ' + p.text : ''; }).filter(Boolean);
+      return { name: f.name, note: slides.concat(pages).join(' | ') };
     });
   }
   function replyFor(text, id) {
@@ -170,6 +172,7 @@
       blobPut(f.blobKey, file).catch(function () { toast('This browser could not keep ' + file.name + ' for later. It will open now but not after a reload.'); });
       BURL[f.blobKey] = URL.createObjectURL(file);
       C.files.push(f); last = f; added++;
+      extractUpload(f, file);
     });
     if (refused) toast('Please choose a PDF.');
     else if (dup && !added) toast('That file is already in your material.');
@@ -181,3 +184,65 @@
     if (e.target.id !== 'file-input') return;
     addUploads(e.target.files); e.target.value = '';
   });
+
+  /* Page text of an upload, kept on the file so a reload and Real replies can still read it. Sample lectures keep their slides and are not extracted. */
+  var pdfJsP;
+  function loadPdfJs() {
+    if (!pdfJsP) pdfJsP = import('/vendor/pdf.min.mjs').then(function (m) {
+      m.GlobalWorkerOptions.workerSrc = new URL('/vendor/pdf.worker.min.mjs', location.origin).href;
+      return m;
+    });
+    return pdfJsP;
+  }
+  function pdfItemsText(items) {
+    var parts = [];
+    for (var i = 0; i < items.length; i++) {
+      var item = items[i];
+      if (!item || typeof item.str !== 'string') continue;
+      if (parts.length && parts[parts.length - 1].slice(-1) !== '\n') parts.push(' ');
+      parts.push(item.str);
+      if (item.hasEOL) parts.push('\n');
+    }
+    return parts.join('').trim();
+  }
+  function readPdfPages(bytes) {
+    return loadPdfJs().then(function (m) {
+      return m.getDocument({ data: bytes, disableWorker: true, isEvalSupported: false }).promise;
+    }).then(function (doc) {
+      var pages = [], n = 1;
+      function next() {
+        if (n > doc.numPages) return doc.destroy().then(function () { return pages; });
+        var pageNo = n++;
+        return doc.getPage(pageNo).then(function (page) { return page.getTextContent(); }).then(function (content) {
+          pages.push({ page: pageNo, text: pdfItemsText(content.items || []) });
+          return next();
+        });
+      }
+      return next();
+    });
+  }
+  function extractUpload(f, blob) {
+    if (!blob || f.defId || f.pageText) return Promise.resolve();
+    f.extracting = true;
+    if (C.files.indexOf(f) >= 0) renderLeft();
+    return blob.arrayBuffer().then(function (ab) { return readPdfPages(new Uint8Array(ab)); }).then(function (pages) {
+      f.pageText = pages;
+      f.pages = pages.length;
+      f.extracting = false;
+      if (C.files.indexOf(f) >= 0) renderLeft();
+    }).catch(function () {
+      f.pageText = [];
+      f.extracting = false;
+      if (C.files.indexOf(f) >= 0) renderLeft();
+      toast('Could not read the text of ' + f.name + '.');
+    });
+  }
+  function extractSavedUploads() {
+    if (!S) return;
+    Object.keys(S.courses).forEach(function (k) {
+      S.courses[k].files.forEach(function (f) {
+        if (f.defId || f.pageText || !f.blobKey) return;
+        blobGet(f.blobKey).then(function (b) { if (b) extractUpload(f, b); }).catch(function () { });
+      });
+    });
+  }
