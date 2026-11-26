@@ -91,6 +91,13 @@
     return XE(id, 'chain', d, min, src, ptags(inner, ['chain', 'power' + n]), 'Find f′(x) for f(x) = (' + ptxt(inner) + ')' + sup(n) + '.', function (x) { return n * Math.pow(pev(inner, x), n - 1) * pev(di, x); },
       'Outside: ' + n + '(' + ptxt(inner) + ')' + (n - 1 > 1 ? sup(n - 1) : '') + '. Inside derivative: ' + ptxt(di) + '. So f′(x) = ' + n + '(' + ptxt(inner) + ')' + (n - 1 > 1 ? sup(n - 1) : '') + '(' + ptxt(di) + ').');
   }
+  function XCP(id, d, min, src, outer, inner, n) { /* outer · (inner)^n, product rule and chain rule */
+    var dout = pder(outer), din = pder(inner);
+    return XE(id, 'chain', d, min, src, ptags(outer.concat(inner), ['chain', 'product', 'power' + n]),
+      'Find f′(x) for f(x) = ' + wrap(outer) + ' · (' + ptxt(inner) + ')' + sup(n) + '.',
+      function (x) { var u = pev(inner, x); return pev(dout, x) * Math.pow(u, n) + pev(outer, x) * n * Math.pow(u, n - 1) * pev(din, x); },
+      'Product and chain rule: (' + ptxt(dout) + ')(' + ptxt(inner) + ')' + sup(n) + ' + (' + ptxt(outer) + ') · ' + n + '(' + ptxt(inner) + ')' + (n > 2 ? sup(n - 1) : '') + '(' + ptxt(din) + ').');
+  }
   function XM(id, d, min, src, el, a, b) { /* −a x² + b x has its largest value at b / (2a) */
     var x0 = b / (2 * a);
     return XE(id, 'optim', d, min, src, el, 'At which x does f(x) = ' + ptxt([[-a, 2], [b, 1]]) + ' have its largest value?', function () { return x0; }, 'f′(x) = ' + ptxt([[-2 * a, 1], [b, 0]]) + ' = 0 gives x = ' + x0 + '.');
@@ -121,8 +128,18 @@
     XO('o9', 3, 4, 'up', null, 2, -8, 3), XO('o10', 4, 4, 'up', null, 3, -18, 2),
     XO('o11', 4, 4, 'ai', null, 1, -14, 7), XO('o12', 5, 5, 'up', null, 2, 8, 1), XO('o13', 5, 5, 'ai', null, 4, -16, 0),
     XK('o14', 6, 6, 'up', 1, 1), XK('o15', 6, 6, 'ai', 1, 3), XK('o16', 7, 7, 'up', 1, 4), XK('o17', 7, 7, 'ai', 2, 3),
-    XM('o18', 3, 3, 'up', ['critical', 'maximum', 'o18'], 1, 8), XM('o19', 4, 4, 'up', ['critical', 'maximum', 'o19'], 2, 12)
+    XM('o18', 3, 3, 'up', ['critical', 'maximum', 'o18'], 1, 8), XM('o19', 4, 4, 'up', ['critical', 'maximum', 'o19'], 2, 12),
+    XCP('c20', 4, 4, 'up', [[1, 1]], [[2, 1], [1, 0]], 2),
+    XCP('c21', 8, 7, 'ai', [[2, 1], [1, 0]], [[1, 2], [1, 0]], 3),
+    XCP('c22', 9, 8, 'up', [[1, 2]], [[1, 2], [1, 0]], 3),
+    XCP('c23', 10, 8, 'ai', [[1, 2], [1, 1]], [[2, 2], [1, 0]], 3)
   ]);
+  /* Chain rule in Graph question mode: three bubbles, five questions each, done in order. The rest of the bank stays for the planner. */
+  var CHAIN_BUBBLES = [
+    { id: 'linear', name: 'Linear inside', note: 'The inside is ax + b, so its derivative is a constant.', ids: ['c0', 'c10', 'c6', 'c1', 'c8'] },
+    { id: 'power', name: 'Power inside', note: 'The inside is a power, so you differentiate that too.', ids: ['c7', 'c13', 'c2', 'c9', 'c5'] },
+    { id: 'mix', name: 'Chain with another rule', note: 'The chain rule together with the product rule.', ids: ['c20', 'c4', 'c21', 'c22', 'c23'] }
+  ];
   /* Everything technical (why the planner chose a stop, the estimated chance of success, which solver ran) is kept out of the
      student's screen on purpose. Add ?dev to the address to see it while testing. */
   var DEV = /[?&]dev(=|&|$)/.test(location.search);
@@ -239,12 +256,48 @@
   function exOpen() {
     if (!S.ex || S.ex.ctx !== S.ctx || (S.ex.phase === 'setup' && !Object.keys(S.ex.topics).length)) S.ex = exNew();
     if (S.focus) setFocus(false);
-    S.gOn = false; renderViewer();
+    S.gOn = false;
+    var gb0 = $('#b-graph'); if (gb0) { gb0.setAttribute('aria-pressed', 'false'); gb0.classList.remove('on'); }
+    renderViewer();
     if (S.ctx === 'calc' && !exTopicsAvail().length && !C.files.length) {   /* demo: no material yet, so bring in the sample lectures at once */
       defsFor('calc').forEach(function (d) { addFile(d); }); toast('Sample lectures added for the demo.'); S.ex = exNew(); S.exOn = true; exRender(); setTimeout(function () { exWaitTopics(0); }, 300); return;
     }
     S.exOn = true; exTimerResume(); exRender(); var b = $('#exview .exh h2'); if (b) b.focus();
     announce('Exercise mode open');
+  }
+  /* Free choice from the graph: one question the student picked. The planner does not choose the next one. */
+  function exStartFree(id) {
+    var e = xById(id);
+    if (!e) return;
+    if (S.focus) setFocus(false);
+    S.gOn = false;
+    var gb = $('#b-graph'); if (gb) { gb.setAttribute('aria-pressed', 'false'); gb.classList.remove('on'); }
+    var s = exNew();
+    s.mode = 'free';
+    s.phase = 'run';
+    s.topics[e.topic] = true;
+    s.plan = [{ id: e.id, min: e.min, p: 0, rem: 0, why: 'You chose this question.' }];
+    s.rat0 = JSON.parse(JSON.stringify(C.ratings || {}));
+    S.ex = s;
+    S.exOn = true;
+    renderViewer();
+    exTimerStart();
+    exRender();
+    renderTop();
+    var i = $('#ex-in'); if (i) i.focus();
+    announce('Question open. You chose this one.');
+  }
+  function exBackToGraph() {
+    exTimerPause();
+    S.exOn = false;
+    S.ex = null;
+    S.gOn = true;
+    S.gqOn = true;
+    exRender();
+    var b = $('#b-graph'); if (b) { b.setAttribute('aria-pressed', 'true'); b.classList.add('on'); }
+    renderViewer();
+    renderTop();
+    announce('Graph question is on. Pick another question.');
   }
   function exExit() { exTimerPause(); S.exOn = false; exRender(); renderTop(); }
   function exBuild() {
@@ -283,6 +336,14 @@
     var old = C.ratings[tp], base = old == null ? 5 : old, nv = Math.max(0, Math.min(10, base + r[1]));
     if (C.start[tp] == null) C.start[tp] = base;
     C.ratings[tp] = nv; C.last[tp] = nv - base; C.pulse[tp] = true; renderLeft();
+    if (s.mode === 'free') {
+      if (!S.gqDone) S.gqDone = {};
+      S.gqDone[e.id] = kind;
+      s.res = { kind: kind, text: r[2], rating: [base, nv], dev: '', adjusted: false, more: false, pending: false, free: true };
+      s.fb = '';
+      exRender();
+      return;
+    }
     var inp = exInput(), oldNext = s.plan[s.cur + 1] ? s.plan[s.cur + 1].id : null, kept = s.plan.slice(0, s.cur + 1);
     s.res = { kind: kind, text: r[2], rating: [base, nv], dev: '', adjusted: false, more: false, pending: true }; s.fb = '';
     exRender();
@@ -318,7 +379,7 @@
   }
   function exHead(sub) {
     var ph = S.ex && S.ex.phase, cancel = ph === 'plan' || ph === 'run', inPath = ph === 'run' && S.ex.view === 'path';
-    var pathBtn = ph === 'run' ? (inPath ? '<button class="btn small" data-ex="pathback">Back to exercise</button>' : '<button class="btn small" data-ex="path">Full path</button>') : '';
+    var pathBtn = ph === 'run' && S.ex.mode !== 'free' ? (inPath ? '<button class="btn small" data-ex="pathback">Back to exercise</button>' : '<button class="btn small" data-ex="path">Full path</button>') : '';
     return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2>' + (sub ? '<p class="soft small">' + esc(sub) + '</p>' : '') + '</div><span class="spacer"></span>' + pathBtn + (cancel ? '<button class="btn small" data-ex="cancel">Cancel</button>' : '') + '<button class="btn small" data-ex="exit">Back to chat</button></div>';
   }
   /* A short look at what the stop is about, without giving the answer away. */
@@ -444,6 +505,7 @@
   }
   function exSeeChanges(s) { return s.res && s.res.adjusted ? '<button class="link exseechg" data-ex="path">See what changed</button>' : ''; }
   function stepperHtml(s, r) {
+    if (s.mode === 'free') return '<p class="exclock soft small" id="exclock">' + exClockText() + '</p>';
     var n = s.plan.length;
     return '<div class="exsteps" role="img" aria-label="Stop ' + (s.cur + 1) + ' of ' + n + '">' + s.plan.map(function (it, i) {
       var st = i < s.cur || (i === s.cur && r) ? 'done' : i === s.cur ? 'now' : 'todo';
@@ -464,10 +526,10 @@
       var up = r.rating[1] > r.rating[0];
       main += '<div class="exres ' + r.kind + '"><b>' + esc(r.text) + '</b>' + (up ? '<span class="exgain">' + esc(TNAME[e.topic]) + ' ' + fmt(r.rating[0]) + ' → ' + fmt(r.rating[1]) + '</span>' : '') + (r.kind !== 'clean' && r.kind !== 'retry' ? '<span class="small">' + esc(e.sol) + '</span>' : '') + '</div>' +
         (r.adjusted ? '<p class="exadj">✦ Your path was adjusted. ' + exSeeChanges(s) + '</p>' : '') + (DEV && r.dev ? '<p class="fine exdev">' + esc(r.dev) + '</p>' : '') +
-        '<div class="row" style="margin-top:14px"><button class="btn dark exbigbtn" data-ex="next"' + (r.pending ? ' disabled' : '') + '>' + (r.pending ? 'One moment…' : r.more ? 'Next' : 'Finish') + '</button></div>';
+        '<div class="row" style="margin-top:14px"><button class="btn dark exbigbtn" data-ex="' + (r.free ? 'freepick' : 'next') + '"' + (r.pending ? ' disabled' : '') + '>' + (r.pending ? 'One moment…' : r.free ? 'Choose another' : r.more ? 'Next' : 'Finish') + '</button></div>';
     }
     main += '</div>';
-    return exHead('') + '<div class="exbody run"><div class="exrunwrap">' + stepperHtml(s, r) + main + (DEV ? '<p class="fine exdev">' + solverNote().replace(/<[^>]+>/g, '') + '</p>' : '') + '</div></div>';
+    return exHead(s.mode === 'free' ? 'You chose this question.' : '') + '<div class="exbody run"><div class="exrunwrap">' + stepperHtml(s, r) + main + (DEV ? '<p class="fine exdev">' + solverNote().replace(/<[^>]+>/g, '') + '</p>' : '') + '</div></div>';
   }
   function exDone() {
     var s = S.ex, solved = s.hist.filter(function (h) { return h.r >= 0.5; }).length, clean = s.hist.filter(function (h) { return h.kind === 'clean' || h.kind === 'retry'; }).length, tp = {};
@@ -504,10 +566,12 @@
     else if (a === 'sol') { s.sol = true; s.hint = true; exRender(true); }
     else if (a === 'skip') exFinish('skip');
     else if (a === 'next') exNext();
+    else if (a === 'freepick') exBackToGraph();
     else if (a === 'again') { var keep = { time: s.time, source: s.source, topics: s.topics }; S.ex = exNew(); S.ex.time = keep.time; S.ex.source = keep.source; S.ex.topics = keep.topics; exRender(); }
     else if (a === 'path') { exTimerPause(); s.view = 'path'; exRender(); }
     else if (a === 'pathback') { s.view = 'ex'; exTimerResume(); exRender(); var inp0 = $('#ex-in'); if (inp0) inp0.focus(); }
     else if (a === 'cancel') {
+      if (s.mode === 'free') { exBackToGraph(); return; }
       if (s.phase === 'run' && s.hist.length) modal('<div class="mhead"><div><h2 id="mtitle">Cancel this session?</h2><p class="lead">Your path is dropped and you go back to the start. Ratings you already earned stay.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div><div class="mfoot"><button class="btn ghost" id="p-cancel">Keep going</button><button class="btn dark" id="ex-cancel-ok">Cancel session</button></div>');
       else exResetToSetup();
     }

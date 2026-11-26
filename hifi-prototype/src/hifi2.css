@@ -112,6 +112,23 @@
 .gkey i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; stroke: none; }
 .gkey i.file { background: var(--ink); } .gkey i.topic { background: var(--blue); }
 .gcap { margin: 0; text-align: center; font-size: 14px; min-height: 30px; display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.vtools .btn.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.gwrap.asking .gsvg { max-height: 38vh; }
+.gqlist { display: grid; gap: 8px; max-height: 32vh; overflow-y: auto; text-align: left; }
+.gqitem { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
+.gqlist.ordered .gqitem { grid-template-columns: auto 1fr auto auto; }
+.gqitem p { margin: 0; font-size: 13px; line-height: 1.35; }
+.gqitem .gqmeta, .gqbubble .gqmeta { font-size: 12px; color: var(--soft); white-space: nowrap; }
+.gqitem .gqnum { font-size: 12px; font-weight: 700; color: var(--soft); }
+.gqitem.done p, .gqitem.locked p { color: var(--soft); }
+.gqitem.locked { opacity: .55; }
+.gqback { display: flex; }
+.gqbubbles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+.gqbubble { display: grid; gap: 4px; text-align: left; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: #fff; cursor: pointer; font: inherit; color: var(--ink); }
+.gqbubble b { font-size: 14px; }
+.gqbubble span { font-size: 12px; color: var(--soft); line-height: 1.35; }
+.gqbubble:hover { border-color: var(--ink); }
+.gqbubble:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 #b-graph.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 
 /* sidebar toggle lives inside the sidebar (and in the header while the sidebar is hidden) */
