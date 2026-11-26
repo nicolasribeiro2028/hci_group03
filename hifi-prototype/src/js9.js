@@ -15,11 +15,39 @@
     nodes.forEach(function (n, i) { var a = -Math.PI / 2 + i * 2 * Math.PI / Math.max(nodes.length, 1); n.x = 280 + Math.cos(a) * 180; n.y = 270 + Math.sin(a) * 180; });
     return { nodes: nodes, edges: edges, byId: ids };
   }
+  function graphQuestionNode() {
+    if (!S || !S.gNode) return null;
+    var n = graphModel().byId[S.gNode];
+    if (!n || n.kind !== 'topic') return null;
+    if (!EXB.some(function (e) { return e.topic === n.tid; })) return null;
+    return n;
+  }
+  function graphSelect(id) {
+    S.gqBubble = null;
+    S.gNode = id;
+    if (STUDY !== 'free' && !graphQuestionNode()) { S.gqOn = false; S.gqBubble = null; }
+    renderViewer();
+  }
   function graphHead() {
-    var on = !!S.gqOn;
+    var topic = graphQuestionNode();
+    var on = !!S.gqOn && !!topic;
+    var qbtn = STUDY === 'free' ? '' : '<button type="button" class="btn small' + (on ? ' on' : '') + '" data-graph="questions" aria-pressed="' + (on ? 'true' : 'false') + '"' + (topic ? '' : ' disabled title="Select a topic first"') + '>Graph question</button>';
     return '<div class="vhead"><div class="tabs"><div class="tab on"><span class="tabb">Graph</span></div></div><div class="vtools">' +
-      '<button type="button" class="btn small' + (on ? ' on' : '') + '" data-graph="questions" aria-pressed="' + (on ? 'true' : 'false') + '">Graph question</button>' +
+      qbtn +
       '<button type="button" class="btn small" data-graph="close">Close graph</button></div></div>';
+  }
+  /* A study link opens one module and leaves the other one out. */
+  function openStudyModule() {
+    if (!STUDY || !S || !S.started) return;
+    if (STUDY === 'optimized') {
+      S.gqOn = false;
+      if (!S.exOn) exOpen();
+      return;
+    }
+    S.gqOn = true;
+    if (S.exOn) exExit();
+    if (!S.gOn) graphToggle(true);
+    else { renderViewer(); renderTop(); }
   }
   function chainBubbleById(id) {
     for (var i = 0; i < CHAIN_BUBBLES.length; i++) if (CHAIN_BUBBLES[i].id === id) return CHAIN_BUBBLES[i];
@@ -56,7 +84,7 @@
       var btn = state === 'locked'
         ? '<button type="button" class="btn small" disabled>Locked</button>'
         : '<button type="button" class="btn small' + (state === 'done' ? '' : ' dark') + '" data-graph="ask" data-qid="' + esc(e.id) + '">' + (state === 'done' ? 'Do again' : 'Do this') + '</button>';
-      return '<div class="gqitem ' + state + '" role="listitem"><span class="gqnum">q' + (i + 1) + '</span><p>' + esc(e.q) + '</p><span class="gqmeta">' + e.min + ' min' + (state === 'done' ? ' · done' : '') + '</span>' + btn + '</div>';
+      return '<div class="gqitem ' + state + '" role="listitem"><span class="gqnum">q' + (i + 1) + '</span><p>' + esc(e.q) + '</p><span class="gqmeta">2 min' + (state === 'done' ? ' · done' : '') + '</span>' + btn + '</div>';
     }).join('');
     return '<div class="gqback"><button type="button" class="btn small" data-graph="bubbles">All types</button></div><div class="gqlist ordered" role="list" aria-label="' + esc(b.name) + ', questions in order">' + rows + '</div>';
   }
@@ -67,7 +95,7 @@
     var done = S.gqDone || {};
     return '<div class="gqlist" role="list" aria-label="Questions you can choose">' + list.map(function (e) {
       var was = done[e.id];
-      return '<div class="gqitem' + (was ? ' done' : '') + '" role="listitem"><p>' + esc(e.q) + '</p><span class="gqmeta">' + e.min + ' min' + (was ? ' · done' : '') + '</span><button type="button" class="btn small' + (was ? '' : ' dark') + '" data-graph="ask" data-qid="' + esc(e.id) + '">' + (was ? 'Do again' : 'Do this') + '</button></div>';
+      return '<div class="gqitem' + (was ? ' done' : '') + '" role="listitem"><p>' + esc(e.q) + '</p><span class="gqmeta">2 min' + (was ? ' · done' : '') + '</span><button type="button" class="btn small' + (was ? '' : ' dark') + '" data-graph="ask" data-qid="' + esc(e.id) + '">' + (was ? 'Do again' : 'Do this') + '</button></div>';
     }).join('') + '</div>';
   }
   function graphHtml() {
@@ -94,25 +122,27 @@
     return head + '<div class="gwrap' + (list ? ' asking' : '') + '"><svg class="gsvg" viewBox="0 0 560 560" role="img" aria-label="' + (S.gqOn ? 'Graph of files and topics, question choice on' : 'Graph of files and topics') + '">' + lines + circles + '</svg><div class="gkey"><span><i class="gnode file"></i>File</span><span><i class="gnode topic"></i>Topic</span></div><p class="gcap" role="status">' + cap + '</p>' + list + '</div>';
   }
   function graphToggle(on) {
+    if (STUDY === 'optimized') return;
     S.gOn = on === undefined ? !S.gOn : !!on; S.gNode = null;
+    if (STUDY === 'free') S.gqOn = true;
     var b = $('#b-graph'); if (b) { b.setAttribute('aria-pressed', !!S.gOn); b.classList.toggle('on', !!S.gOn); }
     if (S.gOn && S.exOn) exExit();
     renderViewer();
   }
   document.addEventListener('click', function (e) {
     var t = e.target; if (!t.closest) return; var o;
-    if (t.closest('#b-graph')) { graphToggle(); return; }
-    if ((o = t.closest('[data-gnode]'))) { S.gqBubble = null; S.gNode = o.getAttribute('data-gnode'); renderViewer(); return; }
+    if (t.closest('#b-graph')) { if (STUDY === 'optimized') return; graphToggle(); return; }
+    if ((o = t.closest('[data-gnode]'))) { graphSelect(o.getAttribute('data-gnode')); return; }
     if ((o = t.closest('[data-graph]'))) {
       var a = o.getAttribute('data-graph');
       if (a === 'close') graphToggle(false);
       else if (a === 'open') { var fid = o.getAttribute('data-fid'); graphToggle(false); openFile(fid); }
-      else if (a === 'questions') { S.gqOn = !S.gqOn; if (!S.gqOn) S.gqBubble = null; renderViewer(); announce(S.gqOn ? 'Graph question is on. Choose your own questions.' : 'Graph question is off. The graph is files and topics only.'); }
+      else if (a === 'questions') { if (STUDY === 'free' || !graphQuestionNode()) return; S.gqOn = !S.gqOn; if (!S.gqOn) S.gqBubble = null; renderViewer(); announce(S.gqOn ? 'Graph question is on. Choose your own questions.' : 'Graph question is off. The graph is files and topics only.'); }
       else if (a === 'bubble') { S.gqBubble = o.getAttribute('data-bid'); renderViewer(); }
       else if (a === 'bubbles') { S.gqBubble = null; renderViewer(); }
       else if (a === 'ask') { var qid = o.getAttribute('data-qid'); if (chainAskAllowed(qid)) exStartFree(qid); }
     }
   });
   document.addEventListener('keydown', function (e) {
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-gnode')) { e.preventDefault(); S.gqBubble = null; S.gNode = e.target.getAttribute('data-gnode'); renderViewer(); }
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-gnode')) { e.preventDefault(); graphSelect(e.target.getAttribute('data-gnode')); }
   });

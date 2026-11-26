@@ -597,6 +597,7 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 .gkey i.file { background: var(--ink); } .gkey i.topic { background: var(--blue); }
 .gcap { margin: 0; text-align: center; font-size: 14px; min-height: 30px; display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .vtools .btn.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.vtools .btn:disabled { opacity: .4; cursor: default; }
 .gwrap.asking .gsvg { max-height: 38vh; }
 .gqlist { display: grid; gap: 8px; max-height: 32vh; overflow-y: auto; text-align: left; }
 .gqitem { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; }
@@ -966,6 +967,9 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
   };
   var POLICY_ID = (/[?&]policy=([a-z0-9_-]+)/i.exec(QS) || [])[1];
   if (!POLICY_ID || !HELP_POLICIES[POLICY_ID]) POLICY_ID = 'adaptive';
+  /* Study assignment. ?condition=optimized opens Exercise mode. ?condition=free opens Graph question. No parameter leaves both available. */
+  var STUDY = (/[?&]condition=(optimized|free)/i.exec(QS) || [])[1];
+  if (STUDY) STUDY = STUDY.toLowerCase();
   function bandOf(r) { return r == null ? 'mid' : r <= 3 ? 'low' : r <= 6 ? 'mid' : 'high'; }
   function policyCell(r, diff) { return JSON.parse(JSON.stringify(HELP_POLICIES[POLICY_ID].cells[bandOf(r)][diff])); }
   function nextLevelOf(m) { return m.cell.levels.filter(function (l) { return l > m.level; })[0] || null; }
@@ -1638,7 +1642,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
     if (t.id === 'b-start') {
       S.profile.desc = $('#prof-desc').value.trim(); S.started = true; S.editing = false;
       Object.keys(S.courses).forEach(function (k) { var c = S.courses[k]; if (!c.pdfDemo && c.chats[0].msgs.length === 1 && !c.chats[0].msgs[0].user) c.chats[0].msgs[0].text = greetText(); });
-      renderAll(); return;
+      renderAll(); openStudyModule(); return;
     }
     if (t.id === 'send') { send(); return; }
     if (t.id === 'b-addctx') { openAddCtx(); return; }
@@ -1780,7 +1784,8 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
     var b = $('#b-practice'); if (!b) return;
     var ex = S.ex && S.ex.phase === 'run' && S.ex.ctx === S.ctx;
     b.textContent = ex ? 'Continue exercises' : 'Exercise mode';
-
+    b.hidden = STUDY === 'free';
+    var g = $('#b-graph'); if (g) g.hidden = STUDY === 'optimized';
   }
   function offerProblems() {
     var rec = (C.ratings.pq == null ? 0 : C.ratings.pq) < (C.ratings.chain == null ? 0 : C.ratings.chain) ? 'p2' : 'p1';
@@ -1829,6 +1834,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
     }
     if (e.target.closest && e.target.closest('#b-exit')) { setFocus(false); return; }
     if (e.target.closest && e.target.closest('#b-practice')) {
+      if (STUDY === 'free') return;
       if (S.exOn) { exExit(); return; }
       exOpen();
     }
@@ -2066,6 +2072,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
     if (email === DEMO && C.chats[0] && C.chats[0].msgs.length === 1 && /^Hi! You have already taken/.test(C.chats[0].msgs[0].text || '')) C.chats[0].msgs[0] = demoGreeting();   /* a demo saved by an earlier version gets the current greeting */
     $('#login').hidden = true; $('#login').removeAttribute('inert');
     renderAll(); setFocus(false); applyLayout();
+    if (S.started) openStudyModule();
     var who = $('#whoami'); if (who) who.textContent = email;
   }
   /* A saved state from a machine that had the course PDF: drop that context when the file is missing. */
@@ -2465,6 +2472,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
   setInterval(function () { var c = $('#exclock'); if (c && S.ex && S.ex.phase === 'run') c.textContent = exClockText(); }, 1000);
   function exInput() { var s = S.ex, tp = Object.keys(s.topics).filter(function (k) { return s.topics[k]; }); return { remaining: s.time - s.used, topics: tp, source: s.source, rat: s.rat0 || C.ratings, speed: s.speed || 1, hist: s.hist.map(function (h) { return { id: h.id, r: h.r }; }) }; }
   function exOpen() {
+    if (STUDY === 'free') return;
     if (!S.ex || S.ex.ctx !== S.ctx || (S.ex.phase === 'setup' && !Object.keys(S.ex.topics).length)) S.ex = exNew();
     if (S.focus) setFocus(false);
     S.gOn = false;
@@ -2487,7 +2495,8 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
     s.mode = 'free';
     s.phase = 'run';
     s.topics[e.topic] = true;
-    s.plan = [{ id: e.id, min: e.min, p: 0, rem: 0, why: 'You chose this question.' }];
+    s.time = 2;
+    s.plan = [{ id: e.id, min: 2, p: 0, rem: 0, why: 'You chose this question.' }];
     s.rat0 = JSON.parse(JSON.stringify(C.ratings || {}));
     S.ex = s;
     S.exOn = true;
@@ -2540,7 +2549,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
   function exFinish(kind) {
     var s = S.ex, e = exCur(), r = RES[kind], tp = e.topic;
     exTimerPause(); var sec = Math.min(s.cs, 1800); s.cs = 0; s.sec = (s.sec || 0) + sec; s.used = s.sec / 60;
-    s.hist.push({ id: e.id, r: r[0], kind: kind, min: e.min, sec: Math.round(sec) });
+    s.hist.push({ id: e.id, r: r[0], kind: kind, min: s.mode === 'free' ? 2 : e.min, sec: Math.round(sec) });
     /* pace = real time over estimated time, from the exercises the student actually worked on (a skip or a shown solution says nothing about speed) */
     var est = 0, act = 0, nw = 0; s.hist.forEach(function (h) { if (h.kind === 'clean' || h.kind === 'retry' || h.kind === 'hint') { est += xById(h.id).min; act += h.sec / 60; nw++; } });
     s.speed = nw >= 2 && est > 0 ? cl(act / est, 0.5, 2) : 1;
@@ -2726,7 +2735,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
   function exRun() {
     var s = S.ex, e = exCur(), r = s.res;
     var keys = [['x', 'x'], ['x²', '^2'], ['xⁿ', '^'], ['(', '('], [')', ')'], ['×', '*'], ['÷', '/']].map(function (k) { return '<button type="button" class="mk" data-ex="key" data-v="' + k[1] + '" aria-label="Insert ' + esc(k[0]) + '">' + k[0] + '</button>'; }).join('');
-    var main = '<div class="excur"><div class="excurtop"><span class="exchip"><span class="pgl">' + GLYPH[e.topic] + '</span>' + TNAME[e.topic] + '</span><span class="soft small">' + e.min + ' min</span></div><p class="exq">' + esc(e.q) + '</p>';
+    var main = '<div class="excur"><div class="excurtop"><span class="exchip"><span class="pgl">' + GLYPH[e.topic] + '</span>' + TNAME[e.topic] + '</span><span class="soft small">' + (s.mode === 'free' ? 2 : e.min) + ' min</span></div><p class="exq">' + esc(e.q) + '</p>';
     if (!r) {
       main += '<div class="exans"><div class="mkeys" role="group" aria-label="Math keys">' + keys + '</div><div class="row" style="gap:8px"><input class="inp" id="ex-in" autocomplete="off" placeholder="Your answer" aria-label="Your answer" value="' + esc(s.input) + '" style="height:44px"><button class="btn dark" style="height:44px;padding:0 22px" data-ex="submit">Check</button></div></div>';
       if (s.fb) main += '<p class="exfb" role="status">' + esc(s.fb) + '</p>';
@@ -2819,11 +2828,39 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
     nodes.forEach(function (n, i) { var a = -Math.PI / 2 + i * 2 * Math.PI / Math.max(nodes.length, 1); n.x = 280 + Math.cos(a) * 180; n.y = 270 + Math.sin(a) * 180; });
     return { nodes: nodes, edges: edges, byId: ids };
   }
+  function graphQuestionNode() {
+    if (!S || !S.gNode) return null;
+    var n = graphModel().byId[S.gNode];
+    if (!n || n.kind !== 'topic') return null;
+    if (!EXB.some(function (e) { return e.topic === n.tid; })) return null;
+    return n;
+  }
+  function graphSelect(id) {
+    S.gqBubble = null;
+    S.gNode = id;
+    if (STUDY !== 'free' && !graphQuestionNode()) { S.gqOn = false; S.gqBubble = null; }
+    renderViewer();
+  }
   function graphHead() {
-    var on = !!S.gqOn;
+    var topic = graphQuestionNode();
+    var on = !!S.gqOn && !!topic;
+    var qbtn = STUDY === 'free' ? '' : '<button type="button" class="btn small' + (on ? ' on' : '') + '" data-graph="questions" aria-pressed="' + (on ? 'true' : 'false') + '"' + (topic ? '' : ' disabled title="Select a topic first"') + '>Graph question</button>';
     return '<div class="vhead"><div class="tabs"><div class="tab on"><span class="tabb">Graph</span></div></div><div class="vtools">' +
-      '<button type="button" class="btn small' + (on ? ' on' : '') + '" data-graph="questions" aria-pressed="' + (on ? 'true' : 'false') + '">Graph question</button>' +
+      qbtn +
       '<button type="button" class="btn small" data-graph="close">Close graph</button></div></div>';
+  }
+  /* A study link opens one module and leaves the other one out. */
+  function openStudyModule() {
+    if (!STUDY || !S || !S.started) return;
+    if (STUDY === 'optimized') {
+      S.gqOn = false;
+      if (!S.exOn) exOpen();
+      return;
+    }
+    S.gqOn = true;
+    if (S.exOn) exExit();
+    if (!S.gOn) graphToggle(true);
+    else { renderViewer(); renderTop(); }
   }
   function chainBubbleById(id) {
     for (var i = 0; i < CHAIN_BUBBLES.length; i++) if (CHAIN_BUBBLES[i].id === id) return CHAIN_BUBBLES[i];
@@ -2860,7 +2897,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
       var btn = state === 'locked'
         ? '<button type="button" class="btn small" disabled>Locked</button>'
         : '<button type="button" class="btn small' + (state === 'done' ? '' : ' dark') + '" data-graph="ask" data-qid="' + esc(e.id) + '">' + (state === 'done' ? 'Do again' : 'Do this') + '</button>';
-      return '<div class="gqitem ' + state + '" role="listitem"><span class="gqnum">q' + (i + 1) + '</span><p>' + esc(e.q) + '</p><span class="gqmeta">' + e.min + ' min' + (state === 'done' ? ' · done' : '') + '</span>' + btn + '</div>';
+      return '<div class="gqitem ' + state + '" role="listitem"><span class="gqnum">q' + (i + 1) + '</span><p>' + esc(e.q) + '</p><span class="gqmeta">2 min' + (state === 'done' ? ' · done' : '') + '</span>' + btn + '</div>';
     }).join('');
     return '<div class="gqback"><button type="button" class="btn small" data-graph="bubbles">All types</button></div><div class="gqlist ordered" role="list" aria-label="' + esc(b.name) + ', questions in order">' + rows + '</div>';
   }
@@ -2871,7 +2908,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
     var done = S.gqDone || {};
     return '<div class="gqlist" role="list" aria-label="Questions you can choose">' + list.map(function (e) {
       var was = done[e.id];
-      return '<div class="gqitem' + (was ? ' done' : '') + '" role="listitem"><p>' + esc(e.q) + '</p><span class="gqmeta">' + e.min + ' min' + (was ? ' · done' : '') + '</span><button type="button" class="btn small' + (was ? '' : ' dark') + '" data-graph="ask" data-qid="' + esc(e.id) + '">' + (was ? 'Do again' : 'Do this') + '</button></div>';
+      return '<div class="gqitem' + (was ? ' done' : '') + '" role="listitem"><p>' + esc(e.q) + '</p><span class="gqmeta">2 min' + (was ? ' · done' : '') + '</span><button type="button" class="btn small' + (was ? '' : ' dark') + '" data-graph="ask" data-qid="' + esc(e.id) + '">' + (was ? 'Do again' : 'Do this') + '</button></div>';
     }).join('') + '</div>';
   }
   function graphHtml() {
@@ -2898,27 +2935,29 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
     return head + '<div class="gwrap' + (list ? ' asking' : '') + '"><svg class="gsvg" viewBox="0 0 560 560" role="img" aria-label="' + (S.gqOn ? 'Graph of files and topics, question choice on' : 'Graph of files and topics') + '">' + lines + circles + '</svg><div class="gkey"><span><i class="gnode file"></i>File</span><span><i class="gnode topic"></i>Topic</span></div><p class="gcap" role="status">' + cap + '</p>' + list + '</div>';
   }
   function graphToggle(on) {
+    if (STUDY === 'optimized') return;
     S.gOn = on === undefined ? !S.gOn : !!on; S.gNode = null;
+    if (STUDY === 'free') S.gqOn = true;
     var b = $('#b-graph'); if (b) { b.setAttribute('aria-pressed', !!S.gOn); b.classList.toggle('on', !!S.gOn); }
     if (S.gOn && S.exOn) exExit();
     renderViewer();
   }
   document.addEventListener('click', function (e) {
     var t = e.target; if (!t.closest) return; var o;
-    if (t.closest('#b-graph')) { graphToggle(); return; }
-    if ((o = t.closest('[data-gnode]'))) { S.gqBubble = null; S.gNode = o.getAttribute('data-gnode'); renderViewer(); return; }
+    if (t.closest('#b-graph')) { if (STUDY === 'optimized') return; graphToggle(); return; }
+    if ((o = t.closest('[data-gnode]'))) { graphSelect(o.getAttribute('data-gnode')); return; }
     if ((o = t.closest('[data-graph]'))) {
       var a = o.getAttribute('data-graph');
       if (a === 'close') graphToggle(false);
       else if (a === 'open') { var fid = o.getAttribute('data-fid'); graphToggle(false); openFile(fid); }
-      else if (a === 'questions') { S.gqOn = !S.gqOn; if (!S.gqOn) S.gqBubble = null; renderViewer(); announce(S.gqOn ? 'Graph question is on. Choose your own questions.' : 'Graph question is off. The graph is files and topics only.'); }
+      else if (a === 'questions') { if (STUDY === 'free' || !graphQuestionNode()) return; S.gqOn = !S.gqOn; if (!S.gqOn) S.gqBubble = null; renderViewer(); announce(S.gqOn ? 'Graph question is on. Choose your own questions.' : 'Graph question is off. The graph is files and topics only.'); }
       else if (a === 'bubble') { S.gqBubble = o.getAttribute('data-bid'); renderViewer(); }
       else if (a === 'bubbles') { S.gqBubble = null; renderViewer(); }
       else if (a === 'ask') { var qid = o.getAttribute('data-qid'); if (chainAskAllowed(qid)) exStartFree(qid); }
     }
   });
   document.addEventListener('keydown', function (e) {
-    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-gnode')) { e.preventDefault(); S.gqBubble = null; S.gNode = e.target.getAttribute('data-gnode'); renderViewer(); }
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-gnode')) { e.preventDefault(); graphSelect(e.target.getAttribute('data-gnode')); }
   });
   fresh(); acctBoot(); renderAll();
   window.__proto = {

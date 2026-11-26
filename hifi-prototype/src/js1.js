@@ -126,6 +126,9 @@
   };
   var POLICY_ID = (/[?&]policy=([a-z0-9_-]+)/i.exec(QS) || [])[1];
   if (!POLICY_ID || !HELP_POLICIES[POLICY_ID]) POLICY_ID = 'adaptive';
+  /* Study assignment. ?condition=optimized opens Exercise mode. ?condition=free opens Graph question. No parameter leaves both available. */
+  var STUDY = (/[?&]condition=(optimized|free)/i.exec(QS) || [])[1];
+  if (STUDY) STUDY = STUDY.toLowerCase();
   function bandOf(r) { return r == null ? 'mid' : r <= 3 ? 'low' : r <= 6 ? 'mid' : 'high'; }
   function policyCell(r, diff) { return JSON.parse(JSON.stringify(HELP_POLICIES[POLICY_ID].cells[bandOf(r)][diff])); }
   function nextLevelOf(m) { return m.cell.levels.filter(function (l) { return l > m.level; })[0] || null; }

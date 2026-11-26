@@ -599,7 +599,7 @@
     if (t.id === 'b-start') {
       S.profile.desc = $('#prof-desc').value.trim(); S.started = true; S.editing = false;
       Object.keys(S.courses).forEach(function (k) { var c = S.courses[k]; if (!c.pdfDemo && c.chats[0].msgs.length === 1 && !c.chats[0].msgs[0].user) c.chats[0].msgs[0].text = greetText(); });
-      renderAll(); return;
+      renderAll(); openStudyModule(); return;
     }
     if (t.id === 'send') { send(); return; }
     if (t.id === 'b-addctx') { openAddCtx(); return; }

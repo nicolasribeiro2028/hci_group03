@@ -254,6 +254,7 @@
   setInterval(function () { var c = $('#exclock'); if (c && S.ex && S.ex.phase === 'run') c.textContent = exClockText(); }, 1000);
   function exInput() { var s = S.ex, tp = Object.keys(s.topics).filter(function (k) { return s.topics[k]; }); return { remaining: s.time - s.used, topics: tp, source: s.source, rat: s.rat0 || C.ratings, speed: s.speed || 1, hist: s.hist.map(function (h) { return { id: h.id, r: h.r }; }) }; }
   function exOpen() {
+    if (STUDY === 'free') return;
     if (!S.ex || S.ex.ctx !== S.ctx || (S.ex.phase === 'setup' && !Object.keys(S.ex.topics).length)) S.ex = exNew();
     if (S.focus) setFocus(false);
     S.gOn = false;
@@ -276,7 +277,8 @@
     s.mode = 'free';
     s.phase = 'run';
     s.topics[e.topic] = true;
-    s.plan = [{ id: e.id, min: e.min, p: 0, rem: 0, why: 'You chose this question.' }];
+    s.time = 2;
+    s.plan = [{ id: e.id, min: 2, p: 0, rem: 0, why: 'You chose this question.' }];
     s.rat0 = JSON.parse(JSON.stringify(C.ratings || {}));
     S.ex = s;
     S.exOn = true;
@@ -329,7 +331,7 @@
   function exFinish(kind) {
     var s = S.ex, e = exCur(), r = RES[kind], tp = e.topic;
     exTimerPause(); var sec = Math.min(s.cs, 1800); s.cs = 0; s.sec = (s.sec || 0) + sec; s.used = s.sec / 60;
-    s.hist.push({ id: e.id, r: r[0], kind: kind, min: e.min, sec: Math.round(sec) });
+    s.hist.push({ id: e.id, r: r[0], kind: kind, min: s.mode === 'free' ? 2 : e.min, sec: Math.round(sec) });
     /* pace = real time over estimated time, from the exercises the student actually worked on (a skip or a shown solution says nothing about speed) */
     var est = 0, act = 0, nw = 0; s.hist.forEach(function (h) { if (h.kind === 'clean' || h.kind === 'retry' || h.kind === 'hint') { est += xById(h.id).min; act += h.sec / 60; nw++; } });
     s.speed = nw >= 2 && est > 0 ? cl(act / est, 0.5, 2) : 1;
@@ -515,7 +517,7 @@
   function exRun() {
     var s = S.ex, e = exCur(), r = s.res;
     var keys = [['x', 'x'], ['x²', '^2'], ['xⁿ', '^'], ['(', '('], [')', ')'], ['×', '*'], ['÷', '/']].map(function (k) { return '<button type="button" class="mk" data-ex="key" data-v="' + k[1] + '" aria-label="Insert ' + esc(k[0]) + '">' + k[0] + '</button>'; }).join('');
-    var main = '<div class="excur"><div class="excurtop"><span class="exchip"><span class="pgl">' + GLYPH[e.topic] + '</span>' + TNAME[e.topic] + '</span><span class="soft small">' + e.min + ' min</span></div><p class="exq">' + esc(e.q) + '</p>';
+    var main = '<div class="excur"><div class="excurtop"><span class="exchip"><span class="pgl">' + GLYPH[e.topic] + '</span>' + TNAME[e.topic] + '</span><span class="soft small">' + (s.mode === 'free' ? 2 : e.min) + ' min</span></div><p class="exq">' + esc(e.q) + '</p>';
     if (!r) {
       main += '<div class="exans"><div class="mkeys" role="group" aria-label="Math keys">' + keys + '</div><div class="row" style="gap:8px"><input class="inp" id="ex-in" autocomplete="off" placeholder="Your answer" aria-label="Your answer" value="' + esc(s.input) + '" style="height:44px"><button class="btn dark" style="height:44px;padding:0 22px" data-ex="submit">Check</button></div></div>';
       if (s.fb) main += '<p class="exfb" role="status">' + esc(s.fb) + '</p>';
