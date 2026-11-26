@@ -92,7 +92,7 @@
   }
   function filesHtml() {
     var h = C.files.map(function (f) {
-      var st = f.status === 'added' ? '' : f.status === 'uploading' ? f.pct + '%' : 'Problem';
+      var st = f.extracting ? 'Reading…' : f.status === 'added' ? '' : f.status === 'uploading' ? f.pct + '%' : 'Problem';
       var row = '<button type="button" class="file' + (C.active === f.id ? ' on' : '') + '" data-open="' + f.id + '"><span class="ico"></span><span class="nm" title="' + esc(f.name) + '">' + esc(f.name) + '</span><span class="st">' + st + '</span></button>';
       if (f.status === 'uploading') row += '<div class="bar" style="margin:-2px 10px 8px"><i style="width:' + f.pct + '%"></i></div>';
       if (f.status === 'problem') row += '<div class="small soft" style="margin:-2px 10px 8px">' + esc(f.note) + ' <button class="link" data-retry="' + f.id + '">Try again</button></div>';

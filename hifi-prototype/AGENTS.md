@@ -21,7 +21,7 @@ Treat every new `REPLY NEEDED` line as a question you should answer. Do not wait
 
 1. Open `agent/log.md` and find the heading for that id, for example `## q-3`.
 2. If `## q-3 reply` is already there, do nothing.
-3. Otherwise append the reply under the same id. Answer only from the notes in that entry. Name the file you used. If the notes do not cover the question, say it is not in the material.
+3. Otherwise append the reply under the same id. Answer only from the notes in that entry. A built-in lecture is its slide text. An uploaded PDF is `p.1:`, `p.2:`, and so on. Name the file you used. If the notes do not cover the question, say it is not in the material.
 4. The page polls the log and shows the reply on its own. The format is in `agent/PROMPT.md`.
 
 ```
