@@ -37,6 +37,7 @@
     if (email === DEMO && C.chats[0] && C.chats[0].msgs.length === 1 && /^Hi! You have already taken/.test(C.chats[0].msgs[0].text || '')) C.chats[0].msgs[0] = demoGreeting();   /* a demo saved by an earlier version gets the current greeting */
     $('#login').hidden = true; $('#login').removeAttribute('inert');
     renderAll(); setFocus(false); applyLayout();
+    if (S.started) openStudyModule();
     var who = $('#whoami'); if (who) who.textContent = email;
   }
   /* A saved state from a machine that had the course PDF: drop that context when the file is missing. */

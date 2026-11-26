@@ -36,7 +36,8 @@
     var b = $('#b-practice'); if (!b) return;
     var ex = S.ex && S.ex.phase === 'run' && S.ex.ctx === S.ctx;
     b.textContent = ex ? 'Continue exercises' : 'Exercise mode';
-
+    b.hidden = STUDY === 'free';
+    var g = $('#b-graph'); if (g) g.hidden = STUDY === 'optimized';
   }
   function offerProblems() {
     var rec = (C.ratings.pq == null ? 0 : C.ratings.pq) < (C.ratings.chain == null ? 0 : C.ratings.chain) ? 'p2' : 'p1';
@@ -85,6 +86,7 @@
     }
     if (e.target.closest && e.target.closest('#b-exit')) { setFocus(false); return; }
     if (e.target.closest && e.target.closest('#b-practice')) {
+      if (STUDY === 'free') return;
       if (S.exOn) { exExit(); return; }
       exOpen();
     }
