@@ -2,7 +2,7 @@
 
 **Group 3, Milestone 3: UI Optimization.** Code: `ui_optimization.ipynb`.
 
-**Declaration of Use of AI.** We used Claude (through Claude Code) to help build the exercise bank, to suggest constraints, to turn our formulation into mathematics and Gurobi code, and to improve the wording of this report. The task, the modelling choices and the conclusions are ours.
+**Declaration of Use of AI.** We used Claude (through Claude Code) to help build the exercise bank, to turn our formulation into mathematics and Gurobi code, and to improve the wording of this report. The task, the modelling choices and the conclusions are ours.
 
 ## Section 1: Overview of the task
 
