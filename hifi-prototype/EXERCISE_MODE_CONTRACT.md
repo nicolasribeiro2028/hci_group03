@@ -6,7 +6,7 @@
 
 | Field | Values in the prototype | Meaning |
 |---|---|---|
-| `remaining` | 15, 30, 45 or 60 minutes at the start | Time budget left. Falls as exercises are finished. |
+| `remaining` | 5, 10 or 20 minutes at the start | Time budget left. Falls as exercises are finished. |
 | `topics` | ids of the topics chosen | Only these topics are planned. |
 | `source` | `both`, `up` (uploaded only), `ai` (AI-generated only) | Where exercises may come from. |
 | `rat` | topic id to 0 to 10, or missing | Self-rating at the start of the session. A missing rating counts as 5 with little weight. |

@@ -83,3 +83,18 @@ Claude (Sonnet 5.5, Claude Code) restructured the front end, wrote the CSS and J
 - **Time is measured.** The clock counts only the time the student spends working on an exercise (it stops while the result or the full path is shown, when Exercise mode is closed, or when the tab is hidden). The session clock shows `m:ss of N min`. The minutes written on a stop are estimates.
 - **Pace.** After two exercises the student actually worked on (solved, with or without a hint, not skipped), the planner scales the estimated minutes by the ratio of real to estimated time (between 0.5 and 2), so a fast student gets more stops and a slow one fewer. The time left in the plan is the real time left.
 - **Full path.** A "Full path" button in the header of a session shows the whole road: done stops (with the time taken), the current one, what is ahead, and a "Since your last exercise" box that lists the stops added and removed by the last re-plan and whether the order changed. New stops carry a "new" tag. After a result that changed the path, "See what changed" opens the same view.
+
+## Update: session progress and finishing
+- **Progress against what does not move.** The session shows a time bar (the time goal, filled with real time, with a small marker where each exercise was finished) and a row of stars. A star is earned per finished exercise: full for no help, half for a hint, outline for the solution or a skip. There is no "stop k of N", because the number of stops can change.
+- **A short trail.** Done stops (their stars), the current stop and the next three, then "…". The plan screen and the first exercise say once that the path adapts after each exercise and ends when the time is up.
+- **Rewards.** A star pops in when it is earned, the topic level is a small bar that moves, a quiet line appears at halfway and after three in a row on your own.
+- **Finishing.** The header has "Full path", "Finish session" (ends with the summary) and a "..." menu with "Discard this session" and "Back to chat, keep my place". When the time is up a banner says so. The summary shows stars, solved, on your own, minutes and the level bars.
+- **What changed, short.** After a result that changed the path: "Your path was adjusted: 1 swapped, +2 ahead. See details". The full path view splits done from ahead (may change) and keeps the list of added and removed stops.
+- The optimization is unchanged (the path can still grow when time is left).
+
+## Rewards, ratings and time (latest)
+- **Time options are 5, 10 and 20 minutes.** Each exercise's estimate is a quarter of the first guess (steps of 5 seconds) and is shown in seconds when under 90 s.
+- **Result banner** after each exercise: Correct / Nice work / Not this time. "N in a row" counts exercises solved on your own and shows from 2.
+- **Ratings change only at the end.** During the session the planner keeps adapting from the results (that is the hidden estimate), but the self-assessment bars do not move. On the end screen each topic gets a suggested change and the student answers "Yes, update" or "No, keep". A correct answer counts more the harder the exercise is compared with the current rating; the change is at most +1.5 per topic and session, in steps of 0.5. The difficulty numbers come from the made-up exercise bank.
+- **End screen:** stats count up and stars pop one by one. The self-rating slider moves in steps of 0.5.
+- **Graph question mode** (`?condition=free`) uses the same result banner, without a rating change.

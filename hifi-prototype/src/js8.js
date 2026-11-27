@@ -10,7 +10,8 @@
      Contract between the screens and the planner: see EXERCISE_MODE_CONTRACT.md. */
   var EXQ = 'Exercise sheet 3';
   var HINTS = { basic: 'Power rule (slide 10): d/dx xⁿ = n · xⁿ⁻¹. Apply it to each term and keep constant multiples in front.', pq: 'Product rule (slide 11): (f · g)′ = f′ · g + f · g′. Quotient rule: (f / g)′ = (f′ · g − f · g′) / g².', chain: 'Chain rule (slide 12): differentiate the outside, keep the inside, then multiply by the derivative of the inside.', tangent: 'The slope of the tangent line at x = a is the derivative f′(a) (slide 20).', optim: 'Maxima and minima occur where f′(x) = 0 (slide 21). Check the sign of f′ on both sides.' };
-  function XE(id, topic, d, min, src, el, q, fn, sol) { return { id: id, topic: topic, d: d, min: min, src: src, el: el, q: q, fn: fn, sol: sol }; }
+  function XE(id, topic, d, min, src, el, q, fn, sol) { min = Math.round(min * 0.25 * 12) / 12; /* real solving time is short: estimates are a quarter of the first guesses, in steps of 5 seconds */
+    return { id: id, topic: topic, d: d, min: min, src: src, el: el, q: q, fn: fn, sol: sol }; }
   var EXB = [
     XE('b1', 'basic', 2, 3, 'up', ['power'], 'Find f′(x) for f(x) = x⁵.', function (x) { return 5 * Math.pow(x, 4); }, 'f′(x) = 5x⁴.'),
     XE('b2', 'basic', 3, 4, 'up', ['power', 'sum', 'cm', 'cubic'], 'Find f′(x) for f(x) = 4x³ − 2x + 7.', function (x) { return 12 * x * x - 2; }, 'f′(x) = 12x² − 2. The constant 7 has derivative 0.'),
@@ -146,7 +147,7 @@
   var GLYPH = { basic: 'xⁿ', pq: 'f·g', chain: 'f∘g', tangent: '↗', optim: '▲' };
   var TNAME = { basic: 'Basic rules', pq: 'Product and quotient', chain: 'Chain rule', tangent: 'Tangent lines', optim: 'Optimization' };
   var SRC = { both: 'Uploaded and AI-generated', up: 'Uploaded only', ai: 'AI-generated only' };
-  var PM = { QPEAK: 0.6, S: 1.5, W0: 2, W1: 2, B0: 2, FLOOR: 0.05, BETA: 0.5, TREF: 5, ETA: 0.35, LREM: 0.8, LRED: 0.4, LGEN: 0.15, LHRED: 0.3, SIMR: 0.6, WIDTH: 250 };
+  var PM = { QPEAK: 0.6, S: 1.5, W0: 2, W1: 2, B0: 2, FLOOR: 0.05, BETA: 0.5, TREF: 1.25, ETA: 0.35, LREM: 0.8, LRED: 0.4, LGEN: 0.15, LHRED: 0.3, SIMR: 0.6, WIDTH: 250 };
   function cl(x, a, b) { return Math.min(b, Math.max(a, x)); }
   function sg(x) { return 1 / (1 + Math.exp(-x)); }
   function lgt(p) { return Math.log(p / (1 - p)); }
@@ -203,7 +204,7 @@
       if (!best || layer[0].obj > best.obj) best = layer[0];
     }
     if (!best) return { items: [], obj: 0 };
-    var items = best.seq.map(function (e, i) { return { id: e.id, min: Math.round(e.min * sp * 10) / 10, p: best.info[i].p, rem: best.info[i].rem }; });
+    var items = best.seq.map(function (e, i) { return { id: e.id, min: Math.round(e.min * sp * 100) / 100, p: best.info[i].p, rem: best.info[i].rem }; });
     return { items: items, obj: best.obj };
   }
   function xWhy(it, i, items, inp) {
@@ -225,7 +226,7 @@
   /* ---------------- state and flow ---------------- */
   /* Asks the local server to solve the integer program with Gurobi (solver/plan.py). If that is not available, searches in the page. */
   function exPlanner(inp) {
-    var body = JSON.stringify({ bank: EXB.map(function (e) { return { id: e.id, topic: e.topic, d: e.d, min: Math.round(e.min * (inp.speed || 1) * 10) / 10, src: e.src, el: e.el }; }), remaining: inp.remaining, topics: inp.topics, source: inp.source, rat: inp.rat, hist: inp.hist });
+    var body = JSON.stringify({ bank: EXB.map(function (e) { return { id: e.id, topic: e.topic, d: e.d, min: Math.round(e.min * (inp.speed || 1) * 100) / 100, src: e.src, el: e.el }; }), remaining: inp.remaining, topics: inp.topics, source: inp.source, rat: inp.rat, hist: inp.hist });
     var ctl = window.AbortController ? new AbortController() : null, to = setTimeout(function () { if (ctl) ctl.abort(); }, 15000);
     return fetch('/plan', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, signal: ctl ? ctl.signal : undefined })
       .then(function (r) { clearTimeout(to); if (!r.ok) return r.json().then(function (j) { throw new Error(j.error || 'solver error'); }); return r.json(); })
@@ -236,10 +237,52 @@
     var s = S.ex; if (!DEV || !s || !s.solver) return '';
     return '<p class="fine exdev">' + (s.solver === 'gurobi' ? 'Gurobi: ' : 'In-page search, not Gurobi: ') + esc(s.solverInfo) + '</p>';
   }
+
+  /* ---- rewards: a star for every finished exercise (full: no help, half: a hint, outline: the solution or a skip) ---- */
+  var STARPATH = 'M12 3.2l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17.2l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z';
+  var STARDEFS = '<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="starHalf" x1="0" x2="1" y1="0" y2="0"><stop offset="50%" stop-color="#e5a50a"/><stop offset="50%" stop-color="#fff" stop-opacity="0"/></linearGradient></defs></svg>';
+  function starKind(kind) { return kind === 'clean' || kind === 'retry' ? 'full' : kind === 'hint' ? 'half' : 'none'; }
+  function starSvg(kind, cls) { return '<svg class="star ' + kind + ' ' + (cls || '') + '" viewBox="0 0 24 24" width="22" height="22" aria-label="' + (kind === 'full' ? 'Full star' : kind === 'half' ? 'Half star' : 'Empty star') + '"><path d="' + STARPATH + '"/></svg>'; }
+  function levelBar(tp, a, b) {
+    return '<div class="exlvl"><span class="exlvln">' + esc(TNAME[tp]) + '</span><span class="exlvlbar"><i data-to="' + (b * 10) + '" style="width:' + (a * 10) + '%"></i></span><span class="exlvlv soft small">' + fmt(a) + (b > a ? ' → ' + fmt(b) : '') + ' of 10</span></div>';
+  }
+  var LVL = [[0, 'Beginner'], [3, 'Getting there'], [5, 'Solid'], [7, 'Strong'], [9, 'Expert']];
+  function lvlIdx(v) { var k = 0; LVL.forEach(function (l, i) { if (v >= l[0]) k = i; }); return k; }
+  /* Rating proposal, made once at the end. A correct answer moves the rating by how hard the exercise was compared with the current rating:
+     hard for you counts a lot, easy for you almost nothing. Wrong or skipped exercises that were easy for you pull it down a little. At most 1.5 up per topic and session, steps of 0.5. */
+  var PSCORE = { clean: 1, retry: 0.7, hint: 0.4, solution: 0, skip: 0 };
+  function exPropose(s) {
+    var by = {}; s.hist.forEach(function (h) { var e = xById(h.id); (by[e.topic] = by[e.topic] || []).push({ e: e, kind: h.kind }); });
+    var out = {};
+    Object.keys(by).forEach(function (k) {
+      var from = s.rat0[k] == null ? 5 : s.rat0[k], raw = 0, solved = 0, hardest = 0;
+      by[k].forEach(function (x) {
+        var w = 1 / (1 + Math.exp(-(x.e.d - from) / 2)), sc = PSCORE[x.kind];
+        if (sc > 0) { raw += 0.25 * sc * w; solved++; hardest = Math.max(hardest, x.e.d); } else raw -= 0.15 * (1 - w);
+      });
+      raw = cl(raw, -0.5, 1.5);
+      var to = cl(from + Math.round(raw * 2) / 2, 0, 10);
+      out[k] = { from: from, to: to, n: by[k].length, solved: solved, hardest: hardest, ans: null };
+    });
+    return out;
+  }
+  function exStreak(s) { var n = 0; for (var i = s.hist.length - 1; i >= 0 && (s.hist[i].kind === 'clean' || s.hist[i].kind === 'retry'); i--) n++; return n; }
+  var BOLT = '<svg class="bolt" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M13.5 2 5 13.5h6L10 22l9-12h-6.2z"/></svg>';
+  var CHECK = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  var CROSS = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>';
+  var BTITLE = { clean: 'Correct!', retry: 'Correct!', hint: 'Nice work', solution: 'Not this time', skip: 'Skipped' };
+  var BSUB = { clean: 'No help needed.', retry: 'Got it on another try.', hint: 'Solved with a hint.', solution: 'Here is the solution.', skip: '' };
+  function animateCounts() { if (!S.ex || S.ex.counted) return; if (S.ex.phase === 'done') S.ex.counted = true; Array.prototype.slice.call(document.querySelectorAll('#exview [data-count]')).forEach(function (el) { var to = +el.getAttribute('data-count'), t0 = null; function step(t) { if (t0 == null) t0 = t; var k = Math.min(1, (t - t0) / 900); el.textContent = Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); } el.textContent = '0'; requestAnimationFrame(step); }); }
+  function animateLevels() { Array.prototype.slice.call(document.querySelectorAll('#exview .exlvlbar i[data-to]')).forEach(function (i) { i.style.width = i.getAttribute('data-to') + '%'; }); }
+  function changeSummary(c) {
+    var sw = Math.min(c.added.length, c.removed.length), net = c.added.length - c.removed.length, p = [];
+    if (sw) p.push(sw + ' swapped'); if (net > 0) p.push('+' + net + ' ahead'); if (net < 0) p.push((-net) + ' removed'); if (c.reordered) p.push('reordered');
+    return p.join(', ');
+  }
   function exTopicsAvail() { return C.topics.filter(function (t) { return EXB.some(function (e) { return e.topic === t.id; }); }); }
   function exNew() {
     var av = exTopicsAvail(), tp = {}; av.forEach(function (t) { tp[t.id] = false; });   /* nothing is selected until the student chooses */
-    return { phase: 'setup', time: 30, topics: tp, source: 'both', plan: [], hist: [], cur: 0, used: 0, sec: 0, cs: 0, t0: null, speed: 1, view: 'ex', changes: null, rat0: null, tries: 0, hint: false, sol: false, input: '', fb: '', res: null, note: '', ctx: S.ctx };
+    return { phase: 'setup', time: 10, topics: tp, source: 'both', plan: [], hist: [], cur: 0, used: 0, sec: 0, cs: 0, t0: null, speed: 1, view: 'ex', changes: null, rat0: null, tries: 0, hint: false, sol: false, input: '', fb: '', res: null, note: '', ctx: S.ctx };
   }
 
   /* ---- Time is measured, not assumed. Only the time the student spends on an exercise counts (the clock stops while the result,
@@ -251,7 +294,13 @@
   function fmtClock(sec) { sec = Math.max(0, Math.round(sec)); return Math.floor(sec / 60) + ':' + ('0' + (sec % 60)).slice(-2); }
   function exClockText() { var s = S.ex; return fmtClock((s.sec || 0) + (s.res || s.view === 'path' ? 0 : exTimerElapsed())) + ' of ' + s.time + ' min'; }
   document.addEventListener('visibilitychange', function () { if (document.hidden) exTimerPause(); else exTimerResume(); });
-  setInterval(function () { var c = $('#exclock'); if (c && S.ex && S.ex.phase === 'run') c.textContent = exClockText(); }, 1000);
+  setInterval(function () {
+    var c = $('#exclock'); if (!c || !S.ex || S.ex.phase !== 'run') return;
+    c.textContent = exClockText();
+    var used = (S.ex.sec || 0) + (S.ex.res || S.ex.view === 'path' ? 0 : exTimerElapsed()), f = $('#extfill'), tu = $('#extimeup');
+    if (f) f.style.width = Math.min(100, used / (S.ex.time * 60) * 100) + '%';
+    if (tu) tu.hidden = used < S.ex.time * 60;
+  }, 1000);
   function exInput() { var s = S.ex, tp = Object.keys(s.topics).filter(function (k) { return s.topics[k]; }); return { remaining: s.time - s.used, topics: tp, source: s.source, rat: s.rat0 || C.ratings, speed: s.speed || 1, hist: s.hist.map(function (h) { return { id: h.id, r: h.r }; }) }; }
   function exOpen() {
     if (STUDY === 'free') return;
@@ -317,7 +366,7 @@
       exRender();
     });
   }
-  function exStart() { var s = S.ex; s.phase = 'run'; s.cur = 0; s.hist = []; s.used = 0; s.sec = 0; s.speed = 1; s.view = 'ex'; s.changes = null; exTimerStart(); s.tries = 0; s.hint = false; s.sol = false; s.input = ''; s.fb = ''; s.res = null; exRender(); var i = $('#ex-in'); if (i) i.focus(); }
+  function exStart() { var s = S.ex; s.phase = 'run'; s.cur = 0; s.hist = []; s.used = 0; s.sec = 0; s.speed = 1; s.view = 'ex'; s.changes = null; s.half = false; exTimerStart(); s.tries = 0; s.hint = false; s.sol = false; s.input = ''; s.fb = ''; s.res = null; exRender(); var i = $('#ex-in'); if (i) i.focus(); }
   function exCur() { var s = S.ex; return s.plan[s.cur] ? xById(s.plan[s.cur].id) : null; }
   function exSubmit() {
     var s = S.ex, e = exCur(), inp = $('#ex-in'); if (!e || s.res) return;
@@ -334,20 +383,19 @@
     s.hist.push({ id: e.id, r: r[0], kind: kind, min: s.mode === 'free' ? 2 : e.min, sec: Math.round(sec) });
     /* pace = real time over estimated time, from the exercises the student actually worked on (a skip or a shown solution says nothing about speed) */
     var est = 0, act = 0, nw = 0; s.hist.forEach(function (h) { if (h.kind === 'clean' || h.kind === 'retry' || h.kind === 'hint') { est += xById(h.id).min; act += h.sec / 60; nw++; } });
-    s.speed = nw >= 2 && est > 0 ? cl(act / est, 0.5, 2) : 1;
-    var old = C.ratings[tp], base = old == null ? 5 : old, nv = Math.max(0, Math.min(10, base + r[1]));
-    if (C.start[tp] == null) C.start[tp] = base;
-    C.ratings[tp] = nv; C.last[tp] = nv - base; C.pulse[tp] = true; renderLeft();
+    s.speed = nw >= 2 && est > 0 ? cl(act / est, 0.4, 2) : 1;
     if (s.mode === 'free') {
       if (!S.gqDone) S.gqDone = {};
       S.gqDone[e.id] = kind;
-      s.res = { kind: kind, text: r[2], rating: [base, nv], dev: '', adjusted: false, more: false, pending: false, free: true };
+      s.res = { kind: kind, text: r[2], dev: '', adjusted: false, more: false, pending: false, free: true };
       s.fb = '';
       exRender();
       return;
     }
     var inp = exInput(), oldNext = s.plan[s.cur + 1] ? s.plan[s.cur + 1].id : null, kept = s.plan.slice(0, s.cur + 1);
-    s.res = { kind: kind, text: r[2], rating: [base, nv], dev: '', adjusted: false, more: false, pending: true }; s.fb = '';
+    var cheer = '', run = 0; for (var hi = s.hist.length - 1; hi >= 0 && (s.hist[hi].kind === 'clean' || s.hist[hi].kind === 'retry'); hi--) run++;
+    if (!s.half && s.sec >= s.time * 30) { s.half = true; cheer = 'Halfway there.'; }
+    s.res = { kind: kind, text: r[2], cheer: cheer, dev: '', adjusted: false, more: false, pending: true }; s.fb = '';
     exRender();
     exPlanner(inp).then(function (rest) {
       if (S.ex !== s || !s.res) return;
@@ -368,7 +416,7 @@
     if ((kind === 'solution' || kind === 'skip') && xSim(cur, nx) > 0.4) return ', because it is related to the one you just missed.';
     return ', because your estimated level changed after this result.';
   }
-  function exTitle(e) { return e ? TNAME[e.topic] + ' (' + e.min + ' min)' : ''; }
+  function exTitle(e) { return e ? TNAME[e.topic] + ' (' + fd(e.min) + ')' : ''; }
   function exNext() {
     var s = S.ex; if (!s.res) return;
     if (!s.res.more) { s.phase = 'done'; exRender(); return; }
@@ -380,9 +428,13 @@
     return '<div class="seg" role="group">' + items.map(function (it) { return '<button type="button" class="' + (String(it[0]) === String(on) ? 'on' : '') + '" data-ex="' + attr + '" data-v="' + it[0] + '" aria-pressed="' + (String(it[0]) === String(on)) + '">' + esc(it[1]) + '</button>'; }).join('') + '</div>';
   }
   function exHead(sub) {
-    var ph = S.ex && S.ex.phase, cancel = ph === 'plan' || ph === 'run', inPath = ph === 'run' && S.ex.view === 'path';
-    var pathBtn = ph === 'run' && S.ex.mode !== 'free' ? (inPath ? '<button class="btn small" data-ex="pathback">Back to exercise</button>' : '<button class="btn small" data-ex="path">Full path</button>') : '';
-    return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2>' + (sub ? '<p class="soft small">' + esc(sub) + '</p>' : '') + '</div><span class="spacer"></span>' + pathBtn + (cancel ? '<button class="btn small" data-ex="cancel">Cancel</button>' : '') + '<button class="btn small" data-ex="exit">Back to chat</button></div>';
+    if (S.ex && S.ex.mode === 'free') return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2>' + (sub ? '<p class="soft small">' + esc(sub) + '</p>' : '') + '</div><span class="spacer"></span><button class="btn small" data-ex="cancel">Cancel</button><button class="btn small" data-ex="exit">Back to chat</button></div>';
+    var ph = S.ex && S.ex.phase, inPath = ph === 'run' && S.ex.view === 'path', b = '';
+    if (ph === 'run') {
+      b += (inPath ? '<button class="btn small" data-ex="pathback">Back to exercise</button>' : '<button class="btn small" data-ex="path">Full path</button>') + '<button class="btn small dark" data-ex="finish">Finish session</button>' +
+        '<span class="exmenuwrap"><button class="btn small icon" data-ex="menu" aria-haspopup="true" aria-label="More options" title="More options">⋯</button><div class="exmenu" id="exmenu" hidden><button type="button" data-ex="cancel">Discard this session</button><button type="button" data-ex="exit">Back to chat, keep my place</button></div></span>';
+    } else b += (ph === 'plan' ? '<button class="btn small" data-ex="cancel">Cancel</button>' : '') + '<button class="btn small" data-ex="exit">Back to chat</button>';
+    return '<div class="exh"><div><h2 tabindex="-1">Exercise mode</h2>' + (sub ? '<p class="soft small">' + esc(sub) + '</p>' : '') + '</div><span class="spacer"></span>' + b + '</div>';
   }
   /* A short look at what the stop is about, without giving the answer away. */
   function teaser(e) {
@@ -406,11 +458,11 @@
     var unrated = av.some(function (t) { return C.ratings[t.id] == null; });   /* the planner needs the self-ratings to personalise the path */
     var pills = av.map(function (t) {
       var r = C.ratings[t.id];
-      return '<button type="button" class="expill' + (s.topics[t.id] ? ' on' : '') + '" data-ex="topic" data-v="' + t.id + '" aria-pressed="' + !!s.topics[t.id] + '">' + esc(TNAME[t.id]) + '<span class="expr">' + (r == null ? '–' : fmt(r)) + '</span></button>';
+      return '<button type="button" class="expill' + (s.topics[t.id] ? ' on' : '') + '" data-ex="topic" data-v="' + t.id + '" aria-pressed="' + !!s.topics[t.id] + '">' + esc(TNAME[t.id]) + '<span class="expr" title="Your self-rating for this topic">' + (r == null ? 'not rated' : fmt(r) + '/10') + '</span></button>';
     }).join('');
     return exHead(ctxName) + '<div class="exbody"><div class="excard narrow setup">' +
       '<h3 class="exbig">Plan your practice</h3>' +
-      '<div class="exsec"><span class="exlab">Time</span>' + seg('time', [[15, '15 min'], [30, '30 min'], [45, '45 min'], [60, '60 min']], s.time) + '</div>' +
+      '<div class="exsec"><span class="exlab">Time</span>' + seg('time', [[5, '5 min'], [10, '10 min'], [20, '20 min']], s.time) + '</div>' +
       '<div class="exsec"><span class="exlab">Choose your topics</span><div class="expills">' + pills + '</div><p class="exhelp' + (picked ? ' ok' : '') + '">' + (picked ? picked + (picked === 1 ? ' topic' : ' topics') + ' chosen' : 'Tap one or more topics to practice') + '</p></div>' +
       (unrated ? '<div class="exrate"><span><b>Rate your topics</b> so the path fits you.</span><button class="btn small" data-act="assess">Rate my knowledge</button></div>' : '<p class="exrelink"><button class="link" data-act="assess">Update my ratings</button></p>') +
       '<div class="exsec"><span class="exlab">Exercises from</span>' + seg('src', [['both', 'Mine and AI'], ['up', 'Mine only'], ['ai', 'AI only']], s.source) + '</div>' +
@@ -432,17 +484,18 @@
     items.forEach(function (it, k) {
       var e = xById(it.id), p = pts[k + 1], right = p.x <= cx;
       h += '<span class="stop' + (k === 0 ? ' next' : '') + '" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-hidden="true">' + GLYPH[e.topic] + '</span>' +
-        '<span class="stoplab ' + (right ? 'r' : 'l') + '" style="left:' + (right ? p.x + 46 : p.x - 46 - 170) + 'px;top:' + (p.y - 26) + 'px" aria-hidden="true"><b>' + TNAME[e.topic] + '</b><span class="tz">' + esc(teaser(e)) + '</span>' + e.min + ' min</span>';
+        '<span class="stoplab ' + (right ? 'r' : 'l') + '" style="left:' + (right ? p.x + 46 : p.x - 46 - 170) + 'px;top:' + (p.y - 26) + 'px" aria-hidden="true"><b>' + TNAME[e.topic] + '</b><span class="tz">' + esc(teaser(e)) + '</span>' + fd(e.min) + '</span>';
     });
     var f = pts[n + 1], more = budget - tot >= 5;   /* time is left: the path is not over, more stops appear as the student progresses */
     h += '<span class="stop finish' + (more ? ' more' : '') + '" style="left:' + f.x + 'px;top:' + f.y + 'px" aria-hidden="true">' + (more ? '…' : '⚑') + '</span><span class="stoplab r" style="left:' + (f.x + 46) + 'px;top:' + (f.y - 20) + 'px" aria-hidden="true"><b>' + (more ? 'More ahead' : 'Finish') + '</b>' + (more ? 'new stops appear as you go' : 'about ' + tot + ' min') + '</span></div>';
-    h += '<ol class="sr">' + items.map(function (it, k) { var e = xById(it.id); return '<li>Stop ' + (k + 1) + ': ' + TNAME[e.topic] + ', ' + e.min + ' minutes</li>'; }).join('') + '</ol>';
+    h += '<ol class="sr">' + items.map(function (it, k) { var e = xById(it.id); return '<li>Stop ' + (k + 1) + ': ' + TNAME[e.topic] + ', ' + fd(e.min) + '</li>'; }).join('') + '</ol>';
     return h;
   }
   /* Second version (testing): stops of the same topic are grouped under one topic marker, so the topic name and symbol are not repeated,
      and the road wanders instead of zigzagging. Set ROAD_STYLE to 'grid' to go back to the first version. */
   var ROAD_STYLE = 'groups';
   function roadHtml(items, budget, ctx) { return ROAD_STYLE === 'groups' ? roadHtmlGroups(items, budget, ctx) : roadHtmlGrid(items, budget); }
+  function fd(min) { var sec = Math.max(5, Math.round(min * 12) * 5); return sec < 90 ? sec + ' sec' : Math.round(sec / 60) + ' min'; }
   function fm(min) { return Math.max(1, Math.round(min)); }
   function roadHtmlGroups(items, budget, ctx) {
     /* ctx (only in the full-path view): { done: how many stops are finished, cur: index of the stop being worked on or -1, hist, fresh: ids added by the last re-plan } */
@@ -472,11 +525,11 @@
       else if (q.kind === 'ex') {
         var isDone = ctx && q.k < ctx.done, isCur = ctx && q.k === ctx.cur, isNew = ctx && ctx.fresh && ctx.fresh.indexOf(q.it.id) >= 0, hs = ctx && ctx.hist ? ctx.hist[q.k] : null;
         h += '<span class="stop sm' + (isDone ? ' done' : '') + (isCur ? ' cur' : '') + (q.k === nextIdx ? ' next' : '') + '" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-hidden="true">' + (isDone ? '✓' : q.k + 1) + '</span>' +
-          lab(p, 23, '<span class="tz">' + esc(teaser(q.e)) + '</span>' + (isDone && hs ? 'took ' + fmtClock(hs.sec) : fm(q.it.min) + ' min') + (isNew ? '<span class="newtag">new</span>' : ''), 20);
+          lab(p, 23, '<span class="tz">' + esc(teaser(q.e)) + '</span>' + (isDone && hs ? 'took ' + fmtClock(hs.sec) : fd(q.it.min)) + (isNew ? '<span class="newtag">new</span>' : ''), 20);
       }
       else h += '<span class="stop finish' + (more ? ' more' : '') + '" style="left:' + p.x + 'px;top:' + p.y + 'px" aria-hidden="true">' + (more ? '…' : '⚑') + '</span>' + lab(p, 32, '<b>' + (more ? 'More ahead' : 'Finish') + '</b>' + (more ? 'new stops appear as you go' : 'about ' + fm(tot) + ' min'), 20);
     });
-    h += '</div><ol class="sr">' + items.map(function (it, k) { var e = xById(it.id); return '<li>Stop ' + (k + 1) + ': ' + TNAME[e.topic] + ', ' + fm(it.min) + ' minutes' + (ctx && k < ctx.done ? ', done' : '') + '</li>'; }).join('') + '</ol>';
+    h += '</div><ol class="sr">' + items.map(function (it, k) { var e = xById(it.id); return '<li>Stop ' + (k + 1) + ': ' + TNAME[e.topic] + ', ' + fd(it.min) + (ctx && k < ctx.done ? ', done' : '') + '</li>'; }).join('') + '</ol>';
     return h;
   }
   function devPlan(items) { /* for the team only (?dev): what the planner believes about each stop */
@@ -486,7 +539,7 @@
   function exPlanView() {
     var s = S.ex, tot = s.plan.reduce(function (a, b) { return a + b.min; }, 0);
     return exHead(s.plan.length + ' stops · about ' + fm(tot) + ' min') + '<div class="exbody road"><div class="exroadwrap">' + roadHtml(s.plan, s.time) + devPlan(s.plan) + '</div></div>' +
-      '<div class="exfoot"><button class="btn" data-ex="back">Change</button><button class="btn dark exbigbtn" data-ex="start">Start</button></div>';
+      '<div class="exfoot"><p class="exfootnote">Your path adapts after each exercise. It ends when your time is up.</p><div class="row" style="gap:10px"><button class="btn" data-ex="back">Change</button><button class="btn dark exbigbtn" data-ex="start">Start</button></div></div>';
   }
   /* The whole path during a session: what is done, where the student is, what is next, and what the last re-plan changed. */
   function changesHtml(s) {
@@ -501,23 +554,36 @@
   function exPathView() {
     var s = S.ex, done = s.cur + (s.res ? 1 : 0), left = Math.max(0, Math.round(s.time - s.used));
     var fresh = s.changes ? s.changes.added : [];
-    return exHead('Stop ' + Math.min(done + 1, s.plan.length) + ' of ' + s.plan.length + ' · ' + fmtClock(s.sec || 0) + ' of ' + s.time + ' min used') + '<div class="exbody road"><div class="exroadwrap">' + changesHtml(s) +
+    return exHead(fmtClock(s.sec || 0) + ' of ' + s.time + ' min used') + '<div class="exbody road"><div class="exroadwrap"><div class="exsplit"><span><b>' + done + '</b> done</span><span><b>' + Math.max(0, s.plan.length - done) + '</b> ahead, may change after each exercise</span></div>' + changesHtml(s) +
       roadHtml(s.plan, s.time, { done: done, cur: s.res ? -1 : s.cur, hist: s.hist, fresh: fresh }) + '</div></div>' +
       '<div class="exfoot"><button class="btn dark exbigbtn" data-ex="pathback">Back to exercise</button></div>';
   }
-  function exSeeChanges(s) { return s.res && s.res.adjusted ? '<button class="link exseechg" data-ex="path">See what changed</button>' : ''; }
-  function stepperHtml(s, r) {
+  function exSeeChanges(s) { return s.res && s.res.adjusted ? '<button class="link exseechg" data-ex="path">See details</button>' : ''; }
+  /* Progress is shown against what does not move (the time goal) and what the student collects (stars), never as "stop k of N", because N can change. */
+  function trailHtml(s, r) {
+    var n = s.plan.length, doneCount = s.cur + (r ? 1 : 0), nodes = [], ahead = s.plan.slice(doneCount, doneCount + (r ? 3 : 4));
+    var from = Math.max(0, doneCount - 3);
+    if (from > 0) nodes.push('<span class="tkmore">+' + from + '</span>');
+    for (var i = from; i < doneCount; i++) nodes.push('<span class="tk done" aria-label="Done">' + starSvg(starKind(s.hist[i] ? s.hist[i].kind : 'skip')) + '</span>');
+    ahead.forEach(function (it, k) { var e = xById(it.id), isNow = !r && k === 0; nodes.push('<span class="tk' + (isNow ? ' now' : '') + '" title="' + esc(TNAME[e.topic]) + '" aria-label="' + (isNow ? 'Now: ' : 'Next: ') + esc(TNAME[e.topic]) + '">' + GLYPH[e.topic] + '</span>'); });
+    if (n > doneCount + ahead.length) nodes.push('<span class="tkmore">…</span>');
+    return '<div class="extrail" aria-label="Your path">' + nodes.join('<i class="tkl"></i>') + '</div>';
+  }
+  function progressHtml(s, r) {
     if (s.mode === 'free') return '<p class="exclock soft small" id="exclock">' + exClockText() + '</p>';
-    var n = s.plan.length;
-    return '<div class="exsteps" role="img" aria-label="Stop ' + (s.cur + 1) + ' of ' + n + '">' + s.plan.map(function (it, i) {
-      var st = i < s.cur || (i === s.cur && r) ? 'done' : i === s.cur ? 'now' : 'todo';
-      return (i ? '<i class="exstl' + (st === 'done' || st === 'now' ? ' on' : '') + '"></i>' : '') + '<span class="exst ' + st + '">' + (st === 'done' ? '✓' : '') + '</span>';
-    }).join('') + '</div><p class="exclock soft small" id="exclock">' + exClockText() + '</p>';
+    var total = s.time * 60, used = (s.sec || 0) + (r || s.view === 'path' ? 0 : exTimerElapsed()), done = s.hist.length, acc = 0;
+    var stars = s.hist.map(function (h, i) { return starSvg(starKind(h.kind), r && i === done - 1 ? 'pop' : ''); }).join('');
+    var marks = s.hist.map(function (h) { acc += h.sec; return '<i class="exmark" style="left:' + Math.min(100, acc / total * 100) + '%"></i>'; }).join('');
+    return '<div class="exprog"><div class="exstars">' + (stars || '<span class="soft small">Your stars appear here</span>') + '<span class="exdone soft small">' + done + ' done</span>' + (exStreak(s) >= 2 ? '<span class="exstreak' + (r ? ' pop' : '') + '" aria-label="' + exStreak(s) + ' in a row">' + BOLT + exStreak(s) + ' in a row</span>' : '') + '</div>' +
+      '<div class="extbar" role="progressbar" aria-valuemin="0" aria-valuemax="' + s.time + '" aria-valuenow="' + Math.round(used / 60) + '" aria-label="Time goal"><i class="extfill" id="extfill" style="width:' + Math.min(100, used / total * 100) + '%"></i>' + marks + '</div>' +
+      '<p class="exclock soft small" id="exclock">' + exClockText() + '</p>' +
+      '<p class="extimeup" id="extimeup"' + (used < total ? ' hidden' : '') + '>Time is up. Finish this exercise, then end the session.</p></div>' + trailHtml(s, r) +
+      (!done && !r ? '<p class="exnote">Your path adapts after each exercise. It ends when your time is up.</p>' : '');
   }
   function exRun() {
     var s = S.ex, e = exCur(), r = s.res;
     var keys = [['x', 'x'], ['x²', '^2'], ['xⁿ', '^'], ['(', '('], [')', ')'], ['×', '*'], ['÷', '/']].map(function (k) { return '<button type="button" class="mk" data-ex="key" data-v="' + k[1] + '" aria-label="Insert ' + esc(k[0]) + '">' + k[0] + '</button>'; }).join('');
-    var main = '<div class="excur"><div class="excurtop"><span class="exchip"><span class="pgl">' + GLYPH[e.topic] + '</span>' + TNAME[e.topic] + '</span><span class="soft small">' + (s.mode === 'free' ? 2 : e.min) + ' min</span></div><p class="exq">' + esc(e.q) + '</p>';
+    var main = '<div class="excur"><div class="excurtop"><span class="exchip"><span class="pgl">' + GLYPH[e.topic] + '</span>' + TNAME[e.topic] + '</span><span class="soft small">' + (s.mode === 'free' ? '2 min' : fd(e.min)) + '</span></div><p class="exq">' + esc(e.q) + '</p>';
     if (!r) {
       main += '<div class="exans"><div class="mkeys" role="group" aria-label="Math keys">' + keys + '</div><div class="row" style="gap:8px"><input class="inp" id="ex-in" autocomplete="off" placeholder="Your answer" aria-label="Your answer" value="' + esc(s.input) + '" style="height:44px"><button class="btn dark" style="height:44px;padding:0 22px" data-ex="submit">Check</button></div></div>';
       if (s.fb) main += '<p class="exfb" role="status">' + esc(s.fb) + '</p>';
@@ -525,20 +591,32 @@
       if (s.sol) main += '<div class="exhint sol"><b>Solution</b> ' + esc(e.sol) + '</div>';
       main += '<div class="row exsub"><button class="btn small ghost" data-ex="hint"' + (s.hint ? ' disabled' : '') + '>Hint</button><button class="btn small ghost" data-ex="sol"' + (s.sol ? ' disabled' : '') + '>Solution</button><button class="btn small ghost" data-ex="skip">Skip</button></div>';
     } else {
-      var up = r.rating[1] > r.rating[0];
-      main += '<div class="exres ' + r.kind + '"><b>' + esc(r.text) + '</b>' + (up ? '<span class="exgain">' + esc(TNAME[e.topic]) + ' ' + fmt(r.rating[0]) + ' → ' + fmt(r.rating[1]) + '</span>' : '') + (r.kind !== 'clean' && r.kind !== 'retry' ? '<span class="small">' + esc(e.sol) + '</span>' : '') + '</div>' +
-        (r.adjusted ? '<p class="exadj">✦ Your path was adjusted. ' + exSeeChanges(s) + '</p>' : '') + (DEV && r.dev ? '<p class="fine exdev">' + esc(r.dev) + '</p>' : '') +
-        '<div class="row" style="margin-top:14px"><button class="btn dark exbigbtn" data-ex="' + (r.free ? 'freepick' : 'next') + '"' + (r.pending ? ' disabled' : '') + '>' + (r.pending ? 'One moment…' : r.free ? 'Choose another' : r.more ? 'Next' : 'Finish') + '</button></div>';
+      var ok = r.kind === 'clean' || r.kind === 'retry';
+      main += '<div class="exbanner ' + (ok ? 'ok' : r.kind === 'hint' ? 'warn' : 'miss') + '" role="status"><div class="exbrow"><span class="exbicon">' + (ok || r.kind === 'hint' ? CHECK : CROSS) + '</span><div class="exbtext"><b>' + BTITLE[r.kind] + '</b>' + (BSUB[r.kind] ? '<span>' + BSUB[r.kind] + '</span>' : '') + '</div>' +
+        '</div>' +
+        (!ok ? '<span class="small exsolline">' + esc(e.sol) + '</span>' : '') + '</div>' +
+        (r.cheer ? '<p class="excheer">✦ ' + esc(r.cheer) + '</p>' : '') +
+        (r.adjusted ? '<p class="exadj">✦ Your path was adjusted' + (s.changes && changeSummary(s.changes) ? ': ' + esc(changeSummary(s.changes)) : '') + '. ' + exSeeChanges(s) + '</p>' : '') + (DEV && r.dev ? '<p class="fine exdev">' + esc(r.dev) + '</p>' : '') +
+        '<div class="row" style="margin-top:14px"><button class="btn dark exbigbtn" data-ex="' + (r.free ? 'freepick' : 'next') + '"' + (r.pending ? ' disabled' : '') + '>' + (r.pending ? 'One moment…' : r.free ? 'Choose another' : r.more ? 'Next' : 'Finish session') + '</button></div>';
     }
     main += '</div>';
-    return exHead(s.mode === 'free' ? 'You chose this question.' : '') + '<div class="exbody run"><div class="exrunwrap">' + stepperHtml(s, r) + main + (DEV ? '<p class="fine exdev">' + solverNote().replace(/<[^>]+>/g, '') + '</p>' : '') + '</div></div>';
+    return exHead(s.mode === 'free' ? 'You chose this question.' : '') + '<div class="exbody run"><div class="exrunwrap">' + progressHtml(s, r) + main + (DEV ? '<p class="fine exdev">' + solverNote().replace(/<[^>]+>/g, '') + '</p>' : '') + '</div></div>';
   }
   function exDone() {
     var s = S.ex, solved = s.hist.filter(function (h) { return h.r >= 0.5; }).length, clean = s.hist.filter(function (h) { return h.kind === 'clean' || h.kind === 'retry'; }).length, tp = {};
     s.hist.forEach(function (h) { tp[xById(h.id).topic] = 1; });
-    var rows = Object.keys(tp).map(function (k) { var a = s.rat0[k] == null ? 5 : s.rat0[k], b = C.ratings[k]; return '<li><span class="pgl">' + GLYPH[k] + '</span><span>' + TNAME[k] + '</span><span class="soft">' + fmt(a) + ' → ' + fmt(b) + '</span></li>'; }).join('');
-    return exHead('') + '<div class="exbody"><div class="excard narrow center"><div class="extrophy" aria-hidden="true">⚑</div><h3 class="exbig">Path complete</h3><ul class="exstats"><li><b>' + solved + '</b>solved</li><li><b>' + clean + '</b>on your own</li><li><b>' + Math.max(1, Math.round(s.used)) + '</b>minutes</li></ul>' +
-      '<ul class="exrates">' + rows + '</ul><div class="row" style="gap:8px;margin-top:18px;justify-content:center"><button class="btn dark exbigbtn" data-ex="again">New path</button><button class="btn" style="height:44px" data-ex="exit">Back to chat</button></div></div></div>';
+    if (!s.prop) s.prop = exPropose(s);
+    var rows = Object.keys(s.prop).map(function (k) {
+      var p = s.prop[k], moved = p.to !== p.from, st;
+      if (p.ans === 'yes') st = '<p class="exrsum ok">Updated to ' + fmt(p.to) + ' of 10.</p>';
+      else if (p.ans === 'no') st = '<p class="exrsum">Kept at ' + fmt(p.from) + ' of 10.</p>';
+      else if (!moved) st = '<p class="exrsum">' + (p.to === p.from ? 'Stays at ' + fmt(p.from) + ' of 10.' : '') + '</p>';
+      else st = '<div class="exrask"><span>Do you agree you are at <b>' + fmt(p.to) + '</b> now?</span><span class="row" style="gap:8px"><button class="btn small dark" data-ex="rate" data-v="' + k + '" data-w="yes">Yes, update</button><button class="btn small" data-ex="rate" data-v="' + k + '" data-w="no">No, keep ' + fmt(p.from) + '</button></span></div>';
+      return '<div class="exrate2">' + levelBar(k, p.from, p.ans === 'no' ? p.from : p.to) + '<p class="exrwhy soft small">Solved ' + p.solved + ' of ' + p.n + (p.solved ? ', hardest ' + p.hardest + ' of 10' : '') + '. ' + (moved ? 'Suggested: ' + fmt(p.from) + ' → ' + fmt(p.to) + '.' : '') + '</p>' + st + '</div>';
+    }).join('');
+    var stars = s.hist.map(function (h, i) { return starSvg(starKind(h.kind), 'pop').replace('class="star ', 'style="animation-delay:' + (i * 90) + 'ms" class="star '); }).join('');
+    return exHead('') + '<div class="exbody"><div class="excard narrow center"><div class="extrophy" aria-hidden="true">⚑</div><h3 class="exbig">Session complete</h3><div class="exstars big">' + stars + '</div><ul class="exstats"><li><b data-count="' + solved + '">' + solved + '</b>solved</li><li><b data-count="' + clean + '">' + clean + '</b>on your own</li><li><b data-count="' + Math.max(1, Math.round(s.used)) + '">' + Math.max(1, Math.round(s.used)) + '</b>minutes</li></ul>' +
+      '<h4 class="exrh">Your ratings</h4><p class="soft small exrnote">Ratings change slowly: they depend on how hard the exercises were compared with your rating. You decide what to keep.</p><div class="exlvls">' + rows + '</div><div class="row" style="gap:8px;margin-top:18px;justify-content:center"><button class="btn dark exbigbtn" data-ex="again">New path</button><button class="btn" style="height:44px" data-ex="exit">Back to chat</button></div></div></div>';
   }
   function exRender(keepFocus) {
     var v = $('#exview'); if (!v) return;
@@ -547,16 +625,19 @@
     if (!S.exOn) return;
     var had = keepFocus && document.activeElement && document.activeElement.id === 'ex-in', pos = had ? document.activeElement.selectionStart : 0;
     var ph = S.ex.phase;
-    v.innerHTML = ph === 'setup' ? exSetup() : ph === 'plan' ? exPlanView() : ph === 'run' ? (S.ex.view === 'path' ? exPathView() : exRun()) : exDone();
+    v.innerHTML = STARDEFS + (ph === 'setup' ? exSetup() : ph === 'plan' ? exPlanView() : ph === 'run' ? (S.ex.view === 'path' ? exPathView() : exRun()) : exDone());
+    setTimeout(animateLevels, 40); setTimeout(animateCounts, 40);
     var eb = v.querySelector('.exbody.road');
     if (eb) { var here = ph === 'run' ? v.querySelector('.exbody.road .stop.cur, .exbody.road .stop.next') : null; if (here) here.scrollIntoView({ block: 'center' }); else eb.scrollTop = eb.scrollHeight; }   /* the plan opens at its Start; the full path opens where the student is */
     if (had) { var i = $('#ex-in'); if (i) { i.focus(); try { i.setSelectionRange(pos, pos); } catch (x) { } } }
   }
   document.addEventListener('click', function (e) {
     if (e.target.closest && e.target.closest('#ex-cancel-ok')) { closeModal(); exResetToSetup(); return; }
+    var mm0 = $('#exmenu'); if (mm0 && !mm0.hidden && !(e.target.closest && e.target.closest('[data-ex=menu]'))) mm0.hidden = true;
     var o = e.target.closest && e.target.closest('[data-ex]'); if (!o || !S.ex && o.dataset.ex !== 'open') return;
     var a = o.getAttribute('data-ex'), v = o.getAttribute('data-v'), s = S.ex;
     if (a === 'exit') exExit();
+    else if (a === 'rate') { var p = s.prop && s.prop[v]; if (p && !p.ans) { p.ans = o.getAttribute('data-w'); if (p.ans === 'yes') { if (C.start[v] == null) C.start[v] = p.from; C.ratings[v] = p.to; C.last[v] = p.to - p.from; C.pulse[v] = true; renderLeft(); } exRender(); } }
     else if (a === 'time') { s.time = +v; exRender(); }
     else if (a === 'src') { s.source = v; exRender(); }
     else if (a === 'topic') { s.topics[v] = !s.topics[v]; s.note = ''; exRender(); }
@@ -570,11 +651,13 @@
     else if (a === 'next') exNext();
     else if (a === 'freepick') exBackToGraph();
     else if (a === 'again') { var keep = { time: s.time, source: s.source, topics: s.topics }; S.ex = exNew(); S.ex.time = keep.time; S.ex.source = keep.source; S.ex.topics = keep.topics; exRender(); }
+    else if (a === 'menu') { var mm = $('#exmenu'); if (mm) mm.hidden = !mm.hidden; }
+    else if (a === 'finish') { if (!s.hist.length) { exTimerPause(); exResetToSetup(); } else { exTimerPause(); s.phase = 'done'; s.view = 'ex'; exRender(); } }
     else if (a === 'path') { exTimerPause(); s.view = 'path'; exRender(); }
     else if (a === 'pathback') { s.view = 'ex'; exTimerResume(); exRender(); var inp0 = $('#ex-in'); if (inp0) inp0.focus(); }
     else if (a === 'cancel') {
       if (s.mode === 'free') { exBackToGraph(); return; }
-      if (s.phase === 'run' && s.hist.length) modal('<div class="mhead"><div><h2 id="mtitle">Cancel this session?</h2><p class="lead">Your path is dropped and you go back to the start. Ratings you already earned stay.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div><div class="mfoot"><button class="btn ghost" id="p-cancel">Keep going</button><button class="btn dark" id="ex-cancel-ok">Cancel session</button></div>');
+      if (s.phase === 'run' && s.hist.length) modal('<div class="mhead"><div><h2 id="mtitle">Discard this session?</h2><p class="lead">Your path is dropped and you go back to the start. Ratings you already earned stay. To keep what you did, use "Finish session" instead.</p></div><button class="xbtn" id="m-x" aria-label="Close">×</button></div><div class="mfoot"><button class="btn ghost" id="p-cancel">Keep going</button><button class="btn dark" id="ex-cancel-ok">Discard session</button></div>');
       else exResetToSetup();
     }
     else if (a === 'samples') { defsFor('calc').forEach(function (d) { addFile(d); }); S.ex = exNew(); exRender(); setTimeout(function () { exWaitTopics(0); }, 300); }
@@ -589,7 +672,7 @@
   document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('#exview .mk')) e.preventDefault(); });
   document.addEventListener('keydown', function (e) {
     if (e.target.id === 'ex-in' && e.key === 'Enter') { e.preventDefault(); exSubmit(); }
-    if (e.key === 'Escape' && S.exOn && !$('#ov')) exExit();
+    if (e.key === 'Escape' && S.exOn && !$('#ov')) { var mm1 = $('#exmenu'); if (mm1 && !mm1.hidden) { mm1.hidden = true; return; } exExit(); }
   });
   document.addEventListener('input', function (e) { if (e.target.id === 'ex-in' && S.ex) S.ex.input = e.target.value; });
   window.__ex = { bank: EXB, plan: xPlan, planner: exPlanner, ability: xAbility, S: function () { return S.ex; }, open: exOpen };

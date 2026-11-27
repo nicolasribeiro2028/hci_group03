@@ -492,7 +492,7 @@
     h += '<div class="legend"><span>0 = never seen it</span><span>10 = could explain it to someone</span></div><div class="list">';
     h += topics.map(function (t) {
       var r = C.ratings[t.id];
-      return '<div class="lrow"><div class="nm">' + esc(t.name) + '</div><div class="sl"><input type="range" min="0" max="10" step="1" value="' + (r == null ? 0 : Math.round(r)) + '" data-rt="' + t.id + '" class="' + (r == null ? 'untouched' : '') + '" aria-label="' + esc(t.name) + '">' + ticksHtml() + '</div><div class="rd" id="rd-' + t.id + '">' + (r == null ? '–' : Math.round(r)) + '</div></div>';
+      return '<div class="lrow"><div class="nm">' + esc(t.name) + '</div><div class="sl"><input type="range" min="0" max="10" step="0.5" value="' + (r == null ? 0 : r) + '" data-rt="' + t.id + '" class="' + (r == null ? 'untouched' : '') + '" aria-label="' + esc(t.name) + '">' + ticksHtml() + '</div><div class="rd" id="rd-' + t.id + '">' + (r == null ? '–' : fmt(r)) + '</div></div>';
     }).join('') + '</div>';
     if (!only) h += '<div style="margin-top:16px"><span class="h">Anything else you already know? (optional)</span><div class="tags" id="tags"></div></div>';
     h += '<div class="mfoot"><span class="fine">' + (only ? 'Your answer updates the topic bar.' : 'Your answers only set the starting point. They are never graded.') + '</span><button class="btn ghost" id="m-skip">Skip for now</button><button class="btn dark" id="m-save">' + (only ? 'Save' : 'Save and continue') + '</button></div>';

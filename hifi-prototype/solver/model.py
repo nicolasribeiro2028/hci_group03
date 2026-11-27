@@ -18,7 +18,7 @@ V1 = dict(S=1.5, W0=1.0, W0_SKIP=0.3, PSTAR=0.7, BAND=0.5, RHO=0.9, FLOOR=0.05,
           KAPPA=0.0,      # caution while the evidence is thin (0 = off)
           ALPHA=0.0,      # value grows with minutes ** (ALPHA + BETA) (0 = every exercise is worth the same)
           BETA=0.0,
-          TREF=5.0, L_INFO=0.0, K_CAND=None, TIME_LIMIT=10.0,
+          TREF=1.25, L_INFO=0.0, K_CAND=None, TIME_LIMIT=10.0,
           EST='local',    # 'local': kernel over similar attempts only. 'hier': topic level + shared bias + local correction
           W1=2.0,         # (hier) weight of the topic-level estimate against similar attempts
           B0=0.0,         # (hier) strength of the prior that the self-rating is right in every topic (0 = no shared bias)
