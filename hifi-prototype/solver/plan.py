@@ -29,7 +29,7 @@ def solve(req):
     b.SIM = [[1.0 if i == j else jaccard(allowed[i]['el'], allowed[j]['el']) for j in range(b.N)] for i in range(b.N)]
     idx = {x['id']: i for i, x in enumerate(b.X)}
     topics = [t for t in req['topics']]
-    P = dict(V4, K_CAND=int(os.environ.get('PLAN_KCAND', 12)), MIPGAP=float(os.environ.get('PLAN_GAP', 0.03)), TIME_LIMIT=float(os.environ.get('PLAN_TIME', 4)), QPEAK=0.6)   # candidates kept, optimality gap, seconds
+    P = dict(V4, K_CAND=int(os.environ.get('PLAN_KCAND', 20)), PER_TOPIC=int(os.environ.get('PLAN_PERTOPIC', 4)), MIPGAP=float(os.environ.get('PLAN_GAP', 0.03)), TIME_LIMIT=float(os.environ.get('PLAN_TIME', 4)), QPEAK=0.6)   # at most 20 candidates, the best 4 of each topic, optimality gap, seconds
     model = Model(b, P)
     st = dict(rating={t: (None if req['rat'].get(t) is None else float(req['rat'][t])) for t in topics},
               hist=[dict(i=idx[h['id']], r=float(h['r'])) for h in req['hist'] if h['id'] in idx])

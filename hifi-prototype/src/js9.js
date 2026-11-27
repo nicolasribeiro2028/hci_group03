@@ -119,7 +119,7 @@
         list = bub ? chainBubbleList(bub.id) : chainBubblesHtml();
       } else if (S.gqOn && sn.kind === 'topic') { cap += ' · pick any question'; list = graphQuestionList(sn.tid); }
     }
-    return head + '<div class="gwrap' + (list ? ' asking' : '') + '"><svg class="gsvg" viewBox="0 0 560 560" role="img" aria-label="' + (S.gqOn ? 'Graph of files and topics, question choice on' : 'Graph of files and topics') + '">' + lines + circles + '</svg><div class="gkey"><span><i class="gnode file"></i>File</span><span><i class="gnode topic"></i>Topic</span></div><p class="gcap" role="status">' + cap + '</p>' + list + '</div>';
+    return head + '<div class="gwrap' + (list ? ' asking' : '') + '"><svg class="gsvg" viewBox="0 0 560 560" role="img" aria-label="' + (S.gqOn ? 'Graph of files and topics, question choice on' : 'Graph of files and topics') + '">' + lines + circles + '</svg><div class="gkey"><span><i class="gdot gdf"></i>File</span><span><i class="gdot gdt"></i>Topic</span></div><p class="gcap" role="status">' + cap + '</p>' + list + '</div>';
   }
   function graphToggle(on) {
     if (STUDY === 'optimized') return;

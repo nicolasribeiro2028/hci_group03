@@ -122,7 +122,14 @@ class Model:
             self.hp[i] = P['L_HRED'] * mx if (P['L_HRED'] and mx > P['SIM_RED_MIN']) else 0.0
             val[i] = self.raw[i] - self.hp[i]
         if P['K_CAND'] and len(cand) > P['K_CAND']:        # keep the most promising candidates (keeps the model small)
-            cand = sorted(cand, key=lambda i: -(val[i] + rem[i]))[:P['K_CAND']]
+            score = lambda i: val[i] + rem[i]
+            if P.get('PER_TOPIC'):      # the best few of EVERY chosen topic, so no topic is left out because another one scores higher
+                keep = []
+                for c in sorted({X[i]['c'] for i in cand}):
+                    keep += sorted([i for i in cand if X[i]['c'] == c], key=lambda i: -score(i))[:P['PER_TOPIC']]
+                cand = sorted(keep, key=lambda i: -score(i))[:P['K_CAND']]
+            else:                       # the best overall
+                cand = sorted(cand, key=lambda i: -score(i))[:P['K_CAND']]
         return cand, val, pr, rem
 
     def slopes(self, cand):

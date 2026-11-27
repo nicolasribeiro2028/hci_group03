@@ -593,8 +593,8 @@ button.sent:hover .cite, button.sent.cited .cite { background: #b38600; color: #
 .glab { font-size: 12px; fill: var(--ink); pointer-events: none; }
 .gkey { display: flex; gap: 16px; font-size: 12px; color: var(--soft); justify-content: center; }
 .gkey span { display: inline-flex; align-items: center; gap: 6px; }
-.gkey i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; stroke: none; }
-.gkey i.file { background: var(--ink); } .gkey i.topic { background: var(--blue); }
+.gkey .gdot { width: 12px; height: 12px; min-width: 12px; flex: none; border-radius: 50%; display: inline-block; }
+.gkey .gdf { background: var(--ink); } .gkey .gdt { background: var(--blue); }
 .gcap { margin: 0; text-align: center; font-size: 14px; min-height: 30px; display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
 .vtools .btn.on { background: var(--ink); color: #fff; border-color: var(--ink); }
 .vtools .btn:disabled { opacity: .4; cursor: default; }
@@ -3155,7 +3155,7 @@ button.srcline.src-ok:hover, button.srcline.src-ok:focus-visible { color: var(--
         list = bub ? chainBubbleList(bub.id) : chainBubblesHtml();
       } else if (S.gqOn && sn.kind === 'topic') { cap += ' · pick any question'; list = graphQuestionList(sn.tid); }
     }
-    return head + '<div class="gwrap' + (list ? ' asking' : '') + '"><svg class="gsvg" viewBox="0 0 560 560" role="img" aria-label="' + (S.gqOn ? 'Graph of files and topics, question choice on' : 'Graph of files and topics') + '">' + lines + circles + '</svg><div class="gkey"><span><i class="gnode file"></i>File</span><span><i class="gnode topic"></i>Topic</span></div><p class="gcap" role="status">' + cap + '</p>' + list + '</div>';
+    return head + '<div class="gwrap' + (list ? ' asking' : '') + '"><svg class="gsvg" viewBox="0 0 560 560" role="img" aria-label="' + (S.gqOn ? 'Graph of files and topics, question choice on' : 'Graph of files and topics') + '">' + lines + circles + '</svg><div class="gkey"><span><i class="gdot gdf"></i>File</span><span><i class="gdot gdt"></i>Topic</span></div><p class="gcap" role="status">' + cap + '</p>' + list + '</div>';
   }
   function graphToggle(on) {
     if (STUDY === 'optimized') return;
