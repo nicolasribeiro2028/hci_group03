@@ -176,6 +176,8 @@ In the "ramp" world the optimized design clearly beats sheet order and easy to h
 
 **We think the optimizer is useful for the student, and not only for this course.** Deciding which exercises to do is one more thing that takes the student's time, and the best path is not obvious. An optimizer that proposes it saves that time, and it does so with the time budget the student has. We will see in Milestone 4 whether students feel the same.
 
+An LLM helped us build the exercise banks, gave us ideas for constraints, and helped us turn what we were thinking into mathematics and then into a working Gurobi model. The main decisions were ours: separating the chat from the exercises, choosing the learning path, the idea of following a failed exercise with a similar one, and what the objective should reward.
+
 ---
 
 ## Hi-Fi Prototype & Evaluation (Milestone 4)
